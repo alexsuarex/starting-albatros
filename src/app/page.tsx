@@ -491,14 +491,13 @@ function DemoAlbi() {
     <section className="py-24 px-6">
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-4 fade-in">
-          El producto que vendes,
+          Tu futuro mejor empleado,
           <br />
-          funcionando ahora mismo.
+          trabajando ahora mismo.
         </h2>
         <p className="text-zinc-500 text-lg mb-10 fade-in">
-          Albi, nuestro asistente de IA, puede atenderte en este momento por
-          WhatsApp. Español o inglés. Así es exactamente como funcionará en tu
-          negocio.
+          Escríbele a Albi por WhatsApp. Te responderá al instante, en español o
+          inglés. Así de natural y rápida será la atención para tus clientes.
         </p>
         <a
           href={WA.general}
