@@ -26,10 +26,10 @@ const WA = {
 function useFadeIn() {
   useEffect(() => {
     const els = document.querySelectorAll(".fade-in");
-    
+
     // First, mark elements as ready (hides them)
     els.forEach((el) => el.classList.add("fade-ready"));
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -132,7 +132,11 @@ function Nav() {
   useEffect(() => {
     const handler = () => {
       if (navRef.current) {
-        navRef.current.classList.toggle("border-b border-zinc-200", window.scrollY > 10);
+        if (window.scrollY > 10) {
+          navRef.current.classList.add("border-b", "border-zinc-200");
+        } else {
+          navRef.current.classList.remove("border-b", "border-zinc-200");
+        }
       }
     };
     window.addEventListener("scroll", handler);
@@ -425,8 +429,8 @@ function Precios() {
             <div
               key={p.name}
               className={`fade-in relative bg-white rounded-lg p-8 flex flex-col ${p.featured
-                  ? "border-2 border-zinc-900 shadow-lg"
-                  : "border border-zinc-200"
+                ? "border-2 border-zinc-900 shadow-lg"
+                : "border border-zinc-200"
                 }`}
             >
               {p.featured && (
@@ -465,8 +469,8 @@ function Precios() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-colors ${p.featured
-                    ? "bg-zinc-900 text-white hover:bg-zinc-700"
-                    : "border border-zinc-200 text-zinc-700 hover:border-zinc-400"
+                  ? "bg-zinc-900 text-white hover:bg-zinc-700"
+                  : "border border-zinc-200 text-zinc-700 hover:border-zinc-400"
                   }`}
               >
                 <WhatsAppIcon size={16} />
@@ -663,6 +667,9 @@ function Footer() {
           <a href="#precios" className="hover:text-zinc-900 transition-colors">
             Precios
           </a>
+          <a href="/login" className="hover:text-zinc-900 transition-colors">
+            Login
+          </a>
           <a
             href={WA.general}
             target="_blank"
@@ -673,7 +680,7 @@ function Footer() {
           </a>
         </div>
         <p className="font-mono-custom text-xs text-zinc-300">
-          Hecho en La Paz 🌊
+          Hecho en La Paz con mucho café ☕ y buen internet ⚡️
         </p>
       </div>
     </footer>
