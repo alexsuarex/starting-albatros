@@ -37,7 +37,7 @@ async function notifyAlex(phone: string, reason: string, summary: string) {
 }
 
 // ─── Procesar respuesta de Groq ───────────────────────────────────────────────
-function extractJsonData(text: string): { data?: Record<string, string>, escalate?: boolean, reason?: string, summary?: string, cleanText: string } {
+function extractJsonData(text: string): { data?: Record<string, string>, escalate: boolean, reason: string, summary: string, cleanText: string } {
     let cleanText = text
     let data: Record<string, string> | undefined
     let escalate = false
