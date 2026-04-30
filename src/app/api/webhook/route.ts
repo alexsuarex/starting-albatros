@@ -6,14 +6,14 @@ import { ALBI_SYSTEM_PROMPT, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
-// ─── Enviar mensaje por Kapso ─────────────────────────────────────────────────
+// ─── Enviar mensaje por Meta Directo ─────────────────────────────────────────
 async function sendWhatsAppMessage(to: string, message: string) {
-    const phoneId = process.env.KAPSO_PHONE_ID;
-    const res = await fetch(`https://api.kapso.ai/meta/whatsapp/v24.0/${phoneId}/messages`, {
+    const phoneId = process.env.WHATSAPP_PHONE_ID;
+    const res = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.KAPSO_API_KEY}`,
+            'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
         },
         body: JSON.stringify({
             messaging_product: 'whatsapp',
@@ -23,7 +23,11 @@ async function sendWhatsAppMessage(to: string, message: string) {
             text: { body: message },
         }),
     })
-    return res.json()
+    const data = await res.json();
+    if (data.error) {
+        console.error('Meta API Error:', data.error);
+    }
+    return data;
 }
 
 // ─── Notificar a Alex por WhatsApp ────────────────────────────────────────────
@@ -71,8 +75,12 @@ export async function POST(req: NextRequest) {
         const body = await req.json()
         const supabase = createServiceClient()
 
-        // Extraer datos del mensaje entrante de Kapso
-        const message = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]
+        // Extraer datos del mensaje entrante de Meta
+        const entry = body?.entry?.[0]
+        const changes = entry?.changes?.[0]
+        const value = changes?.value
+        const message = value?.messages?.[0]
+
         if (!message || message.type !== 'text') {
             return NextResponse.json({ ok: true })
         }
@@ -206,14 +214,14 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// Kapso verifica el webhook con GET
+// Meta verifica el webhook con GET
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const mode = searchParams.get('hub.mode')
     const token = searchParams.get('hub.verify_token')
     const challenge = searchParams.get('hub.challenge')
 
-    if (mode === 'subscribe' && token === process.env.KAPSO_WEBHOOK_SECRET) {
+    if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
         return new NextResponse(challenge, { status: 200 })
     }
 

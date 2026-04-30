@@ -10,12 +10,12 @@ export async function POST(req: NextRequest) {
 
     const { to, message } = await req.json()
 
-    const phoneId = process.env.KAPSO_PHONE_ID;
-    const res = await fetch(`https://api.kapso.ai/meta/whatsapp/v24.0/${phoneId}/messages`, {
+    const phoneId = process.env.WHATSAPP_PHONE_ID;
+    const res = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.KAPSO_API_KEY}`,
+            'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
         },
         body: JSON.stringify({
             messaging_product: 'whatsapp',
