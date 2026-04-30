@@ -4,7 +4,7 @@ import Groq from 'groq-sdk'
 import { createServiceClient } from '@/lib/supabase/server'
 import { ALBI_SYSTEM_PROMPT, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN } from '@/lib/albi-prompt'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+
 
 // ─── Enviar mensaje por Meta Directo ─────────────────────────────────────────
 async function sendWhatsAppMessage(to: string, message: string) {
@@ -140,6 +140,7 @@ export async function POST(req: NextRequest) {
         }))
 
         // ─── Llamar a Groq con Albi ───────────────────────────────────────────────
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || '' })
         const completion = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
             messages: [
