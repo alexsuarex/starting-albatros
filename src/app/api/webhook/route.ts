@@ -9,6 +9,14 @@ import { ALBI_SYSTEM_PROMPT, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE
 // ─── Enviar mensaje por Meta Directo ─────────────────────────────────────────
 async function sendWhatsAppMessage(to: string, message: string) {
     const phoneId = process.env.WHATSAPP_PHONE_ID;
+    
+    // Normalizar números de México para la API de prueba de Meta
+    // Meta recibe 521XXX... pero la whitelist suele tener 52XXX...
+    let finalTo = to;
+    if (finalTo.startsWith('521') && finalTo.length === 13) {
+        finalTo = '52' + finalTo.substring(3);
+    }
+
     const res = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
         method: 'POST',
         headers: {
@@ -18,7 +26,7 @@ async function sendWhatsAppMessage(to: string, message: string) {
         body: JSON.stringify({
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
-            to: to,
+            to: finalTo,
             type: 'text',
             text: { body: message },
         }),
