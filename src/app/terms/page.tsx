@@ -188,7 +188,7 @@ export default function Terms() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="https://wa.me/15556291595?text=Hola%2C+tengo+una+pregunta+sobre+los+t%C3%A9rminos+y+condiciones+de+Albatros+Dev"
+                  href="https://wa.me/5216121670637?text=Hola%2C+tengo+una+pregunta+sobre+los+t%C3%A9rminos+y+condiciones+de+Albatros+Dev"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-zinc-900 text-white text-sm px-5 py-2.5 rounded-full hover:bg-zinc-700 transition-colors"
@@ -239,7 +239,7 @@ export default function Terms() {
             <div>
               <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">Contacto</p>
               <ul className="space-y-2.5 text-sm text-zinc-500">
-                <li><a href="https://wa.me/15556291595?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+Dev" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900 transition-colors">WhatsApp</a></li>
+                <li><a href="https://wa.me/5216121670637?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+Dev" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900 transition-colors">WhatsApp</a></li>
                 <li><a href="mailto:hola@albatrosia.com" className="hover:text-zinc-900 transition-colors">hola@albatrosia.com</a></li>
                 <li className="text-zinc-400 text-xs pt-1">La Paz, BCS, México</li>
               </ul>
