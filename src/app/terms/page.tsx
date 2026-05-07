@@ -233,6 +233,7 @@ export default function Terms() {
               <ul className="space-y-2.5 text-sm text-zinc-500">
                 <li><Link href="/privacy-policy" className="hover:text-zinc-900 transition-colors">Aviso de Privacidad</Link></li>
                 <li><Link href="/terms" className="text-zinc-900 font-medium">Términos y Condiciones</Link></li>
+                <li><Link href="/data-deletion" className="hover:text-zinc-900 transition-colors">Eliminación de Datos</Link></li>
               </ul>
             </div>
             <div>

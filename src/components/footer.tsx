@@ -43,6 +43,7 @@ export function Footer() {
             <ul className="space-y-2.5 text-[13px] text-[#555555]">
               <li><a href="/privacy-policy" className="hover:text-[#0A0A0A] transition-colors duration-200">Aviso de Privacidad</a></li>
               <li><a href="/terms" className="hover:text-[#0A0A0A] transition-colors duration-200">Términos y Condiciones</a></li>
+              <li><a href="/data-deletion" className="hover:text-[#0A0A0A] transition-colors duration-200">Eliminación de Datos</a></li>
             </ul>
           </div>
 

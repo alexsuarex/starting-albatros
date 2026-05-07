@@ -687,6 +687,7 @@ function Footer() {
             <ul className="space-y-2.5 text-sm text-zinc-500">
               <li><a href="/privacy-policy" className="hover:text-zinc-900 transition-colors">Aviso de Privacidad</a></li>
               <li><a href="/terms" className="hover:text-zinc-900 transition-colors">Términos y Condiciones</a></li>
+              <li><a href="/data-deletion" className="hover:text-zinc-900 transition-colors">Eliminación de Datos</a></li>
             </ul>
           </div>
 

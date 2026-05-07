@@ -192,6 +192,7 @@ export default function PrivacyPolicy() {
               <ul className="space-y-2.5 text-sm text-zinc-500">
                 <li><Link href="/privacy-policy" className="text-zinc-900 font-medium">Aviso de Privacidad</Link></li>
                 <li><Link href="/terms" className="hover:text-zinc-900 transition-colors">Términos y Condiciones</Link></li>
+                <li><Link href="/data-deletion" className="hover:text-zinc-900 transition-colors">Eliminación de Datos</Link></li>
               </ul>
             </div>
             <div>
