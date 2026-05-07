@@ -208,34 +208,45 @@ export default function Terms() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-zinc-200">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-display text-base font-semibold text-zinc-900">
-                Albatros Dev
-              </span>
-              <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">
-                beta
-              </span>
+      <footer className="py-16 px-6 border-t border-zinc-200">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="font-display text-base font-semibold text-zinc-900">Albatros Dev</span>
+                <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">beta</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Agencia digital en La Paz, BCS. Sitios web, Google Maps y chatbots con IA para negocios locales.
+              </p>
             </div>
-            <p className="text-xs text-zinc-400 font-mono-custom">
-              © 2026 Albatros Dev · La Paz, Baja California Sur, México
-            </p>
+            <div>
+              <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">Menú</p>
+              <ul className="space-y-2.5 text-sm text-zinc-500">
+                <li><Link href="/#servicios" className="hover:text-zinc-900 transition-colors">Servicios</Link></li>
+                <li><Link href="/#precios" className="hover:text-zinc-900 transition-colors">Precios</Link></li>
+                <li><Link href="/#faq" className="hover:text-zinc-900 transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">Legal</p>
+              <ul className="space-y-2.5 text-sm text-zinc-500">
+                <li><Link href="/privacy-policy" className="hover:text-zinc-900 transition-colors">Aviso de Privacidad</Link></li>
+                <li><Link href="/terms" className="text-zinc-900 font-medium">Términos y Condiciones</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">Contacto</p>
+              <ul className="space-y-2.5 text-sm text-zinc-500">
+                <li><a href="https://wa.me/15556291595?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+Dev" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900 transition-colors">WhatsApp</a></li>
+                <li><a href="mailto:hola@albatrosia.com" className="hover:text-zinc-900 transition-colors">hola@albatrosia.com</a></li>
+                <li className="text-zinc-400 text-xs pt-1">La Paz, BCS, México</li>
+              </ul>
+            </div>
           </div>
-          <div className="flex items-center gap-6 text-sm text-zinc-400">
-            <Link href="/#servicios" className="hover:text-zinc-900 transition-colors">
-              Servicios
-            </Link>
-            <Link href="/#precios" className="hover:text-zinc-900 transition-colors">
-              Precios
-            </Link>
-            <Link href="/privacy-policy" className="hover:text-zinc-900 transition-colors">
-              Privacidad
-            </Link>
-            <Link href="/terms" className="text-zinc-900 font-medium">
-              Términos
-            </Link>
+          <div className="pt-8 border-t border-zinc-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+            <p className="font-mono-custom text-xs text-zinc-400">© 2026 Albatros Dev · La Paz, Baja California Sur, México</p>
+            <p className="font-mono-custom text-xs text-zinc-300">Hecho en La Paz con mucho café ☕ y buen internet ⚡️</p>
           </div>
         </div>
       </footer>

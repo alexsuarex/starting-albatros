@@ -645,49 +645,91 @@ function CTAFinal() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer className="py-12 px-6 border-t border-zinc-200">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-display text-base font-semibold text-zinc-900">
-              Albatros Dev
-            </span>
-            <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">
-              beta
-            </span>
+    <footer className="py-16 px-6 border-t border-zinc-200">
+      <div className="max-w-6xl mx-auto">
+
+        {/* Columns */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="font-display text-base font-semibold text-zinc-900">
+                Albatros Dev
+              </span>
+              <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">
+                beta
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Agencia digital en La Paz, BCS. Sitios web, Google Maps y chatbots con IA para negocios locales.
+            </p>
           </div>
-          <p className="text-xs text-zinc-400 font-mono-custom">
+
+          {/* Menú */}
+          <div>
+            <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">
+              Menú
+            </p>
+            <ul className="space-y-2.5 text-sm text-zinc-500">
+              <li><a href="#servicios" className="hover:text-zinc-900 transition-colors">Servicios</a></li>
+              <li><a href="#precios" className="hover:text-zinc-900 transition-colors">Precios</a></li>
+              <li><a href="#faq" className="hover:text-zinc-900 transition-colors">FAQ</a></li>
+              <li><a href="/login" className="hover:text-zinc-900 transition-colors">Login</a></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">
+              Legal
+            </p>
+            <ul className="space-y-2.5 text-sm text-zinc-500">
+              <li><a href="/privacy-policy" className="hover:text-zinc-900 transition-colors">Aviso de Privacidad</a></li>
+              <li><a href="/terms" className="hover:text-zinc-900 transition-colors">Términos y Condiciones</a></li>
+            </ul>
+          </div>
+
+          {/* Contacto */}
+          <div>
+            <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">
+              Contacto
+            </p>
+            <ul className="space-y-2.5 text-sm text-zinc-500">
+              <li>
+                <a
+                  href={WA.general}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-zinc-900 transition-colors"
+                >
+                  WhatsApp
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:hola@albatrosia.com"
+                  className="hover:text-zinc-900 transition-colors"
+                >
+                  hola@albatrosia.com
+                </a>
+              </li>
+              <li className="text-zinc-400 text-xs pt-1">La Paz, BCS, México</li>
+            </ul>
+          </div>
+
+        </div>
+
+        {/* Bottom bar */}
+        <div className="pt-8 border-t border-zinc-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+          <p className="font-mono-custom text-xs text-zinc-400">
             © 2026 Albatros Dev · La Paz, Baja California Sur, México
           </p>
+          <p className="font-mono-custom text-xs text-zinc-300">
+            Hecho en La Paz con mucho café ☕ y buen internet ⚡️
+          </p>
         </div>
-        <div className="flex items-center gap-6 text-sm text-zinc-400">
-          <a href="#servicios" className="hover:text-zinc-900 transition-colors">
-            Servicios
-          </a>
-          <a href="#precios" className="hover:text-zinc-900 transition-colors">
-            Precios
-          </a>
-          <a href="/privacy-policy" className="hover:text-zinc-900 transition-colors">
-            Privacidad
-          </a>
-          <a href="/terms" className="hover:text-zinc-900 transition-colors">
-            Términos
-          </a>
-          <a href="/login" className="hover:text-zinc-900 transition-colors">
-            Login
-          </a>
-          <a
-            href={WA.general}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-zinc-900 transition-colors"
-          >
-            WhatsApp
-          </a>
-        </div>
-        <p className="font-mono-custom text-xs text-zinc-300">
-          Hecho en La Paz con mucho café ☕ y buen internet ⚡️
-        </p>
+
       </div>
     </footer>
   );
