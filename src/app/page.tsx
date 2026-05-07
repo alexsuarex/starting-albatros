@@ -667,6 +667,12 @@ function Footer() {
           <a href="#precios" className="hover:text-zinc-900 transition-colors">
             Precios
           </a>
+          <a href="/privacy-policy" className="hover:text-zinc-900 transition-colors">
+            Privacidad
+          </a>
+          <a href="/terms" className="hover:text-zinc-900 transition-colors">
+            Términos
+          </a>
           <a href="/login" className="hover:text-zinc-900 transition-colors">
             Login
           </a>

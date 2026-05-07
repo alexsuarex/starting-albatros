@@ -30,6 +30,18 @@ export function Footer() {
               Precios
             </a>
             <a
+              href="/privacy-policy"
+              className="hover:text-[#0A0A0A] transition-colors duration-200"
+            >
+              Privacidad
+            </a>
+            <a
+              href="/terms"
+              className="hover:text-[#0A0A0A] transition-colors duration-200"
+            >
+              Términos
+            </a>
+            <a
               href={whatsappLinks.general}
               target="_blank"
               rel="noopener noreferrer"
