@@ -63,8 +63,8 @@ export function HowItWorks() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {steps.map((step, i) => (
-            <FadeIn key={step.number} delay={i * 0.15} y={30}>
-              <div className="relative group p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-400">
+            <FadeIn key={step.number} delay={i * 0.15} y={30} className="h-full">
+              <div className="relative group p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-400 h-full flex flex-col">
                 {/* Light halo behind icon */}
                 <div className="absolute top-8 left-8 w-16 h-16 rounded-full bg-[#1A2B3C]/20 blur-xl group-hover:bg-[#1A2B3C]/30 transition-all duration-500" />
 
