@@ -193,38 +193,24 @@ export function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center justify-start gap-4 relative z-50">
-              <div className="relative group">
-                <motion.a
-                  href="#audit-form"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98, y: 0 }}
-                  className="relative inline-flex items-center justify-center px-6 py-3 rounded-full bg-white text-black font-bold text-sm overflow-hidden transition-all duration-300 shadow-lg"
+              <div className="relative">
+                <a
+                  href="https://wa.me/5216121670637?text=Hola%2C%20vengo%20de%20la%20web%20y%20quiero%20solicitar%20mi%20auditoría%20gratuita"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative inline-flex items-center justify-center px-8 py-4 rounded-full bg-white text-black font-black uppercase tracking-[0.1em] text-[11px] transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <motion.div 
-                    initial={{ left: '-100%' }}
-                    whileHover={{ left: '100%' }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="absolute top-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 pointer-events-none"
-                  />
-                  <span className="relative z-10">Aplicar a Auditoría</span>
-                </motion.a>
+                  <span className="relative z-10 text-black">Aplicar a Auditoría</span>
+                </a>
               </div>
               
-              <div className="relative group">
-                <motion.a
+              <div className="relative">
+                <a
                   href="#plans"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98, y: 0 }}
-                  className="relative inline-flex items-center justify-center px-6 py-3 rounded-full bg-black/30 text-white border border-white/10 font-bold text-sm backdrop-blur-md overflow-hidden transition-all duration-300"
+                  className="relative inline-flex items-center justify-center px-8 py-4 rounded-full bg-black/40 text-white border border-white/10 font-black uppercase tracking-[0.1em] text-[11px] backdrop-blur-md transition-all duration-300 hover:bg-black/60 hover:border-white/20 active:scale-[0.98]"
                 >
-                  <motion.div 
-                    initial={{ left: '-100%' }}
-                    whileHover={{ left: '100%' }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="absolute top-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 pointer-events-none"
-                  />
-                  <span className="relative z-10">Explorar Planes</span>
-                </motion.a>
+                  <span className="relative z-10 text-white">Explorar Planes</span>
+                </a>
               </div>
             </div>
           </div>

@@ -12,7 +12,7 @@ export function FinalCTA() {
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-gradient-to-t from-indigo-500/5 via-indigo-500/2 to-transparent blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-        <span className="text-white/40 text-[10px] font-bold tracking-[0.5em] uppercase mb-8 block drop-shadow-[0_0_12px_rgba(255,255,255,0.3)]">
+        <span className="text-white/80 text-[11px] font-black tracking-[0.6em] uppercase mb-10 block drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
           El momento es ahora
         </span>
         
@@ -23,36 +23,29 @@ export function FinalCTA() {
         />
 
         <FadeIn delay={0.2}>
-          <p className="text-white/40 text-base md:text-lg max-w-xl mx-auto mb-12 leading-relaxed font-light italic">
+          <p className="text-white/50 text-base md:text-lg max-w-xl mx-auto mb-12 leading-relaxed font-light italic">
             No decidas contratarnos hoy. Decide saber qué te está costando no actuar. Tu auditoría gratuita te espera.
           </p>
         </FadeIn>
 
         <FadeIn delay={0.4}>
-          <div className="relative inline-block group">
-            <motion.a 
-              href="#audit-form" 
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98, y: 0 }}
-              className="relative inline-flex items-center px-8 py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest overflow-hidden transition-all duration-300 shadow-xl group-hover:shadow-[0_15px_40px_rgba(255,255,255,0.1)]"
+          <div className="relative inline-block">
+            <a 
+              href="https://wa.me/5216121670637?text=Hola%2C%20vengo%20de%20la%20web%20y%20quiero%20solicitar%20mi%20auditoría%20gratuita" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-flex items-center px-10 py-5 rounded-full bg-white text-black text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98]"
             >
-              {/* Glass Glint Effect */}
-              <motion.div 
-                initial={{ left: '-100%' }}
-                whileHover={{ left: '100%' }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
-                className="absolute top-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 pointer-events-none"
-              />
               <span className="relative z-10">Solicitar Auditoría Gratuita</span>
-            </motion.a>
+            </a>
           </div>
         </FadeIn>
 
         <FadeIn delay={0.5}>
-          <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-4 text-white/30 text-[9px] uppercase tracking-[0.25em] font-bold">
-            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">48 Horas de entrega</span>
-            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">PDF de 6 páginas</span>
-            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">Cero compromiso</span>
+          <div className="mt-14 flex flex-wrap justify-center gap-x-12 gap-y-6 text-white/60 text-[10px] uppercase tracking-[0.3em] font-black">
+            <span className="drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">48 Horas de entrega</span>
+            <span className="drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">PDF de 6 páginas</span>
+            <span className="drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">Cero compromiso</span>
           </div>
         </FadeIn>
       </div>

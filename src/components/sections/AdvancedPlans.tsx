@@ -182,15 +182,8 @@ function StageCard({ plan, index, scrollYProgress }: { plan: any, index: number,
           target="_blank" 
           rel="noopener noreferrer"
           onClick={() => trackEvent('plan_cta_click', { plan: plan.id })}
-          className={`group relative flex items-center justify-center gap-2 w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 overflow-hidden ${plan.featured ? 'bg-white text-black hover:bg-gray-100' : 'bg-white/10 text-white hover:bg-white/20'}`}
+          className={`group relative flex items-center justify-center gap-2 w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 overflow-hidden ${plan.featured ? 'bg-white text-black' : 'bg-white/10 text-white'}`}
         >
-          {/* Adding the Glint effect to CTA for consistency */}
-          <motion.div 
-            initial={{ left: '-100%' }}
-            whileHover={{ left: '100%' }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="absolute top-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 pointer-events-none"
-          />
           <span className="relative z-10">{plan.cta}</span>
           <IconArrowRight size={16} className="relative z-10 group-hover:translate-x-1.5 transition-transform" />
         </a>

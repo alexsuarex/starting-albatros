@@ -92,7 +92,7 @@ export function Footer() {
               © 2026 Albatros dev · Hecho en México con precisión técnica
             </motion.p>
             <div className="flex gap-6">
-               <span className="text-white/10 text-[10px] uppercase tracking-widest">v5.1 Stable</span>
+               <span className="text-white/30 text-[10px] uppercase tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">v5.1 Stable</span>
             </div>
           </div>
         </FadeIn>

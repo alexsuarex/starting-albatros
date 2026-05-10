@@ -332,7 +332,7 @@ function PlanShowcase({ plan, index }: { plan: Plan; index: number }) {
           target="_blank"
           rel="noopener noreferrer"
           className={`relative z-10 mt-auto flex items-center justify-between gap-3 w-full px-5 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-            isFeatured ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#0A0A0A] text-white hover:bg-indigo-600'
+            isFeatured ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#0A0A0A] text-white'
           }`}
         >
           <span className="flex items-center gap-2">{plan.cta}</span>
