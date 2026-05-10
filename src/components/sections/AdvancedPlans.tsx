@@ -127,9 +127,11 @@ function StageCard({ plan, index, scrollYProgress }: { plan: any, index: number,
     index === 0 ? [1, 1, 0.95] : [0.95, 1, 1]
   );
 
+  const pointerEvents = useTransform(opacity, (o: number) => o > 0.5 ? 'auto' : 'none');
+
   return (
     <motion.div 
-      style={{ opacity, y, scale, zIndex: index === 0 ? 50 : 51 }}
+      style={{ opacity, y, scale, zIndex: index === 0 ? 50 : 51, pointerEvents }}
       className="absolute w-full max-w-[380px]"
     >
       <div className={`relative p-7 md:p-9 rounded-[2.5rem] border bg-[#0A0A0A] shadow-2xl transition-all duration-500 ${plan.featured ? 'border-white/15' : 'border-white/5'}`}>
