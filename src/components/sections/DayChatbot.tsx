@@ -153,27 +153,27 @@ export function DayChatbot() {
   // Phase 3: 0.66 to 1.0
 
   // Phase 1: Neural Birth
-  const text1Opacity = useTransform(smoothProgress, [0, 0.1, 0.25, 0.3], [1, 1, 1, 0]);
-  const text1Typewriter = useTransform(smoothProgress, [0, 0.15], [0, 1]);
-  const text1Y = useTransform(smoothProgress, [0.25, 0.3], [0, -50]);
-  const img1Scale = useTransform(smoothProgress, [0, 0.3, 0.33], [1, 1.4, 1.6]);
-  const img1Opacity = useTransform(smoothProgress, [0, 0.2, 0.3], [1, 1, 0]);
-  const img1Blur = useTransform(smoothProgress, [0.25, 0.3], [0, 8]);
+  const text1Opacity = useTransform(smoothProgress, [0, 0.1, 0.22, 0.3], [1, 1, 1, 0]);
+  const text1Typewriter = useTransform(smoothProgress, [0, 0.12], [0, 1]);
+  const text1Y = useTransform(smoothProgress, [0.22, 0.3], [0, -40]);
+  const img1Scale = useTransform(smoothProgress, [0, 0.22, 0.32], [1, 1.1, 1.2]);
+  const img1Opacity = useTransform(smoothProgress, [0, 0.22, 0.32], [1, 1, 0]);
+  const img1Blur = useTransform(smoothProgress, [0.22, 0.32], [0, 10]);
 
   // Phase 2: AI Interaction
-  const text2Opacity = useTransform(smoothProgress, [0.31, 0.36, 0.6, 0.64], [0, 1, 1, 0]);
-  const text2Typewriter = useTransform(smoothProgress, [0.33, 0.45], [0, 1]);
-  const text2Y = useTransform(smoothProgress, [0.31, 0.36, 0.6, 0.64], [50, 0, 0, -50]);
-  const img2Scale = useTransform(smoothProgress, [0.25, 0.33, 0.55, 0.64], [0.6, 1, 1, 1.4]);
-  const img2Opacity = useTransform(smoothProgress, [0.28, 0.33, 0.58, 0.64], [0, 1, 1, 0]);
-  const img2Blur = useTransform(smoothProgress, [0.58, 0.64], [0, 8]);
+  const text2Opacity = useTransform(smoothProgress, [0.3, 0.35, 0.58, 0.64], [0, 1, 1, 0]);
+  const text2Typewriter = useTransform(smoothProgress, [0.33, 0.42], [0, 1]);
+  const text2Y = useTransform(smoothProgress, [0.3, 0.35, 0.58, 0.64], [40, 0, 0, -40]);
+  const img2Scale = useTransform(smoothProgress, [0.28, 0.35, 0.58, 0.66], [0.85, 1, 1, 1.15]);
+  const img2Opacity = useTransform(smoothProgress, [0.3, 0.35, 0.58, 0.66], [0, 1, 1, 0]);
+  const img2Blur = useTransform(smoothProgress, [0.58, 0.66], [0, 10]);
 
   // Phase 3: Delivery
-  const text3Opacity = useTransform(smoothProgress, [0.64, 0.7, 0.9, 1], [0, 1, 1, 0]);
-  const text3Typewriter = useTransform(smoothProgress, [0.66, 0.78], [0, 1]);
-  const text3Y = useTransform(smoothProgress, [0.64, 0.7, 0.9, 1], [50, 0, 0, -50]);
-  const img3Scale = useTransform(smoothProgress, [0.55, 0.66, 0.85, 1], [0.6, 1, 1, 1.4]);
-  const img3Opacity = useTransform(smoothProgress, [0.62, 0.66, 0.85, 1], [0, 1, 1, 0]);
+  const text3Opacity = useTransform(smoothProgress, [0.63, 0.68, 0.92, 1], [0, 1, 1, 0]);
+  const text3Typewriter = useTransform(smoothProgress, [0.66, 0.74], [0, 1]);
+  const text3Y = useTransform(smoothProgress, [0.63, 0.68, 0.92, 1], [40, 0, 0, -40]);
+  const img3Scale = useTransform(smoothProgress, [0.61, 0.68, 0.92, 1], [0.85, 1, 1, 1.15]);
+  const img3Opacity = useTransform(smoothProgress, [0.63, 0.68, 0.92, 1], [0, 1, 1, 0]);
 
   return (
     <section ref={containerRef} id="day-6-chatbot" className="relative h-[400vh] bg-[#050505]">
