@@ -195,9 +195,7 @@ export function Hero() {
             <div className="flex flex-wrap items-center justify-start gap-4 relative z-50">
               <div className="relative">
                 <a
-                  href="https://wa.me/5216121670637?text=Hola%2C%20vengo%20de%20la%20web%20y%20quiero%20solicitar%20mi%20auditoría%20gratuita"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="#audit-form"
                   className="relative inline-flex items-center justify-center px-8 py-4 rounded-full bg-white text-black font-black uppercase tracking-[0.1em] text-[11px] transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span className="relative z-10 text-black">Aplicar a Auditoría</span>

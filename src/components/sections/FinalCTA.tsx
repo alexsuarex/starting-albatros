@@ -31,9 +31,7 @@ export function FinalCTA() {
         <FadeIn delay={0.4}>
           <div className="relative inline-block">
             <a 
-              href="https://wa.me/5216121670637?text=Hola%2C%20vengo%20de%20la%20web%20y%20quiero%20solicitar%20mi%20auditoría%20gratuita" 
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#audit-form" 
               className="relative inline-flex items-center px-10 py-5 rounded-full bg-white text-black text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98]"
             >
               <span className="relative z-10">Solicitar Auditoría Gratuita</span>
