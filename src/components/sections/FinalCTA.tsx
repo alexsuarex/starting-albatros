@@ -12,7 +12,9 @@ export function FinalCTA() {
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-gradient-to-t from-indigo-500/5 via-indigo-500/2 to-transparent blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-        <span className="text-white/20 text-[10px] font-bold tracking-[0.4em] uppercase mb-6 block">El momento es ahora</span>
+        <span className="text-white/40 text-[10px] font-bold tracking-[0.5em] uppercase mb-8 block drop-shadow-[0_0_12px_rgba(255,255,255,0.3)]">
+          El momento es ahora
+        </span>
         
         <AnimatedText 
           text="Domina tu mercado." 
@@ -47,10 +49,10 @@ export function FinalCTA() {
         </FadeIn>
 
         <FadeIn delay={0.5}>
-          <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-white/10 text-[9px] uppercase tracking-[0.2em] font-bold">
-            <span>48 Horas de entrega</span>
-            <span>PDF de 6 páginas</span>
-            <span>Cero compromiso</span>
+          <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-4 text-white/30 text-[9px] uppercase tracking-[0.25em] font-bold">
+            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">48 Horas de entrega</span>
+            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">PDF de 6 páginas</span>
+            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">Cero compromiso</span>
           </div>
         </FadeIn>
       </div>

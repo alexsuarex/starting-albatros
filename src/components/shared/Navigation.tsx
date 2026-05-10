@@ -35,8 +35,8 @@ export function Navigation() {
           <div className="max-w-[1200px] mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
             {/* Logo */}
             <a href="#hero" className="flex items-center gap-2 group">
-              <span className="font-display text-lg font-medium tracking-tight text-[#FAFAF7] group-hover:text-[#BBCCD7] transition-colors">
-                Albatros
+              <span className="font-display text-lg font-medium tracking-tight text-[#FAFAF7] group-hover:text-white transition-all duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] group-hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">
+                Albatros <span className="text-white/40 font-light ml-1 text-xs">dev</span>
               </span>
             </a>
 

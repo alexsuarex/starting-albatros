@@ -29,7 +29,9 @@ export function Footer() {
           
           <FadeIn delay={0} y={20}>
             <div className="col-span-2 md:col-span-1">
-              <span className="font-display text-2xl font-normal text-white block mb-6 tracking-tighter">Albatros.</span>
+              <span className="font-display text-2xl font-normal text-white block mb-6 tracking-tighter">
+                Albatros <span className="text-white/40 font-light">dev.</span>
+              </span>
               <p className="text-white/30 text-xs leading-relaxed max-w-[200px]">
                 Código limpio. Plazos públicos. Precios honestos. La agencia para el 1% de los negocios.
               </p>
@@ -87,7 +89,7 @@ export function Footer() {
               }}
               className="text-white/20 text-[10px] uppercase tracking-widest cursor-default transition-all duration-300"
             >
-              © 2026 Albatros · Hecho en México con precisión técnica
+              © 2026 Albatros dev · Hecho en México con precisión técnica
             </motion.p>
             <div className="flex gap-6">
                <span className="text-white/10 text-[10px] uppercase tracking-widest">v5.1 Stable</span>
@@ -96,7 +98,7 @@ export function Footer() {
         </FadeIn>
       </div>
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'ProfessionalService', name: 'Albatros', description: 'Agencia digital de desarrollo web, SEO local y automatización con IA.', url: 'https://albatrosia.com', priceRange: '$390 - $3,490 USD', telephone: '+5216121670637' }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'ProfessionalService', name: 'Albatros dev', description: 'Agencia digital de desarrollo web, SEO local y automatización con IA.', url: 'https://albatrosia.com', priceRange: '$390 - $3,490 USD', telephone: '+5216121670637' }) }} />
     </footer>
   );
 }
