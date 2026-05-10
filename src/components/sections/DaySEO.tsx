@@ -101,7 +101,7 @@ export function DaySEO() {
           <div className="relative h-[400px] md:h-[600px] w-full flex items-center justify-center">
             {/* Visual 1 */}
             <motion.div className="absolute w-full flex items-center justify-center" style={{ scale: img1Scale, opacity: img1Opacity, filter: useMotionTemplate`blur(${img1Blur}px)`, zIndex: 10 }}>
-              <div className="relative w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0A0A0A] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex items-center justify-center">
+              <div role="img" aria-label="Visualización de dominio en Google Maps y posicionamiento local" className="relative w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0A0A0A] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent" />
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="w-24 h-24 rounded-full border-4 border-orange-400 flex items-center justify-center text-orange-400 shadow-[0_0_50px_rgba(251,146,60,0.5)] backdrop-blur-xl mb-6 relative">
@@ -118,7 +118,7 @@ export function DaySEO() {
 
             {/* Visual 2 */}
             <motion.div className="absolute w-full flex items-center justify-center" style={{ scale: img2Scale, opacity: img2Opacity, filter: useMotionTemplate`blur(${img2Blur}px)`, zIndex: 20 }}>
-              <div className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0a0a0a] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col p-10 md:p-12">
+              <div role="img" aria-label="Simulación de búsqueda en Google con resultados optimizados por Albatros dev" className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0a0a0a] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col p-10 md:p-12">
                 <div className="h-14 w-full rounded-full border border-white/10 bg-white/5 flex items-center px-8 gap-5 mb-10">
                   <IconSearch className="text-yellow-400 w-6 h-6" />
                   <span className="text-white/60 text-sm font-mono tracking-tight">servicios premium cerca de mi|</span>
@@ -134,7 +134,7 @@ export function DaySEO() {
 
             {/* Visual 3 */}
             <motion.div className="absolute w-full flex items-center justify-center" style={{ scale: img3Scale, opacity: img3Opacity, zIndex: 30 }}>
-              <div className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#050505] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col p-12 font-mono">
+              <div role="img" aria-label="Panel de métricas de SEO técnico mostrando puntuación perfecta" className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#050505] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col p-12 font-mono">
                 <div className="flex justify-between items-center mb-10">
                   <div className="text-red-400 text-[10px] font-black flex items-center gap-3 tracking-[0.3em] uppercase italic">
                     <span className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />

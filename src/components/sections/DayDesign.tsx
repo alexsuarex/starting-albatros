@@ -101,7 +101,7 @@ export function DayDesign() {
           <div className="relative h-[400px] md:h-[600px] w-full flex items-center justify-center">
             {/* Visual 1 */}
             <motion.div className="absolute w-full flex items-center justify-center" style={{ scale: img1Scale, opacity: img1Opacity, filter: useMotionTemplate`blur(${img1Blur}px)`, zIndex: 10 }}>
-              <div className="relative w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden bg-[#050505] shadow-[0_50px_100px_rgba(0,0,0,0.8)] border border-white/5 flex items-center justify-center">
+              <div role="img" aria-label="Mockup de interfaz Glassmorphism premium diseñada por Albatros dev" className="relative w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden bg-[#050505] shadow-[0_50px_100px_rgba(0,0,0,0.8)] border border-white/5 flex items-center justify-center">
                 <div className="absolute top-1/4 left-1/4 w-48 h-48 bg-cyan-500 rounded-full blur-[70px] opacity-30" />
                 <div className="relative w-[85%] h-[75%] rounded-[2.5rem] border border-white/10 bg-white/5 backdrop-blur-3xl shadow-2xl p-10">
                   <div className="flex gap-3 mb-8">
@@ -119,7 +119,7 @@ export function DayDesign() {
 
             {/* Visual 2 */}
             <motion.div className="absolute w-full flex items-center justify-center" style={{ scale: img2Scale, opacity: img2Opacity, filter: useMotionTemplate`blur(${img2Blur}px)`, zIndex: 20 }}>
-              <div className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0d1117] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col font-mono text-[11px]">
+              <div role="img" aria-label="Ejemplo de código TypeScript escalable y moderno" className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0d1117] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col font-mono text-[11px]">
                 <div className="h-12 bg-[#161b22] border-b border-white/5 flex items-center px-8 gap-6 text-white/30">
                   <span className="text-white/70 border-b-2 border-emerald-400 pb-3 translate-y-[1px] font-bold">Hero.tsx</span>
                   <span className="pb-3">layout.tsx</span>
@@ -139,7 +139,7 @@ export function DayDesign() {
 
             {/* Visual 3 */}
             <motion.div className="absolute w-full flex items-center justify-center" style={{ scale: img3Scale, opacity: img3Opacity, zIndex: 30 }}>
-              <div className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0A0A0A] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col p-10 relative">
+              <div role="img" aria-label="Gráfica de optimización de conversión y neuromarketing" className="w-full max-w-md aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 bg-[#0A0A0A] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col p-10 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-transparent to-transparent" />
                 <div className="relative z-10">
                   <h4 className="text-white/20 text-[10px] uppercase tracking-[0.4em] font-black mb-3">Conversion Rate</h4>
