@@ -68,11 +68,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico?v=2' },
-      { url: '/favicon.png?v=2', type: 'image/png' },
+      { url: '/brand-albatros.png?v=3', type: 'image/png' },
     ],
-    shortcut: '/favicon.png?v=2',
-    apple: '/apple-icon.png?v=2',
+    shortcut: '/brand-albatros.png?v=3',
+    apple: '/brand-albatros.png?v=3',
   },
 };
 
