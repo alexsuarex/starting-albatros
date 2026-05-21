@@ -336,8 +336,8 @@ function Precios() {
   const { t, wa, lang, currency, setCurrency } = useLanguage();
 
   const getWaLink = (name: string) => {
-    if (name === "Presencia" || name === "Presence") return wa.presencia;
-    if (name === "Negocio Activo" || name === "Active Business") return wa.negocioActivo;
+    if (name === "Presencia Digital" || name === "Digital Presence") return wa.presencia;
+    if (name === "Atención WhatsApp IA" || name === "WhatsApp AI Support") return wa.negocioActivo;
     return wa.turismoPro;
   };
 

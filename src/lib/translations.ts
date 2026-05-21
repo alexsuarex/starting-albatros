@@ -53,15 +53,15 @@ export const PRICING_BY_CURRENCY = {
 export const WA_LINKS = {
   es: {
     general: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+Dev",
-    presencia: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Presencia+de+Albatros+Dev",
-    negocioActivo: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Negocio+Activo+de+Albatros+Dev",
-    turismoPro: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Turismo+Pro+de+Albatros+Dev",
+    presencia: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Presencia+Digital+de+Albatros+Dev",
+    negocioActivo: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Atenci%C3%B3n+WhatsApp+IA+de+Albatros+Dev",
+    turismoPro: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Reservas+%26+Pagos+de+Albatros+Dev",
   },
   en: {
     general: "https://wa.me/5216121670637?text=Hi%2C+I%27d+like+to+know+more+about+Albatros+Dev",
-    presencia: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Presence+package+from+Albatros+Dev",
-    negocioActivo: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Active+Business+package+from+Albatros+Dev",
-    turismoPro: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Turismo+Pro+package+from+Albatros+Dev",
+    presencia: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Digital+Presence+package+from+Albatros+Dev",
+    negocioActivo: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+WhatsApp+AI+Support+package+from+Albatros+Dev",
+    turismoPro: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Bookings+%26+Payments+package+from+Albatros+Dev",
   }
 };
 
@@ -149,7 +149,7 @@ export const translations = {
       note: "* Precios en USD. Precio beta disponible para los primeros 5 clientes. Sujeto a cambio al lanzamiento oficial.",
       paquetes: [
         {
-          name: "Presencia",
+          name: "Presencia Digital",
           setup: "$250",
           monthly: "$60",
           featured: false,
@@ -164,7 +164,7 @@ export const translations = {
           ],
         },
         {
-          name: "Negocio Activo",
+          name: "Atención WhatsApp IA",
           setup: "$450",
           monthly: "$120",
           featured: true,
@@ -179,7 +179,7 @@ export const translations = {
           ],
         },
         {
-          name: "Turismo Pro",
+          name: "Reservas & Pagos",
           setup: "$700",
           monthly: "$180",
           featured: false,
@@ -346,7 +346,7 @@ export const translations = {
       note: "* Prices in USD. Beta pricing available for the first 5 clients. Subject to change upon official launch.",
       paquetes: [
         {
-          name: "Presence",
+          name: "Digital Presence",
           setup: "$250",
           monthly: "$60",
           featured: false,
@@ -361,7 +361,7 @@ export const translations = {
           ],
         },
         {
-          name: "Active Business",
+          name: "WhatsApp AI Support",
           setup: "$450",
           monthly: "$120",
           featured: true,
@@ -376,7 +376,7 @@ export const translations = {
           ],
         },
         {
-          name: "Turismo Pro",
+          name: "Bookings & Payments",
           setup: "$700",
           monthly: "$180",
           featured: false,
