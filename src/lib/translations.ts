@@ -2,6 +2,54 @@
 
 export type Language = 'es' | 'en';
 
+export type Currency = 'USD' | 'MXN' | 'CLP' | 'COP';
+
+export const CURRENCIES: { code: Currency; symbol: string; label: string; flag: string }[] = [
+  { code: 'USD', symbol: '$', label: 'USD', flag: '🇺🇸' },
+  { code: 'MXN', symbol: '$', label: 'MXN', flag: '🇲🇽' },
+  { code: 'CLP', symbol: '$', label: 'CLP', flag: '🇨🇱' },
+  { code: 'COP', symbol: '$', label: 'COP', flag: '🇨🇴' },
+];
+
+export const PRICING_BY_CURRENCY = {
+  USD: {
+    symbol: '$',
+    suffix: 'USD',
+    paquetes: {
+      presencia: { setup: "$250", monthly: "$60" },
+      negocioActivo: { setup: "$450", monthly: "$120" },
+      turismoPro: { setup: "$700", monthly: "$180" }
+    }
+  },
+  MXN: {
+    symbol: '$',
+    suffix: 'MXN',
+    paquetes: {
+      presencia: { setup: "$4,999", monthly: "$1,199" },
+      negocioActivo: { setup: "$8,999", monthly: "$2,399" },
+      turismoPro: { setup: "$13,999", monthly: "$3,599" }
+    }
+  },
+  CLP: {
+    symbol: '$',
+    suffix: 'CLP',
+    paquetes: {
+      presencia: { setup: "$239,990", monthly: "$59,990" },
+      negocioActivo: { setup: "$429,990", monthly: "$119,990" },
+      turismoPro: { setup: "$669,990", monthly: "$179,990" }
+    }
+  },
+  COP: {
+    symbol: '$',
+    suffix: 'COP',
+    paquetes: {
+      presencia: { setup: "$999,000", monthly: "$240,000" },
+      negocioActivo: { setup: "$1,790,000", monthly: "$470,000" },
+      turismoPro: { setup: "$2,790,000", monthly: "$690,000" }
+    }
+  }
+};
+
 export const WA_LINKS = {
   es: {
     general: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+Dev",
@@ -106,7 +154,7 @@ export const translations = {
           monthly: "$60",
           featured: false,
           features: [
-            { label: "Sitio web React (5 secciones)", included: true },
+            { label: "Sitio web Next.js (código a la medida, 5 secciones)", included: true },
             { label: "Dominio + SSL incluido", included: true },
             { label: "Google Maps optimizado", included: true },
             { label: "SEO local básico", included: true },
@@ -121,7 +169,7 @@ export const translations = {
           monthly: "$120",
           featured: true,
           features: [
-            { label: "Sitio web React (5 secciones)", included: true },
+            { label: "Sitio web Next.js (código a la medida, 5 secciones)", included: true },
             { label: "Dominio + SSL incluido", included: true },
             { label: "Google Maps optimizado", included: true },
             { label: "SEO local básico", included: true },
@@ -136,7 +184,7 @@ export const translations = {
           monthly: "$180",
           featured: false,
           features: [
-            { label: "Sitio web React (5 secciones)", included: true },
+            { label: "Sitio web Next.js (código a la medida, 5 secciones)", included: true },
             { label: "Dominio + SSL incluido", included: true },
             { label: "Google Maps optimizado", included: true },
             { label: "SEO local básico", included: true },
@@ -159,10 +207,10 @@ export const translations = {
       title2: "desde La Paz.",
       desc: "Somos una agencia digital con base en La Paz, Baja California Sur, pero con alcance global. Diseñamos soluciones que funcionan en cualquier mercado, ya sea en México, Chile, Argentina, Colombia o Norteamérica. Ayudamos a los negocios locales a capturar clientes internacionales usando tecnología de punta.",
       stats: [
-        { num: "80+", label: "propiedades y clientes gestionados con tecnología propia" },
-        { num: "3", label: "servicios digitales especializados para tu negocio" },
-        { num: "24/7", label: "disponibilidad de tu chatbot una vez activo" },
-        { num: "Global", label: "Alcance y soporte en toda América" },
+        { num: "< 2s", label: "tiempo de respuesta promedio de la IA" },
+        { num: "24/7", label: "captura de leads y operación continua" },
+        { num: "2", label: "idiomas (ES/EN) con detección automática" },
+        { num: "6", label: "países con soporte y cobertura activa" },
       ]
     },
     faq: {
@@ -303,7 +351,7 @@ export const translations = {
           monthly: "$60",
           featured: false,
           features: [
-            { label: "React website (5 sections)", included: true },
+            { label: "Next.js website (custom code, 5 sections)", included: true },
             { label: "Domain + SSL included", included: true },
             { label: "Optimized Google Maps", included: true },
             { label: "Basic local SEO", included: true },
@@ -318,7 +366,7 @@ export const translations = {
           monthly: "$120",
           featured: true,
           features: [
-            { label: "React website (5 sections)", included: true },
+            { label: "Next.js website (custom code, 5 sections)", included: true },
             { label: "Domain + SSL included", included: true },
             { label: "Optimized Google Maps", included: true },
             { label: "Basic local SEO", included: true },
@@ -333,7 +381,7 @@ export const translations = {
           monthly: "$180",
           featured: false,
           features: [
-            { label: "React website (5 sections)", included: true },
+            { label: "Next.js website (custom code, 5 sections)", included: true },
             { label: "Domain + SSL included", included: true },
             { label: "Optimized Google Maps", included: true },
             { label: "Basic local SEO", included: true },
@@ -356,10 +404,10 @@ export const translations = {
       title2: "from La Paz.",
       desc: "We are a digital agency based in La Paz, Baja California Sur, but with a global reach. We design modern solutions that work in any market—whether in Mexico, Chile, Argentina, Colombia, or North America. We help businesses capture international clients using cutting-edge technology.",
       stats: [
-        { num: "80+", label: "properties and clients managed with our own technology" },
-        { num: "3", label: "specialized digital services for your business" },
-        { num: "24/7", label: "chatbot availability once active" },
-        { num: "Global", label: "Reach and support throughout the Americas" },
+        { num: "< 2s", label: "average AI response time" },
+        { num: "24/7", label: "continuous operation & lead capture" },
+        { num: "2", label: "languages (ES/EN) with automatic detection" },
+        { num: "6", label: "countries with active support & coverage" },
       ]
     },
     faq: {

@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Language, translations, WA_LINKS } from "@/lib/translations";
+import { Language, translations, WA_LINKS, Currency, CURRENCIES, PRICING_BY_CURRENCY } from "@/lib/translations";
 
 // ─── Contexto de Idioma ───────────────────────────────────────────────────────
 const LanguageContext = createContext<{
@@ -16,6 +16,8 @@ const LanguageContext = createContext<{
   setLang: (lang: Language) => void;
   t: typeof translations.es;
   wa: typeof WA_LINKS.es;
+  currency: Currency;
+  setCurrency: (currency: Currency) => void;
 } | null>(null);
 
 function useLanguage() {
@@ -329,8 +331,9 @@ function Servicios() {
 }
 
 // ─── Precios ──────────────────────────────────────────────────────────────────
+// ─── Precios ──────────────────────────────────────────────────────────────────
 function Precios() {
-  const { t, wa } = useLanguage();
+  const { t, wa, lang, currency, setCurrency } = useLanguage();
 
   const getWaLink = (name: string) => {
     if (name === "Presencia" || name === "Presence") return wa.presencia;
@@ -349,65 +352,71 @@ function Precios() {
         </p>
 
         <div className="grid md:grid-cols-3 gap-6 stagger">
-          {t.precios.paquetes.map((p) => (
-            <div
-              key={p.name}
-              className={`fade-in relative bg-white rounded-lg p-8 flex flex-col ${
-                p.featured
-                  ? "border-2 border-zinc-900 shadow-lg"
-                  : "border border-zinc-200"
-              }`}
-            >
-              {p.featured && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs font-mono-custom px-3 py-1 rounded-full whitespace-nowrap">
-                  {t.precios.recommended}
-                </span>
-              )}
-              <h3 className="font-display text-xl font-semibold text-zinc-900 mb-1">
-                {p.name}
-              </h3>
-              <div className="mb-6">
-                <span className="text-3xl font-semibold text-zinc-900">
-                  {p.setup} USD
-                </span>
-                <span className="text-zinc-400 text-sm ml-1">{t.precios.setup}</span>
-                <div className="text-zinc-500 text-sm mt-1">
-                  + {p.monthly} USD / {t.precios.monthly}
-                </div>
-              </div>
+          {t.precios.paquetes.map((p, idx) => {
+            const pkgKey = idx === 0 ? 'presencia' : idx === 1 ? 'negocioActivo' : 'turismoPro';
+            const priceInfo = PRICING_BY_CURRENCY[currency].paquetes[pkgKey];
+            const suffix = PRICING_BY_CURRENCY[currency].suffix;
 
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {p.features.map((f) => (
-                  <li key={f.label} className="flex items-center gap-2 text-sm">
-                    <span className={f.included ? "text-zinc-900" : "text-zinc-300"}>
-                      {f.included ? "✓" : "—"}
-                    </span>
-                    <span className={f.included ? "text-zinc-600" : "text-zinc-300"}>
-                      {f.label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <a
-                href={getWaLink(p.name)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-colors ${
+            return (
+              <div
+                key={p.name}
+                className={`fade-in relative bg-white rounded-lg p-8 flex flex-col ${
                   p.featured
-                    ? "bg-zinc-900 text-white hover:bg-zinc-700"
-                    : "border border-zinc-200 text-zinc-700 hover:border-zinc-400"
+                    ? "border-2 border-zinc-900 shadow-lg"
+                    : "border border-zinc-200"
                 }`}
               >
-                <WhatsAppIcon size={16} />
-                {t.precios.cta}
-              </a>
-            </div>
-          ))}
+                {p.featured && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs font-mono-custom px-3 py-1 rounded-full whitespace-nowrap">
+                    {t.precios.recommended}
+                  </span>
+                )}
+                <h3 className="font-display text-xl font-semibold text-zinc-900 mb-1">
+                  {p.name}
+                </h3>
+                <div className="mb-6">
+                  <span className="text-3xl font-semibold text-zinc-900">
+                    {priceInfo.setup} {suffix}
+                  </span>
+                  <span className="text-zinc-400 text-sm ml-1">{t.precios.setup}</span>
+                  <div className="text-zinc-500 text-sm mt-1">
+                    + {priceInfo.monthly} {suffix} / {t.precios.monthly}
+                  </div>
+                </div>
+
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {p.features.map((f) => (
+                    <li key={f.label} className="flex items-center gap-2 text-sm">
+                      <span className={f.included ? "text-zinc-900" : "text-zinc-300"}>
+                        {f.included ? "✓" : "—"}
+                      </span>
+                      <span className={f.included ? "text-zinc-600" : "text-zinc-300"}>
+                        {f.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href={getWaLink(p.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-colors ${
+                    p.featured
+                      ? "bg-zinc-900 text-white hover:bg-zinc-700"
+                      : "border border-zinc-200 text-zinc-700 hover:border-zinc-400"
+                  }`}
+                >
+                  <WhatsAppIcon size={16} />
+                  {t.precios.cta}
+                </a>
+              </div>
+            );
+          })}
         </div>
 
         <p className="text-xs text-zinc-400 font-mono-custom mt-8 fade-in">
-          {t.precios.note}
+          {t.precios.note.replace("USD", currency)}
         </p>
       </div>
     </section>
@@ -678,22 +687,64 @@ function FloatingWA() {
 export default function Home() {
   useFadeIn();
   const [lang, setLang] = useState<Language>("es");
+  const [currency, setCurrency] = useState<Currency>("USD");
 
   useEffect(() => {
-    // 1. Verificar preferencia guardada en localStorage
+    // 1. Detectar e inicializar idioma
     const savedLang = localStorage.getItem("albi-lang") as Language;
     if (savedLang === "es" || savedLang === "en") {
       setLang(savedLang);
+    } else {
+      const browserLang = navigator.language || (navigator as any).userLanguage || "es";
+      if (browserLang.startsWith("en")) {
+        setLang("en");
+      } else {
+        setLang("es");
+      }
+    }
+
+    // 2. Detectar e inicializar moneda
+    const savedCurrency = localStorage.getItem("albi-detected-currency") as Currency;
+    if (savedCurrency === "USD" || savedCurrency === "MXN" || savedCurrency === "CLP" || savedCurrency === "COP") {
+      setCurrency(savedCurrency);
       return;
     }
 
-    // 2. Si no hay preferencia, detectar el idioma del navegador
-    const browserLang = navigator.language || (navigator as any).userLanguage || "es";
-    if (browserLang.startsWith("en")) {
-      setLang("en");
-    } else {
-      setLang("es");
+    // Fallback rápido por locale del navegador antes de geolocalizar por IP
+    const browserLangGeo = navigator.language || (navigator as any).userLanguage || "es";
+    let initialCurrency: Currency = "USD";
+    if (browserLangGeo.toLowerCase().includes("-mx")) {
+      initialCurrency = "MXN";
+    } else if (browserLangGeo.toLowerCase().includes("-cl")) {
+      initialCurrency = "CLP";
+    } else if (browserLangGeo.toLowerCase().includes("-co")) {
+      initialCurrency = "COP";
     }
+    setCurrency(initialCurrency);
+
+    // Geolocalización precisa por IP
+    const detectIPCurrency = async () => {
+      try {
+        const res = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(3000) });
+        if (res.ok) {
+          const data = await res.json();
+          const country = data.country_code; // ej. MX, CL, CO
+          let detectedCurrency: Currency = "USD";
+          if (country === "MX") {
+            detectedCurrency = "MXN";
+          } else if (country === "CL") {
+            detectedCurrency = "CLP";
+          } else if (country === "CO") {
+            detectedCurrency = "COP";
+          }
+          setCurrency(detectedCurrency);
+          localStorage.setItem("albi-detected-currency", detectedCurrency);
+        }
+      } catch (err) {
+        console.warn("Geolocalización por IP fallida, usando fallback de locale:", err);
+      }
+    };
+    detectIPCurrency();
   }, []);
 
   const handleLanguageChange = (newLang: Language) => {
@@ -701,11 +752,25 @@ export default function Home() {
     localStorage.setItem("albi-lang", newLang);
   };
 
+  const handleCurrencyChange = (newCurrency: Currency) => {
+    setCurrency(newCurrency);
+    localStorage.setItem("albi-detected-currency", newCurrency);
+  };
+
   const t = translations[lang];
   const wa = WA_LINKS[lang];
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang: handleLanguageChange, t, wa }}>
+    <LanguageContext.Provider
+      value={{
+        lang,
+        setLang: handleLanguageChange,
+        t,
+        wa,
+        currency,
+        setCurrency: handleCurrencyChange,
+      }}
+    >
       <Nav />
       <main>
         <Hero />
