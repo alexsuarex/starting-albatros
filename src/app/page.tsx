@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, createContext, useContext } from "react";
 import Image from "next/image";
 import {
   Accordion,
@@ -8,19 +8,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
+import { Language, translations, WA_LINKS } from "@/lib/translations";
 
-// ─── WhatsApp links ───────────────────────────────────────────────────────────
-const WA = {
-  general:
-    "https://wa.me/5216121670637?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+Dev",
-  presencia:
-    "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Presencia+de+Albatros+Dev",
-  negocioActivo:
-    "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Negocio+Activo+de+Albatros+Dev",
-  turismoPro:
-    "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Turismo+Pro+de+Albatros+Dev",
-};
+// ─── Contexto de Idioma ───────────────────────────────────────────────────────
+const LanguageContext = createContext<{
+  lang: Language;
+  setLang: (lang: Language) => void;
+  t: typeof translations.es;
+  wa: typeof WA_LINKS.es;
+} | null>(null);
+
+function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error("useLanguage debe usarse dentro de un LanguageProvider");
+  }
+  return context;
+}
 
 // ─── Scroll animation hook ────────────────────────────────────────────────────
 function useFadeIn() {
@@ -128,6 +132,7 @@ function WhatsAppIcon({ size = 20 }: { size?: number }) {
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 function Nav() {
   const navRef = useRef<HTMLElement>(null);
+  const { t, wa, lang, setLang } = useLanguage();
 
   useEffect(() => {
     const handler = () => {
@@ -160,25 +165,36 @@ function Nav() {
 
         <div className="hidden md:flex items-center gap-8 text-sm text-zinc-500">
           <a href="#servicios" className="hover:text-zinc-900 transition-colors">
-            Servicios
+            {t.nav.services}
           </a>
           <a href="#precios" className="hover:text-zinc-900 transition-colors">
-            Precios
+            {t.nav.pricing}
           </a>
           <a href="#faq" className="hover:text-zinc-900 transition-colors">
-            FAQ
+            {t.nav.faq}
           </a>
         </div>
 
-        <a
-          href={WA.general}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 bg-zinc-900 text-white text-sm px-4 py-2 rounded-full hover:bg-zinc-700 transition-colors"
-        >
-          <WhatsAppIcon size={16} />
-          Hablar con Albi
-        </a>
+        <div className="flex items-center gap-4">
+          {/* Selector de idioma premium de un solo botón */}
+          <button
+            onClick={() => setLang(lang === "es" ? "en" : "es")}
+            className="text-xs font-mono border border-zinc-200 px-2.5 py-1 rounded-full hover:bg-zinc-50 transition-colors font-medium text-zinc-600 hover:text-zinc-900"
+            title={lang === "es" ? "Switch to English" : "Cambiar a Español"}
+          >
+            {lang === "es" ? "EN 🇺🇸" : "ES 🇪🇸"}
+          </button>
+
+          <a
+            href={wa.general}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-zinc-900 text-white text-sm px-4 py-2 rounded-full hover:bg-zinc-700 transition-colors"
+          >
+            <WhatsAppIcon size={16} />
+            {t.nav.talkToAlbi}
+          </a>
+        </div>
       </div>
     </nav>
   );
@@ -186,6 +202,8 @@ function Nav() {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function Hero() {
+  const { t, wa } = useLanguage();
+
   return (
     <section
       id="hero"
@@ -194,42 +212,38 @@ function Hero() {
       <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center py-20">
         <div>
           <p className="font-mono-custom text-xs text-zinc-400 mb-6 tracking-widest uppercase">
-            v0.1-beta · La Paz, BCS
+            {t.hero.kicker}
           </p>
-          <h1 className="font-display text-5xl md:text-7xl font-semibold leading-[1.05] text-zinc-900 mb-6">
-            Todavía en
+          <h1 className="font-display text-4xl md:text-6xl font-semibold leading-[1.1] text-zinc-900 mb-6">
+            {t.hero.title1}
             <br />
-            blanco y negro.
-            <br />
-            <span className="text-zinc-400">Pronto, a color.</span>
+            {t.hero.title2}
           </h1>
-          <p className="text-zinc-500 text-lg leading-relaxed mb-8 max-w-md">
-            Somos Albatros Dev — la agencia digital de La Paz que construye la
-            presencia online de negocios locales. Sitio web, Google Maps y
-            atención con IA las 24 horas.
+          <p className="text-zinc-500 text-base md:text-lg leading-relaxed mb-8 max-w-md">
+            {t.hero.description}
           </p>
           <div className="flex flex-wrap gap-3">
             <a
               href="#precios"
               className="bg-zinc-900 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-zinc-700 transition-colors"
             >
-              Ver paquetes
+              {t.hero.viewPackages}
             </a>
             <a
-              href={WA.general}
+              href={wa.general}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 border border-zinc-200 text-zinc-700 px-6 py-3 rounded-full text-sm font-medium hover:border-zinc-400 transition-colors"
             >
               <WhatsAppIcon size={16} />
-              Hablar con Albi
+              {t.hero.talkToAlbi}
             </a>
           </div>
         </div>
         <div className="flex items-center justify-center">
           <Image
             src="/hero-mockup.png"
-            alt="Presencia digital para tu negocio"
+            alt={t.hero.altHero}
             width={600}
             height={300}
             className="w-full max-w-lg mx-auto"
@@ -243,34 +257,18 @@ function Hero() {
 
 // ─── Problema ─────────────────────────────────────────────────────────────────
 function Problema() {
-  const puntos = [
-    {
-      num: "01",
-      title: "Sin presencia online",
-      desc: "Un turista te busca en Google a las 11pm. No te encuentra. Reserva con tu competencia.",
-    },
-    {
-      num: "02",
-      title: "WhatsApp saturado",
-      desc: "Respondes cuando puedes. Cuando puedes ya es tarde. El cliente ya se fue.",
-    },
-    {
-      num: "03",
-      title: "Google Maps abandonado",
-      desc: "Tu ficha desactualizada, sin fotos, con horario incorrecto. Primera impresión: mala.",
-    },
-  ];
+  const { t } = useLanguage();
 
   return (
     <section className="py-24 px-6 bg-zinc-50 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-16 fade-in">
-          ¿Cuántos clientes perdiste
+          {t.problema.title1}
           <br />
-          hoy por no contestar WhatsApp?
+          {t.problema.title2}
         </h2>
         <div className="grid md:grid-cols-3 gap-6 stagger">
-          {puntos.map((p) => (
+          {t.problema.puntos.map((p) => (
             <div
               key={p.num}
               className="fade-in relative border border-zinc-200 bg-white p-8 rounded-lg overflow-hidden"
@@ -294,50 +292,19 @@ function Problema() {
 
 // ─── Servicios ────────────────────────────────────────────────────────────────
 function Servicios() {
-  const servicios = [
-    {
-      num: "01",
-      title: "Sitio web que vende",
-      items: [
-        "Sitio React moderno y rápido",
-        "Sistema de reservaciones online",
-        "Integración de pagos (Stripe / MercadoPago)",
-        "Responsive, SSL, dominio incluido",
-      ],
-    },
-    {
-      num: "02",
-      title: "Google Maps + SEO local",
-      items: [
-        "Ficha Google Business optimizada",
-        "Palabras clave para tu ciudad y giro",
-        "Fotos, horarios, reseñas gestionadas",
-        "Reporte mensual de visibilidad",
-      ],
-    },
-    {
-      num: "03",
-      title: "Atención con IA 24/7",
-      items: [
-        "Chatbot en WhatsApp que responde solo",
-        "Conoce tus servicios, precios y horarios",
-        "Captura leads mientras duermes",
-        "Escala a humano cuando es necesario",
-      ],
-    },
-  ];
+  const { t } = useLanguage();
 
   return (
     <section id="servicios" className="py-24 px-6 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-4 fade-in">
-          Tres problemas.
+          {t.servicios.title1}
         </h2>
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-400 mb-16 fade-in">
-          Tres soluciones.
+          {t.servicios.title2}
         </h2>
         <div className="grid md:grid-cols-3 gap-6 stagger">
-          {servicios.map((s) => (
+          {t.servicios.puntos.map((s) => (
             <div key={s.num} className="fade-in relative p-8 border border-zinc-200 rounded-lg">
               <span className="absolute top-4 right-4 font-mono-custom text-6xl font-bold text-zinc-100 select-none leading-none">
                 {s.num}
@@ -363,79 +330,37 @@ function Servicios() {
 
 // ─── Precios ──────────────────────────────────────────────────────────────────
 function Precios() {
-  const paquetes = [
-    {
-      name: "Presencia",
-      setup: "$250",
-      monthly: "$60",
-      waLink: WA.presencia,
-      featured: false,
-      features: [
-        { label: "Sitio web React (5 secciones)", included: true },
-        { label: "Dominio + SSL incluido", included: true },
-        { label: "Google Maps optimizado", included: true },
-        { label: "SEO local básico", included: true },
-        { label: "Chatbot WhatsApp con IA", included: false },
-        { label: "Sistema de reservaciones", included: false },
-        { label: "Integración de pagos", included: false },
-      ],
-    },
-    {
-      name: "Negocio Activo",
-      setup: "$450",
-      monthly: "$120",
-      waLink: WA.negocioActivo,
-      featured: true,
-      features: [
-        { label: "Sitio web React (5 secciones)", included: true },
-        { label: "Dominio + SSL incluido", included: true },
-        { label: "Google Maps optimizado", included: true },
-        { label: "SEO local básico", included: true },
-        { label: "Chatbot WhatsApp con IA", included: true },
-        { label: "Sistema de reservaciones", included: false },
-        { label: "Integración de pagos", included: false },
-      ],
-    },
-    {
-      name: "Turismo Pro",
-      setup: "$700",
-      monthly: "$180",
-      waLink: WA.turismoPro,
-      featured: false,
-      features: [
-        { label: "Sitio web React (5 secciones)", included: true },
-        { label: "Dominio + SSL incluido", included: true },
-        { label: "Google Maps optimizado", included: true },
-        { label: "SEO local básico", included: true },
-        { label: "Chatbot WhatsApp con IA", included: true },
-        { label: "Sistema de reservaciones", included: true },
-        { label: "Integración de pagos", included: true },
-      ],
-    },
-  ];
+  const { t, wa } = useLanguage();
+
+  const getWaLink = (name: string) => {
+    if (name === "Presencia" || name === "Presence") return wa.presencia;
+    if (name === "Negocio Activo" || name === "Active Business") return wa.negocioActivo;
+    return wa.turismoPro;
+  };
 
   return (
     <section id="precios" className="py-24 px-6 bg-zinc-50 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-3 fade-in">
-          Precios de fundador.
+          {t.precios.title}
         </h2>
         <p className="text-zinc-500 mb-16 fade-in">
-          Solo para los primeros 5 clientes beta. Después suben.
+          {t.precios.subtitle}
         </p>
 
         <div className="grid md:grid-cols-3 gap-6 stagger">
-          {paquetes.map((p) => (
+          {t.precios.paquetes.map((p) => (
             <div
               key={p.name}
-              className={`fade-in relative bg-white rounded-lg p-8 flex flex-col ${p.featured
-                ? "border-2 border-zinc-900 shadow-lg"
-                : "border border-zinc-200"
-                }`}
+              className={`fade-in relative bg-white rounded-lg p-8 flex flex-col ${
+                p.featured
+                  ? "border-2 border-zinc-900 shadow-lg"
+                  : "border border-zinc-200"
+              }`}
             >
               {p.featured && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs font-mono-custom px-3 py-1 rounded-full whitespace-nowrap">
-                  Recomendado
+                  {t.precios.recommended}
                 </span>
               )}
               <h3 className="font-display text-xl font-semibold text-zinc-900 mb-1">
@@ -445,9 +370,9 @@ function Precios() {
                 <span className="text-3xl font-semibold text-zinc-900">
                   {p.setup} USD
                 </span>
-                <span className="text-zinc-400 text-sm ml-1">setup</span>
+                <span className="text-zinc-400 text-sm ml-1">{t.precios.setup}</span>
                 <div className="text-zinc-500 text-sm mt-1">
-                  + {p.monthly} USD / mes
+                  + {p.monthly} USD / {t.precios.monthly}
                 </div>
               </div>
 
@@ -465,24 +390,24 @@ function Precios() {
               </ul>
 
               <a
-                href={p.waLink}
+                href={getWaLink(p.name)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-colors ${p.featured
-                  ? "bg-zinc-900 text-white hover:bg-zinc-700"
-                  : "border border-zinc-200 text-zinc-700 hover:border-zinc-400"
-                  }`}
+                className={`flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-colors ${
+                  p.featured
+                    ? "bg-zinc-900 text-white hover:bg-zinc-700"
+                    : "border border-zinc-200 text-zinc-700 hover:border-zinc-400"
+                }`}
               >
                 <WhatsAppIcon size={16} />
-                Quiero este paquete
+                {t.precios.cta}
               </a>
             </div>
           ))}
         </div>
 
         <p className="text-xs text-zinc-400 font-mono-custom mt-8 fade-in">
-          * Precios en USD. Precio beta disponible para los primeros 5 clientes.
-          Sujeto a cambio al lanzamiento oficial.
+          {t.precios.note}
         </p>
       </div>
     </section>
@@ -491,29 +416,30 @@ function Precios() {
 
 // ─── Demo Albi ────────────────────────────────────────────────────────────────
 function DemoAlbi() {
+  const { t, wa } = useLanguage();
+
   return (
     <section className="py-24 px-6">
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-4 fade-in">
-          Tu futuro mejor empleado,
+          {t.demoAlbi.title1}
           <br />
-          trabajando ahora mismo.
+          {t.demoAlbi.title2}
         </h2>
         <p className="text-zinc-500 text-lg mb-10 fade-in">
-          Escríbele a Albi por WhatsApp. Te responderá al instante, en español o
-          inglés. Así de natural y rápida será la atención para tus clientes.
+          {t.demoAlbi.desc}
         </p>
         <a
-          href={WA.general}
+          href={wa.general}
           target="_blank"
           rel="noopener noreferrer"
           className="fade-in inline-flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-700 transition-colors"
         >
           <WhatsAppIcon size={20} />
-          Hablar con Albi ahora
+          {t.demoAlbi.btn}
         </a>
         <p className="font-mono-custom text-xs text-zinc-400 mt-4 fade-in">
-          responde en segundos · disponible 24/7 · bilingüe
+          {t.demoAlbi.footer}
         </p>
       </div>
     </section>
@@ -522,29 +448,21 @@ function DemoAlbi() {
 
 // ─── Sobre nosotros ───────────────────────────────────────────────────────────
 function Sobre() {
-  const stats = [
-    { num: "80+", label: "propiedades gestionadas con tecnología propia" },
-    { num: "3", label: "servicios especializados para negocios locales" },
-    { num: "24/7", label: "disponibilidad del chatbot una vez activo" },
-    { num: "La Paz → Los Cabos → México", label: "ruta de expansión" },
-  ];
+  const { t } = useLanguage();
 
   return (
     <section className="py-24 px-6 bg-zinc-900 text-white">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold mb-6 fade-in">
-          Construido en La Paz,
+          {t.sobre.title1}
           <br />
-          para La Paz.
+          {t.sobre.title2}
         </h2>
         <p className="text-zinc-400 text-lg max-w-2xl mb-16 leading-relaxed fade-in">
-          Somos una agencia digital local. Conocemos el mercado turístico de
-          Baja California Sur, entendemos los negocios de aquí y construimos
-          soluciones que funcionan en este contexto. No somos una empresa de
-          CDMX o del norte que llegó a vender. Somos de aquí.
+          {t.sobre.desc}
         </p>
         <div className="grid grid-cols-2 gap-6 stagger">
-          {stats.map((s) => (
+          {t.sobre.stats.map((s) => (
             <div key={s.label} className="fade-in border border-zinc-800 rounded-lg p-6">
               <div className="font-display text-2xl font-semibold text-white mb-2">
                 {s.num}
@@ -560,41 +478,16 @@ function Sobre() {
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────
 function FAQ() {
-  const faqs = [
-    {
-      q: "¿Cuánto tiempo tarda en estar listo mi sitio?",
-      a: "Entre 5 y 14 días dependiendo del paquete. Presencia en 5–7 días, Turismo Pro en 10–14 días.",
-    },
-    {
-      q: "¿Necesito saber de tecnología para usar esto?",
-      a: "No. Nosotros configuramos todo. Tú solo apruebas el resultado y usas el producto final.",
-    },
-    {
-      q: "¿El chatbot puede atender en inglés a turistas?",
-      a: "Sí. Albi detecta el idioma del cliente y responde en español o inglés automáticamente.",
-    },
-    {
-      q: "¿Qué pasa si quiero cancelar el servicio mensual?",
-      a: "Puedes cancelar en cualquier momento con 15 días de aviso. El sitio web sigue siendo tuyo.",
-    },
-    {
-      q: "¿Los precios son en pesos o dólares?",
-      a: "En dólares USD. Aceptamos transferencia, tarjeta o pago en efectivo en La Paz.",
-    },
-    {
-      q: "¿Qué es el precio beta?",
-      a: "Es el precio de lanzamiento para nuestros primeros 5 clientes. Una vez completados los lugares, los precios suben al precio regular.",
-    },
-  ];
+  const { t } = useLanguage();
 
   return (
     <section id="faq" className="py-24 px-6 scroll-mt-16">
       <div className="max-w-3xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-16 fade-in">
-          Preguntas frecuentes
+          {t.faq.title}
         </h2>
         <Accordion className="fade-in">
-          {faqs.map((f, i) => (
+          {t.faq.items.map((f, i) => (
             <AccordionItem key={i} value={`item-${i}`} className="border-zinc-200">
               <AccordionTrigger className="text-left font-medium text-zinc-900 hover:text-zinc-600">
                 {f.q}
@@ -612,30 +505,32 @@ function FAQ() {
 
 // ─── CTA Final ────────────────────────────────────────────────────────────────
 function CTAFinal() {
+  const { t, wa } = useLanguage();
+
   return (
     <section className="py-24 px-6 bg-zinc-50 text-center">
       <div className="max-w-2xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-4 fade-in">
-          Tu negocio puede responder
+          {t.ctaFinal.title1}
           <br />
-          WhatsApp aunque estés
+          {t.ctaFinal.title2}
           <br />
-          en la playa.
+          {t.ctaFinal.title3}
         </h2>
         <p className="text-zinc-500 mb-10 fade-in">
-          Quedan lugares disponibles en la beta. Escríbenos hoy.
+          {t.ctaFinal.desc}
         </p>
         <a
-          href={WA.general}
+          href={wa.general}
           target="_blank"
           rel="noopener noreferrer"
           className="fade-in inline-flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-700 transition-colors"
         >
           <WhatsAppIcon size={20} />
-          Hablar con Albi por WhatsApp
+          {t.ctaFinal.btn}
         </a>
         <p className="font-mono-custom text-xs text-zinc-400 mt-4 fade-in">
-          Sin compromiso. Te respondemos en minutos.
+          {t.ctaFinal.footer}
         </p>
       </div>
     </section>
@@ -644,13 +539,13 @@ function CTAFinal() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
+  const { t, wa } = useLanguage();
+
   return (
     <footer className="py-16 px-6 border-t border-zinc-200">
       <div className="max-w-6xl mx-auto">
-
         {/* Columns */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
-
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
@@ -662,44 +557,72 @@ function Footer() {
               </span>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Agencia digital en La Paz, BCS. Sitios web, Google Maps y chatbots con IA para negocios locales.
+              {t.footer.brandDesc}
             </p>
           </div>
 
           {/* Menú */}
           <div>
             <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">
-              Menú
+              {t.footer.menu}
             </p>
             <ul className="space-y-2.5 text-sm text-zinc-500">
-              <li><a href="#servicios" className="hover:text-zinc-900 transition-colors">Servicios</a></li>
-              <li><a href="#precios" className="hover:text-zinc-900 transition-colors">Precios</a></li>
-              <li><a href="#faq" className="hover:text-zinc-900 transition-colors">FAQ</a></li>
-              <li><a href="/login" className="hover:text-zinc-900 transition-colors">Login</a></li>
+              <li>
+                <a href="#servicios" className="hover:text-zinc-900 transition-colors">
+                  {t.nav.services}
+                </a>
+              </li>
+              <li>
+                <a href="#precios" className="hover:text-zinc-900 transition-colors">
+                  {t.nav.pricing}
+                </a>
+              </li>
+              <li>
+                <a href="#faq" className="hover:text-zinc-900 transition-colors">
+                  {t.nav.faq}
+                </a>
+              </li>
+              <li>
+                <a href="/login" className="hover:text-zinc-900 transition-colors">
+                  Login
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
             <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">
-              Legal
+              {t.footer.legal}
             </p>
             <ul className="space-y-2.5 text-sm text-zinc-500">
-              <li><a href="/privacy-policy" className="hover:text-zinc-900 transition-colors">Aviso de Privacidad</a></li>
-              <li><a href="/terms" className="hover:text-zinc-900 transition-colors">Términos y Condiciones</a></li>
-              <li><a href="/data-deletion" className="hover:text-zinc-900 transition-colors">Eliminación de Datos</a></li>
+              <li>
+                <a href="/privacy-policy" className="hover:text-zinc-900 transition-colors">
+                  {t.footer.privacy}
+                </a>
+              </li>
+              <li>
+                <a href="/terms" className="hover:text-zinc-900 transition-colors">
+                  {t.footer.terms}
+                </a>
+              </li>
+              <li>
+                <a href="/data-deletion" className="hover:text-zinc-900 transition-colors">
+                  {t.footer.dataDeletion}
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* Contacto */}
           <div>
             <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">
-              Contacto
+              {t.footer.contact}
             </p>
             <ul className="space-y-2.5 text-sm text-zinc-500">
               <li>
                 <a
-                  href={WA.general}
+                  href={wa.general}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-zinc-900 transition-colors"
@@ -715,22 +638,20 @@ function Footer() {
                   hola@albatrosia.com
                 </a>
               </li>
-              <li className="text-zinc-400 text-xs pt-1">La Paz, BCS, México</li>
+              <li className="text-zinc-400 text-xs pt-1">{t.footer.address}</li>
             </ul>
           </div>
-
         </div>
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-zinc-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
           <p className="font-mono-custom text-xs text-zinc-400">
-            © 2026 Albatros Dev · La Paz, Baja California Sur, México
+            {t.footer.bottomLeft}
           </p>
           <p className="font-mono-custom text-xs text-zinc-300">
-            Hecho en La Paz con mucho café ☕ y buen internet ⚡️
+            {t.footer.bottomRight}
           </p>
         </div>
-
       </div>
     </footer>
   );
@@ -738,9 +659,11 @@ function Footer() {
 
 // ─── Botón flotante WhatsApp (mobile) ─────────────────────────────────────────
 function FloatingWA() {
+  const { wa } = useLanguage();
+
   return (
     <a
-      href={WA.general}
+      href={wa.general}
       target="_blank"
       rel="noopener noreferrer"
       className="md:hidden fixed bottom-6 right-6 z-50 bg-zinc-900 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-zinc-700 transition-colors"
@@ -754,9 +677,35 @@ function FloatingWA() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   useFadeIn();
+  const [lang, setLang] = useState<Language>("es");
+
+  useEffect(() => {
+    // 1. Verificar preferencia guardada en localStorage
+    const savedLang = localStorage.getItem("albi-lang") as Language;
+    if (savedLang === "es" || savedLang === "en") {
+      setLang(savedLang);
+      return;
+    }
+
+    // 2. Si no hay preferencia, detectar el idioma del navegador
+    const browserLang = navigator.language || (navigator as any).userLanguage || "es";
+    if (browserLang.startsWith("en")) {
+      setLang("en");
+    } else {
+      setLang("es");
+    }
+  }, []);
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLang(newLang);
+    localStorage.setItem("albi-lang", newLang);
+  };
+
+  const t = translations[lang];
+  const wa = WA_LINKS[lang];
 
   return (
-    <>
+    <LanguageContext.Provider value={{ lang, setLang: handleLanguageChange, t, wa }}>
       <Nav />
       <main>
         <Hero />
@@ -770,6 +719,6 @@ export default function Home() {
       </main>
       <Footer />
       <FloatingWA />
-    </>
+    </LanguageContext.Provider>
   );
 }
