@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+type Channel = 'whatsapp' | 'facebook'
+
 type Conversation = {
     id: string
     phone: string
@@ -16,6 +18,7 @@ type Conversation = {
     status: 'bot' | 'human' | 'closed'
     unread: boolean
     updated_at: string
+    channel: Channel
 }
 
 type Message = {
@@ -24,6 +27,23 @@ type Message = {
     role: 'user' | 'bot' | 'human'
     content: string
     created_at: string
+}
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+function WhatsAppIcon({ size = 20 }: { size?: number }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+    )
+}
+
+function FacebookIcon({ size = 20 }: { size?: number }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+    )
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -63,12 +83,13 @@ export default function Dashboard() {
     const [reply, setReply] = useState('')
     const [sending, setSending] = useState(false)
     const [filter, setFilter] = useState<'all' | 'human' | 'bot' | 'closed'>('all')
+    const [channelTab, setChannelTab] = useState<Channel>('whatsapp')
     const [user, setUser] = useState<any>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
     const supabase = createClient()
 
-    // ─── Auth check ─────────────────────────────────────────────────────────────
+    // ─── Auth check ──────────────────────────────────────────────────────────
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
             if (!data.user) router.push('/login')
@@ -76,44 +97,38 @@ export default function Dashboard() {
         })
     }, [])
 
-    // ─── Cargar conversaciones ───────────────────────────────────────────────────
+    // ─── Cargar conversaciones ────────────────────────────────────────────────
     useEffect(() => {
         if (!user) return
         loadConversations()
 
-        // Realtime subscription
-        const channel = supabase
-            .channel('alb_conversations')
+        const sub = supabase
+            .channel('alb_conversations_sub')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'alb_conversations' }, () => {
                 loadConversations()
             })
             .subscribe()
 
-        return () => { supabase.removeChannel(channel) }
-    }, [user, filter])
+        return () => { supabase.removeChannel(sub) }
+    }, [user])
 
     async function loadConversations() {
-        let query = supabase
+        const { data } = await supabase
             .from('alb_conversations')
             .select('*')
             .order('updated_at', { ascending: false })
-
-        if (filter !== 'all') query = query.eq('status', filter)
-
-        const { data } = await query
-        setConversations(data || [])
+        // Las conversaciones antiguas sin campo channel se tratan como whatsapp
+        setConversations((data || []).map(c => ({ ...c, channel: (c.channel || 'whatsapp') as Channel })))
     }
 
-    // ─── Cargar mensajes de conversación seleccionada ────────────────────────────
+    // ─── Cargar mensajes de conversación seleccionada ─────────────────────────
     useEffect(() => {
         if (!selected) return
         loadMessages()
 
-        // Marcar como leído
         supabase.from('alb_conversations').update({ unread: false }).eq('id', selected.id)
 
-        // Realtime para mensajes
-        const channel = supabase
+        const sub = supabase
             .channel(`messages-${selected.id}`)
             .on('postgres_changes', {
                 event: 'INSERT',
@@ -126,7 +141,7 @@ export default function Dashboard() {
             })
             .subscribe()
 
-        return () => { supabase.removeChannel(channel) }
+        return () => { supabase.removeChannel(sub) }
     }, [selected?.id])
 
     async function loadMessages() {
@@ -139,20 +154,22 @@ export default function Dashboard() {
         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
     }
 
-    // ─── Enviar respuesta manual ─────────────────────────────────────────────────
+    // ─── Enviar respuesta manual ──────────────────────────────────────────────
     async function handleSend() {
         if (!reply.trim() || !selected || sending) return
         setSending(true)
 
-        // Guardar en Supabase
         await supabase.from('alb_messages').insert({
             conversation_id: selected.id,
             role: 'human',
             content: reply.trim(),
         })
 
-        // Enviar por Kapso via API route
-        await fetch('/api/send-message', {
+        const apiPath = selected.channel === 'facebook'
+            ? '/api/send-message/facebook'
+            : '/api/send-message'
+
+        await fetch(apiPath, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ to: selected.phone, message: reply.trim() }),
@@ -162,7 +179,7 @@ export default function Dashboard() {
         setSending(false)
     }
 
-    // ─── Cambiar status ──────────────────────────────────────────────────────────
+    // ─── Cambiar status ───────────────────────────────────────────────────────
     async function changeStatus(status: 'bot' | 'human' | 'closed') {
         if (!selected) return
         await supabase.from('alb_conversations').update({ status }).eq('id', selected.id)
@@ -170,14 +187,19 @@ export default function Dashboard() {
         loadConversations()
     }
 
-    // ─── Logout ──────────────────────────────────────────────────────────────────
+    // ─── Logout ───────────────────────────────────────────────────────────────
     async function handleLogout() {
         await supabase.auth.signOut()
         router.push('/login')
     }
 
-    const filtered = conversations.filter(c => filter === 'all' || c.status === filter)
-    const humanCount = conversations.filter(c => c.status === 'human' && c.unread).length
+    const filtered = conversations.filter(c =>
+        c.channel === channelTab &&
+        (filter === 'all' || c.status === filter)
+    )
+
+    const waAlerts = conversations.filter(c => c.channel === 'whatsapp' && c.status === 'human' && c.unread).length
+    const fbAlerts = conversations.filter(c => c.channel === 'facebook' && c.status === 'human' && c.unread).length
 
     return (
         <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -187,9 +209,9 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                     <span className="font-display text-base font-semibold text-zinc-900">Albatros Dev</span>
                     <span className="font-mono text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">dashboard</span>
-                    {humanCount > 0 && (
+                    {(waAlerts + fbAlerts) > 0 && (
                         <span className="bg-amber-500 text-white text-xs font-mono w-5 h-5 rounded-full flex items-center justify-center">
-                            {humanCount}
+                            {waAlerts + fbAlerts}
                         </span>
                     )}
                 </div>
@@ -200,26 +222,63 @@ export default function Dashboard() {
 
             <div className="flex flex-1 overflow-hidden">
 
-                {/* ─── Sidebar ──────────────────────────────────────────────────────── */}
+                {/* ─── Sidebar ──────────────────────────────────────────────────── */}
                 <div className="w-80 border-r border-zinc-200 flex flex-col flex-shrink-0">
 
-                    {/* Filtros */}
+                    {/* Channel tabs */}
+                    <div className="flex border-b border-zinc-200">
+                        <button
+                            onClick={() => { setChannelTab('whatsapp'); setSelected(null) }}
+                            className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-3 font-mono transition-colors border-b-2 -mb-px ${
+                                channelTab === 'whatsapp'
+                                    ? 'border-zinc-900 text-zinc-900'
+                                    : 'border-transparent text-zinc-400 hover:text-zinc-700'
+                            }`}
+                        >
+                            <WhatsAppIcon size={11} />
+                            WhatsApp
+                            {waAlerts > 0 && (
+                                <span className="bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                    {waAlerts}
+                                </span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => { setChannelTab('facebook'); setSelected(null) }}
+                            className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-3 font-mono transition-colors border-b-2 -mb-px ${
+                                channelTab === 'facebook'
+                                    ? 'border-[#1877F2] text-[#1877F2]'
+                                    : 'border-transparent text-zinc-400 hover:text-zinc-700'
+                            }`}
+                        >
+                            <FacebookIcon size={11} />
+                            Facebook
+                            {fbAlerts > 0 && (
+                                <span className="bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                    {fbAlerts}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Status filters */}
                     <div className="p-3 border-b border-zinc-100 flex gap-1">
                         {(['all', 'human', 'bot', 'closed'] as const).map(f => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
-                                className={`text-xs px-2.5 py-1 rounded-full font-mono transition-colors ${filter === f
+                                className={`text-xs px-2.5 py-1 rounded-full font-mono transition-colors ${
+                                    filter === f
                                         ? 'bg-zinc-900 text-white'
                                         : 'text-zinc-400 hover:text-zinc-900'
-                                    }`}
+                                }`}
                             >
                                 {f === 'all' ? 'Todos' : f === 'human' ? '⚡ Humano' : f === 'bot' ? 'Bot' : 'Cerrados'}
                             </button>
                         ))}
                     </div>
 
-                    {/* Lista de conversaciones */}
+                    {/* Conversation list */}
                     <div className="flex-1 overflow-y-auto">
                         {filtered.length === 0 && (
                             <div className="p-6 text-center text-xs text-zinc-400 font-mono">
@@ -230,8 +289,9 @@ export default function Dashboard() {
                             <button
                                 key={conv.id}
                                 onClick={() => setSelected(conv)}
-                                className={`w-full text-left p-4 border-b border-zinc-100 hover:bg-zinc-50 transition-colors ${selected?.id === conv.id ? 'bg-zinc-50' : ''
-                                    }`}
+                                className={`w-full text-left p-4 border-b border-zinc-100 hover:bg-zinc-50 transition-colors ${
+                                    selected?.id === conv.id ? 'bg-zinc-50' : ''
+                                }`}
                             >
                                 <div className="flex items-start justify-between gap-2 mb-1">
                                     <div className="flex items-center gap-2 min-w-0">
@@ -239,7 +299,7 @@ export default function Dashboard() {
                                             <span className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
                                         )}
                                         <span className="font-medium text-sm text-zinc-900 truncate">
-                                            {conv.name || conv.phone}
+                                            {conv.name || (conv.channel === 'facebook' ? 'Usuario de Facebook' : conv.phone)}
                                         </span>
                                     </div>
                                     <StatusBadge status={conv.status} />
@@ -258,7 +318,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* ─── Panel de conversación ────────────────────────────────────────── */}
+                {/* ─── Panel de conversación ────────────────────────────────────── */}
                 {!selected ? (
                     <div className="flex-1 flex items-center justify-center text-zinc-300">
                         <div className="text-center">
@@ -273,10 +333,10 @@ export default function Dashboard() {
                         <div className="h-14 border-b border-zinc-200 flex items-center justify-between px-4 flex-shrink-0">
                             <div>
                                 <p className="font-medium text-sm text-zinc-900">
-                                    {selected.name || selected.phone}
+                                    {selected.name || (selected.channel === 'facebook' ? 'Usuario de Facebook' : selected.phone)}
                                 </p>
                                 <p className="text-xs text-zinc-400 font-mono">
-                                    {selected.phone}
+                                    {selected.channel === 'facebook' ? 'Facebook Messenger' : selected.phone}
                                     {selected.business_name && ` · ${selected.business_name}`}
                                     {selected.business_type && ` · ${selected.business_type}`}
                                 </p>
@@ -284,7 +344,6 @@ export default function Dashboard() {
                             <div className="flex items-center gap-2">
                                 <PackageBadge pkg={selected.package_interest} />
                                 <StatusBadge status={selected.status} />
-                                {/* Acciones */}
                                 {selected.status === 'human' && (
                                     <button
                                         onClick={() => changeStatus('bot')}
@@ -312,12 +371,13 @@ export default function Dashboard() {
                                     className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
                                 >
                                     <div
-                                        className={`max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
+                                        className={`max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                                            msg.role === 'user'
                                                 ? 'bg-white border border-zinc-200 text-zinc-900 rounded-tl-sm'
                                                 : msg.role === 'bot'
                                                     ? 'bg-zinc-900 text-white rounded-tr-sm'
                                                     : 'bg-zinc-700 text-white rounded-tr-sm'
-                                            }`}
+                                        }`}
                                     >
                                         {msg.role !== 'user' && (
                                             <p className={`text-xs mb-1 font-mono ${msg.role === 'bot' ? 'text-zinc-400' : 'text-zinc-300'}`}>
