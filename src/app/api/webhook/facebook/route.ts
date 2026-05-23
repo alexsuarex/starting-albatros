@@ -1,6 +1,5 @@
 // app/api/webhook/facebook/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { after } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 import Groq from 'groq-sdk'
 import { createServiceClient } from '@/lib/supabase/server'
@@ -266,15 +265,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true })
         }
 
-        // 4. Responder a Meta INMEDIATAMENTE (máx 5 segundos)
-        // 5. Procesar eventos de forma asíncrona sin bloquear la respuesta
-        after(async () => {
-            try {
-                await processWebhookEvents(body)
-            } catch (err) {
-                console.error('[Facebook Webhook] Error procesando eventos:', err)
-            }
-        })
+        // Procesar eventos y responder
+        await processWebhookEvents(body)
 
         return NextResponse.json({ ok: true })
     } catch (error) {
