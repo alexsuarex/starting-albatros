@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
 
     const { to, message } = await req.json()
 
-    const res = await fetch('https://graph.facebook.com/v21.0/me/messages', {
+    const pageId = process.env.FACEBOOK_PAGE_ID || 'me'
+    const res = await fetch(`https://graph.facebook.com/v25.0/${pageId}/messages`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
