@@ -178,11 +178,16 @@ const systemPrompt = business.businesses.business_settings[0].system_prompt
 
 ## Roadmap de Desarrollo
 
-### AHORA — Fase 0 (Ya en progreso)
+### AHORA — Fase 0 (Completado ✅ 2026-05-25)
 - [x] Chatbot Albi en WhatsApp
 - [x] Dashboard con conversaciones WA + FB
-- [ ] `pages_messaging` aprobado en Meta (en progreso)
-- [ ] Albi respondiendo en Facebook Messenger
+- [x] Albi respondiendo en Facebook Messenger (Development mode, solo admins)
+- [ ] `pages_messaging` Advanced Access aprobado por Meta (App Review pendiente)
+
+> **Decisión 2026-05-25**: El SaaS multi-tenant NO se construye aún.
+> La prioridad es usar Albatros internamente para conseguir clientes.
+> Los negocios piloto se conectan manualmente (el equipo de Albatros lo hace por ellos).
+> El flujo de auto-conexión con OAuth (Bloque 2) se construirá cuando haya varios clientes reales que atender.
 
 ### Fase 1 — Multi-tenant básico (Mes 1-2)
 - [ ] Agregar tabla `businesses` y `business_settings`

@@ -168,15 +168,15 @@ async function processWebhookEvents(body: any) {
                 content: userText,
             })
 
-            // ─── Obtener historial ────────────────────────────────────────────
+            // ─── Obtener los últimos 20 mensajes (orden cronológico) ──────────
             const { data: history } = await supabase
                 .from('alb_messages')
                 .select('role, content')
                 .eq('conversation_id', conversation.id)
-                .order('created_at', { ascending: true })
+                .order('created_at', { ascending: false })
                 .limit(20)
 
-            const chatHistory = (history || []).map((m: any) => ({
+            const chatHistory = (history || []).reverse().map((m: any) => ({
                 role: m.role === 'user' ? 'user' : 'assistant',
                 content: m.content,
             }))
