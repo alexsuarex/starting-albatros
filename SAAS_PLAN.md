@@ -290,6 +290,42 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
 ---
 
+## Arquitectura de Apps de Meta — Decisión 2026-05-25
+
+### Situación actual (dos apps separadas — provisional)
+
+```
+App "Albatros-WSA"           → WhatsApp de Albatros (+52 612 167 0637) ✅
+App "Albatros-IA-Platform"   → Messenger de página FB de Albatros      ✅
+                             → WhatsApp: vacío (no configurado aquí)
+```
+
+### Objetivo final (una sola app — plataforma SaaS)
+
+```
+App "Albatros-IA-Platform"
+  ├── Messenger Albatros                 ✅ (ya funciona)
+  ├── WhatsApp Albatros                  ← migrar desde Albatros-WSA (Fase 1)
+  ├── WhatsApp Cliente A (Restaurante)   ← Embedded Signup (Fase 2)
+  ├── WhatsApp Cliente B (Clínica)       ← Embedded Signup (Fase 2)
+  └── Messenger Cliente C (Tienda)       ← Facebook Login for Business (Fase 2)
+         ↓
+  Un solo webhook detecta el negocio por phone_number_id o page_id
+```
+
+### Regla: NUNCA crear una app de Meta por cliente
+Eso no escala. La arquitectura correcta es UNA app plataforma + Embedded Signup
+para que cada cliente autorice conectar su WABA/página a la app de Albatros.
+
+### Cuándo actuar
+| Momento | Acción |
+|---|---|
+| **Ahora** | No tocar nada. Dejar WhatsApp en Albatros-WSA. |
+| **Fase 1 (primer cliente piloto)** | Configurar WhatsApp en Albatros-IA-Platform. Migrar número propio. Implementar Embedded Signup básico. |
+| **Fase 2 (self-service)** | Embedded Signup completo + Facebook Login for Business para que clientes conecten solos. |
+
+---
+
 ## Notas de contexto técnico
 
 - Proyecto base: `albatros-dev` en Next.js 16 App Router

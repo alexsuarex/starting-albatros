@@ -2,7 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { createServiceClient } from '@/lib/supabase/server'
-import { ALBI_SYSTEM_PROMPT, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN } from '@/lib/albi-prompt'
+import { getAlbiSystemPrompt, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN } from '@/lib/albi-prompt'
+import { processConversationalBooking } from '@/lib/booking-parser'
 
 
 
@@ -152,7 +153,7 @@ export async function POST(req: NextRequest) {
         const completion = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
             messages: [
-                { role: 'system', content: ALBI_SYSTEM_PROMPT },
+                { role: 'system', content: getAlbiSystemPrompt() },
                 ...chatHistory,
             ],
             max_tokens: 500,
@@ -201,10 +202,17 @@ export async function POST(req: NextRequest) {
 
         // ─── Respuesta normal del bot ─────────────────────────────────────────────
         if (cleanText) {
+            const finalMessage = await processConversationalBooking(
+                cleanText,
+                conversation.id,
+                conversation.language || 'es',
+                phone
+            )
+
             await supabase.from('alb_messages').insert({
                 conversation_id: conversation.id,
                 role: 'bot',
-                content: cleanText,
+                content: finalMessage,
             })
 
             await supabase
@@ -212,7 +220,7 @@ export async function POST(req: NextRequest) {
                 .update({ updated_at: new Date().toISOString() })
                 .eq('id', conversation.id)
 
-            await sendWhatsAppMessage(phone, cleanText)
+            await sendWhatsAppMessage(phone, finalMessage)
         }
 
         return NextResponse.json({ ok: true })

@@ -218,7 +218,7 @@ export const translations = {
       items: [
         {
           q: "¿Cuánto tiempo tarda en estar listo mi sitio?",
-          a: "Entre 5 y 14 días dependiendo del paquete. Presencia en 5–7 días, Turismo Pro en 10–14 días."
+          a: "Entre 5 y 14 días dependiendo del paquete. Presencia Digital en 5–7 días, Reservas & Pagos en 10–14 días."
         },
         {
           q: "¿Necesito saber de tecnología para usar esto?",
@@ -415,7 +415,7 @@ export const translations = {
       items: [
         {
           q: "How long does it take for my site to be ready?",
-          a: "Between 5 and 14 days depending on the package. Presence in 5–7 days, Turismo Pro in 10–14 days."
+          a: "Between 5 and 14 days depending on the package. Digital Presence in 5–7 days, Bookings & Payments in 10–14 days."
         },
         {
           q: "Do I need technical knowledge to use this?",

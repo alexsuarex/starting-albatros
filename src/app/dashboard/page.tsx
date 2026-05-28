@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Channel = 'whatsapp' | 'facebook'
+type View = 'inbox' | 'agenda'
 
 type Conversation = {
     id: string
@@ -27,6 +28,20 @@ type Message = {
     role: 'user' | 'bot' | 'human'
     content: string
     created_at: string
+}
+
+type Appointment = {
+    id: string
+    conversation_id: string | null
+    client_name: string
+    client_phone: string
+    client_email: string | null
+    appointment_date: string
+    appointment_time: string
+    status: 'scheduled' | 'completed' | 'cancelled'
+    notes: string | null
+    created_at: string
+    alb_conversations?: { id: string; phone: string; channel: Channel } | null
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -75,8 +90,42 @@ function PackageBadge({ pkg }: { pkg: string | null }) {
     )
 }
 
+// ─── Appointment status badge ─────────────────────────────────────────────────
+function ApptStatusBadge({ status }: { status: string }) {
+    const styles: Record<string, string> = {
+        scheduled: 'bg-amber-50 text-amber-600 border border-amber-200',
+        completed: 'bg-zinc-100 text-zinc-500',
+        cancelled: 'bg-red-50 text-red-400',
+    }
+    const labels: Record<string, string> = {
+        scheduled: 'Agendada',
+        completed: 'Completada',
+        cancelled: 'Cancelada',
+    }
+    return (
+        <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${styles[status] || ''}`}>
+            {labels[status] || status}
+        </span>
+    )
+}
+
+// ─── Date helpers ──────────────────────────────────────────────────────────────
+function getLocalDateStr(offsetDays = 0): string {
+    const d = new Date()
+    d.setDate(d.getDate() + offsetDays)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function formatAgendaDate(dateStr: string): string {
+    if (dateStr === getLocalDateStr()) return 'Hoy'
+    if (dateStr === getLocalDateStr(1)) return 'Mañana'
+    const d = new Date(dateStr + 'T00:00:00')
+    return d.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
+    // ── Inbox state ───────────────────────────────────────────────────────────
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [selected, setSelected] = useState<Conversation | null>(null)
     const [messages, setMessages] = useState<Message[]>([])
@@ -84,6 +133,14 @@ export default function Dashboard() {
     const [sending, setSending] = useState(false)
     const [filter, setFilter] = useState<'all' | 'human' | 'bot' | 'closed'>('all')
     const [channelTab, setChannelTab] = useState<Channel>('whatsapp')
+
+    // ── Agenda state ──────────────────────────────────────────────────────────
+    const [view, setView] = useState<View>('inbox')
+    const [agendaDate, setAgendaDate] = useState<string>(() => getLocalDateStr())
+    const [appointments, setAppointments] = useState<Appointment[]>([])
+    const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null)
+    const [todayApptCount, setTodayApptCount] = useState(0)
+
     const [user, setUser] = useState<any>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
@@ -117,7 +174,6 @@ export default function Dashboard() {
             .from('alb_conversations')
             .select('*')
             .order('updated_at', { ascending: false })
-        // Las conversaciones antiguas sin campo channel se tratan como whatsapp
         setConversations((data || []).map(c => ({ ...c, channel: (c.channel || 'whatsapp') as Channel })))
     }
 
@@ -152,6 +208,69 @@ export default function Dashboard() {
             .order('created_at', { ascending: true })
         setMessages(data || [])
         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    }
+
+    // ─── Contador de citas de hoy (para badge en botón Agenda) ───────────────
+    useEffect(() => {
+        if (!user) return
+        supabase
+            .from('alb_appointments')
+            .select('id', { count: 'exact', head: true })
+            .eq('appointment_date', getLocalDateStr())
+            .eq('status', 'scheduled')
+            .then(({ count }) => setTodayApptCount(count || 0))
+    }, [user])
+
+    // ─── Cargar citas ─────────────────────────────────────────────────────────
+    useEffect(() => {
+        if (!user || view !== 'agenda') return
+        loadAppointments()
+
+        const sub = supabase
+            .channel('alb_appointments_sub')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'alb_appointments' }, () => {
+                loadAppointments()
+            })
+            .subscribe()
+
+        return () => { supabase.removeChannel(sub) }
+    }, [user, view, agendaDate])
+
+    async function loadAppointments() {
+        const { data } = await supabase
+            .from('alb_appointments')
+            .select('*, alb_conversations(id, phone, channel)')
+            .eq('appointment_date', agendaDate)
+            .order('appointment_time', { ascending: true })
+        setAppointments(data || [])
+    }
+
+    async function updateApptStatus(id: string, status: 'completed' | 'cancelled') {
+        await supabase.from('alb_appointments').update({ status }).eq('id', id)
+        setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a))
+        if (selectedAppt?.id === id) setSelectedAppt(prev => prev ? { ...prev, status } : null)
+        if (status === 'completed' || status === 'cancelled') {
+            setTodayApptCount(prev => Math.max(0, prev - 1))
+        }
+    }
+
+    function shiftDay(delta: number) {
+        const d = new Date(agendaDate + 'T00:00:00')
+        d.setDate(d.getDate() + delta)
+        const next = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        setAgendaDate(next)
+        setSelectedAppt(null)
+    }
+
+    function openConversation(appt: Appointment) {
+        const conv = appt.alb_conversations
+        if (!conv) return
+        const target = conversations.find(c => c.id === conv.id)
+        if (target) {
+            setView('inbox')
+            setChannelTab(conv.channel)
+            setSelected(target)
+        }
     }
 
     // ─── Enviar respuesta manual ──────────────────────────────────────────────
@@ -215,231 +334,393 @@ export default function Dashboard() {
                         </span>
                     )}
                 </div>
-                <button onClick={handleLogout} className="text-xs text-zinc-400 hover:text-zinc-900 transition-colors font-mono">
-                    Cerrar sesión
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setView(view === 'agenda' ? 'inbox' : 'agenda')}
+                        className={`text-xs font-mono px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
+                            view === 'agenda'
+                                ? 'bg-zinc-900 text-white'
+                                : 'text-zinc-400 hover:text-zinc-900 border border-zinc-200'
+                        }`}
+                    >
+                        {view === 'agenda' ? '← Mensajes' : 'Agenda'}
+                        {todayApptCount > 0 && view !== 'agenda' && (
+                            <span className="bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                {todayApptCount}
+                            </span>
+                        )}
+                    </button>
+                    <button onClick={handleLogout} className="text-xs text-zinc-400 hover:text-zinc-900 transition-colors font-mono">
+                        Cerrar sesión
+                    </button>
+                </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden">
+            {view === 'agenda' ? (
 
-                {/* ─── Sidebar ──────────────────────────────────────────────────── */}
-                <div className="w-80 border-r border-zinc-200 flex flex-col flex-shrink-0">
+                // ─── Vista Agenda ─────────────────────────────────────────────
+                <div className="flex flex-1 overflow-hidden">
 
-                    {/* Channel tabs */}
-                    <div className="flex border-b border-zinc-200">
-                        <button
-                            onClick={() => { setChannelTab('whatsapp'); setSelected(null) }}
-                            className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-3 font-mono transition-colors border-b-2 -mb-px ${
-                                channelTab === 'whatsapp'
-                                    ? 'border-zinc-900 text-zinc-900'
-                                    : 'border-transparent text-zinc-400 hover:text-zinc-700'
-                            }`}
-                        >
-                            <WhatsAppIcon size={11} />
-                            WhatsApp
-                            {waAlerts > 0 && (
-                                <span className="bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
-                                    {waAlerts}
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            onClick={() => { setChannelTab('facebook'); setSelected(null) }}
-                            className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-3 font-mono transition-colors border-b-2 -mb-px ${
-                                channelTab === 'facebook'
-                                    ? 'border-[#1877F2] text-[#1877F2]'
-                                    : 'border-transparent text-zinc-400 hover:text-zinc-700'
-                            }`}
-                        >
-                            <FacebookIcon size={11} />
-                            Facebook
-                            {fbAlerts > 0 && (
-                                <span className="bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
-                                    {fbAlerts}
-                                </span>
-                            )}
-                        </button>
-                    </div>
+                    {/* Lista de citas */}
+                    <div className="w-72 border-r border-zinc-200 flex flex-col flex-shrink-0">
 
-                    {/* Status filters */}
-                    <div className="p-3 border-b border-zinc-100 flex gap-1">
-                        {(['all', 'human', 'bot', 'closed'] as const).map(f => (
+                        {/* Navegación de fecha */}
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200">
                             <button
-                                key={f}
-                                onClick={() => setFilter(f)}
-                                className={`text-xs px-2.5 py-1 rounded-full font-mono transition-colors ${
-                                    filter === f
-                                        ? 'bg-zinc-900 text-white'
-                                        : 'text-zinc-400 hover:text-zinc-900'
-                                }`}
+                                onClick={() => shiftDay(-1)}
+                                className="text-zinc-400 hover:text-zinc-900 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100"
                             >
-                                {f === 'all' ? 'Todos' : f === 'human' ? '⚡ Humano' : f === 'bot' ? 'Bot' : 'Cerrados'}
+                                ←
                             </button>
-                        ))}
-                    </div>
-
-                    {/* Conversation list */}
-                    <div className="flex-1 overflow-y-auto">
-                        {filtered.length === 0 && (
-                            <div className="p-6 text-center text-xs text-zinc-400 font-mono">
-                                Sin conversaciones
+                            <div className="text-center">
+                                <p className="text-sm font-medium text-zinc-900 font-mono">{formatAgendaDate(agendaDate)}</p>
+                                <p className="text-xs text-zinc-400 font-mono">{agendaDate}</p>
                             </div>
-                        )}
-                        {filtered.map(conv => (
                             <button
-                                key={conv.id}
-                                onClick={() => setSelected(conv)}
-                                className={`w-full text-left p-4 border-b border-zinc-100 hover:bg-zinc-50 transition-colors ${
-                                    selected?.id === conv.id ? 'bg-zinc-50' : ''
-                                }`}
+                                onClick={() => shiftDay(1)}
+                                className="text-zinc-400 hover:text-zinc-900 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100"
                             >
-                                <div className="flex items-start justify-between gap-2 mb-1">
-                                    <div className="flex items-center gap-2 min-w-0">
-                                        {conv.unread && conv.status === 'human' && (
-                                            <span className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
-                                        )}
-                                        <span className="font-medium text-sm text-zinc-900 truncate">
-                                            {conv.name || (conv.channel === 'facebook' ? 'Usuario de Facebook' : conv.phone)}
-                                        </span>
-                                    </div>
-                                    <StatusBadge status={conv.status} />
-                                </div>
-                                {conv.business_name && (
-                                    <p className="text-xs text-zinc-500 truncate mb-1">{conv.business_name}</p>
-                                )}
-                                <div className="flex items-center gap-1">
-                                    <PackageBadge pkg={conv.package_interest} />
-                                    <span className="text-xs text-zinc-300 font-mono ml-auto">
-                                        {new Date(conv.updated_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
-                                    </span>
-                                </div>
+                                →
                             </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ─── Panel de conversación ────────────────────────────────────── */}
-                {!selected ? (
-                    <div className="flex-1 flex items-center justify-center text-zinc-300">
-                        <div className="text-center">
-                            <p className="font-display text-2xl mb-2">Albi Dashboard</p>
-                            <p className="text-sm font-mono">Selecciona una conversación</p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="flex-1 flex flex-col overflow-hidden">
-
-                        {/* Header de la conversación */}
-                        <div className="h-14 border-b border-zinc-200 flex items-center justify-between px-4 flex-shrink-0">
-                            <div>
-                                <p className="font-medium text-sm text-zinc-900">
-                                    {selected.name || (selected.channel === 'facebook' ? 'Usuario de Facebook' : selected.phone)}
-                                </p>
-                                <p className="text-xs text-zinc-400 font-mono">
-                                    {selected.channel === 'facebook' ? 'Facebook Messenger' : selected.phone}
-                                    {selected.business_name && ` · ${selected.business_name}`}
-                                    {selected.business_type && ` · ${selected.business_type}`}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <PackageBadge pkg={selected.package_interest} />
-                                <StatusBadge status={selected.status} />
-                                {selected.status === 'human' && (
-                                    <button
-                                        onClick={() => changeStatus('bot')}
-                                        className="text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-600 px-3 py-1.5 rounded-full font-mono transition-colors"
-                                    >
-                                        Devolver al bot
-                                    </button>
-                                )}
-                                {selected.status !== 'closed' && (
-                                    <button
-                                        onClick={() => changeStatus('closed')}
-                                        className="text-xs border border-zinc-200 hover:border-zinc-400 text-zinc-400 px-3 py-1.5 rounded-full font-mono transition-colors"
-                                    >
-                                        Cerrar
-                                    </button>
-                                )}
-                            </div>
                         </div>
 
-                        {/* Mensajes */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
-                            {messages.map(msg => (
-                                <div
-                                    key={msg.id}
-                                    className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
-                                >
-                                    <div
-                                        className={`max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                                            msg.role === 'user'
-                                                ? 'bg-white border border-zinc-200 text-zinc-900 rounded-tl-sm'
-                                                : msg.role === 'bot'
-                                                    ? 'bg-zinc-900 text-white rounded-tr-sm'
-                                                    : 'bg-zinc-700 text-white rounded-tr-sm'
-                                        }`}
-                                    >
-                                        {msg.role !== 'user' && (
-                                            <p className={`text-xs mb-1 font-mono ${msg.role === 'bot' ? 'text-zinc-400' : 'text-zinc-300'}`}>
-                                                {msg.role === 'bot' ? 'Albi' : 'Alex'}
-                                            </p>
-                                        )}
-                                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                                        <p className={`text-xs mt-1 ${msg.role === 'user' ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                                            {new Date(msg.created_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                            <div ref={messagesEndRef} />
-                        </div>
-
-                        {/* Input de respuesta */}
-                        <div className="border-t border-zinc-200 p-4 flex-shrink-0 bg-white">
-                            {selected.status === 'closed' ? (
-                                <div className="text-center text-xs text-zinc-400 font-mono py-2">
-                                    Conversación cerrada
-                                    <button onClick={() => changeStatus('human')} className="ml-2 text-zinc-600 underline">
-                                        Reabrir
-                                    </button>
+                        {/* Citas del día */}
+                        <div className="flex-1 overflow-y-auto">
+                            {appointments.length === 0 ? (
+                                <div className="p-6 text-center text-xs text-zinc-400 font-mono">
+                                    Sin citas este día
                                 </div>
                             ) : (
-                                <div className="flex gap-3 items-end">
-                                    <textarea
-                                        value={reply}
-                                        onChange={(e) => setReply(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                e.preventDefault()
-                                                handleSend()
-                                            }
-                                        }}
-                                        placeholder={
-                                            selected.status === 'bot'
-                                                ? 'El bot está respondiendo. Escribe para tomar control...'
-                                                : 'Escribe tu respuesta... (Enter para enviar)'
-                                        }
-                                        rows={2}
-                                        className="flex-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-zinc-400 transition-colors resize-none"
-                                    />
+                                appointments.map(appt => (
                                     <button
-                                        onClick={handleSend}
-                                        disabled={!reply.trim() || sending}
-                                        className="bg-zinc-900 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                                        key={appt.id}
+                                        onClick={() => setSelectedAppt(appt)}
+                                        className={`w-full text-left px-4 py-3 border-b border-zinc-100 hover:bg-zinc-50 transition-colors ${
+                                            selectedAppt?.id === appt.id ? 'bg-zinc-50' : ''
+                                        }`}
                                     >
-                                        {sending ? '...' : 'Enviar'}
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="font-mono text-sm font-semibold text-zinc-900">
+                                                {appt.appointment_time.substring(0, 5)}
+                                            </span>
+                                            <ApptStatusBadge status={appt.status} />
+                                        </div>
+                                        <p className="text-sm text-zinc-700 truncate">{appt.client_name}</p>
+                                        <p className="text-xs text-zinc-400 font-mono truncate">{appt.client_phone}</p>
                                     </button>
-                                </div>
-                            )}
-                            {selected.status === 'bot' && reply.trim() && (
-                                <p className="text-xs text-amber-600 font-mono mt-1.5">
-                                    ⚡ Al enviar, tomarás control de esta conversación
-                                </p>
+                                ))
                             )}
                         </div>
                     </div>
-                )}
-            </div>
+
+                    {/* Detalle de cita */}
+                    {!selectedAppt ? (
+                        <div className="flex-1 flex items-center justify-center text-zinc-300">
+                            <div className="text-center">
+                                <p className="font-display text-2xl mb-2">Agenda</p>
+                                <p className="text-sm font-mono">Selecciona una cita</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 overflow-y-auto p-8">
+                            <div className="max-w-md">
+
+                                {/* Hora y estado */}
+                                <div className="flex items-center gap-3 mb-6">
+                                    <span className="font-mono text-4xl font-semibold text-zinc-900">
+                                        {selectedAppt.appointment_time.substring(0, 5)}
+                                    </span>
+                                    <ApptStatusBadge status={selectedAppt.status} />
+                                </div>
+
+                                {/* Datos del lead */}
+                                <div className="space-y-4 mb-8">
+                                    <div>
+                                        <p className="text-xs text-zinc-400 font-mono mb-0.5">Nombre</p>
+                                        <p className="text-sm font-medium text-zinc-900">{selectedAppt.client_name}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-zinc-400 font-mono mb-0.5">Teléfono</p>
+                                        <p className="text-sm text-zinc-700 font-mono">{selectedAppt.client_phone}</p>
+                                    </div>
+                                    {selectedAppt.client_email && (
+                                        <div>
+                                            <p className="text-xs text-zinc-400 font-mono mb-0.5">Email</p>
+                                            <p className="text-sm text-zinc-700 font-mono">{selectedAppt.client_email}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="text-xs text-zinc-400 font-mono mb-0.5">Canal</p>
+                                        <div className="flex items-center gap-1.5 text-sm text-zinc-700">
+                                            {selectedAppt.alb_conversations?.channel === 'facebook'
+                                                ? <><FacebookIcon size={12} /> Facebook Messenger</>
+                                                : <><WhatsAppIcon size={12} /> WhatsApp</>
+                                            }
+                                        </div>
+                                    </div>
+                                    {selectedAppt.notes && (
+                                        <div>
+                                            <p className="text-xs text-zinc-400 font-mono mb-0.5">Nota</p>
+                                            <p className="text-sm text-zinc-500">{selectedAppt.notes}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Acciones */}
+                                {selectedAppt.status === 'scheduled' && (
+                                    <div className="flex gap-2 mb-5">
+                                        <button
+                                            onClick={() => updateApptStatus(selectedAppt.id, 'completed')}
+                                            className="text-xs bg-zinc-900 text-white px-4 py-2 rounded-full font-mono hover:bg-zinc-700 transition-colors"
+                                        >
+                                            Marcar completada
+                                        </button>
+                                        <button
+                                            onClick={() => updateApptStatus(selectedAppt.id, 'cancelled')}
+                                            className="text-xs border border-zinc-200 text-zinc-400 px-4 py-2 rounded-full font-mono hover:border-zinc-400 transition-colors"
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                )}
+
+                                {selectedAppt.alb_conversations && (
+                                    <button
+                                        onClick={() => openConversation(selectedAppt)}
+                                        className="text-xs text-zinc-400 hover:text-zinc-900 font-mono transition-colors underline"
+                                    >
+                                        Ver conversación →
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+            ) : (
+
+                // ─── Vista Inbox ──────────────────────────────────────────────
+                <div className="flex flex-1 overflow-hidden">
+
+                    {/* Sidebar */}
+                    <div className="w-80 border-r border-zinc-200 flex flex-col flex-shrink-0">
+
+                        {/* Channel tabs */}
+                        <div className="flex border-b border-zinc-200">
+                            <button
+                                onClick={() => { setChannelTab('whatsapp'); setSelected(null) }}
+                                className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-3 font-mono transition-colors border-b-2 -mb-px ${
+                                    channelTab === 'whatsapp'
+                                        ? 'border-zinc-900 text-zinc-900'
+                                        : 'border-transparent text-zinc-400 hover:text-zinc-700'
+                                }`}
+                            >
+                                <WhatsAppIcon size={11} />
+                                WhatsApp
+                                {waAlerts > 0 && (
+                                    <span className="bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                        {waAlerts}
+                                    </span>
+                                )}
+                            </button>
+                            <button
+                                onClick={() => { setChannelTab('facebook'); setSelected(null) }}
+                                className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-3 font-mono transition-colors border-b-2 -mb-px ${
+                                    channelTab === 'facebook'
+                                        ? 'border-[#1877F2] text-[#1877F2]'
+                                        : 'border-transparent text-zinc-400 hover:text-zinc-700'
+                                }`}
+                            >
+                                <FacebookIcon size={11} />
+                                Facebook
+                                {fbAlerts > 0 && (
+                                    <span className="bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                        {fbAlerts}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Status filters */}
+                        <div className="p-3 border-b border-zinc-100 flex gap-1">
+                            {(['all', 'human', 'bot', 'closed'] as const).map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFilter(f)}
+                                    className={`text-xs px-2.5 py-1 rounded-full font-mono transition-colors ${
+                                        filter === f
+                                            ? 'bg-zinc-900 text-white'
+                                            : 'text-zinc-400 hover:text-zinc-900'
+                                    }`}
+                                >
+                                    {f === 'all' ? 'Todos' : f === 'human' ? '⚡ Humano' : f === 'bot' ? 'Bot' : 'Cerrados'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Conversation list */}
+                        <div className="flex-1 overflow-y-auto">
+                            {filtered.length === 0 && (
+                                <div className="p-6 text-center text-xs text-zinc-400 font-mono">
+                                    Sin conversaciones
+                                </div>
+                            )}
+                            {filtered.map(conv => (
+                                <button
+                                    key={conv.id}
+                                    onClick={() => setSelected(conv)}
+                                    className={`w-full text-left p-4 border-b border-zinc-100 hover:bg-zinc-50 transition-colors ${
+                                        selected?.id === conv.id ? 'bg-zinc-50' : ''
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between gap-2 mb-1">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            {conv.unread && conv.status === 'human' && (
+                                                <span className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
+                                            )}
+                                            <span className="font-medium text-sm text-zinc-900 truncate">
+                                                {conv.name || (conv.channel === 'facebook' ? 'Usuario de Facebook' : conv.phone)}
+                                            </span>
+                                        </div>
+                                        <StatusBadge status={conv.status} />
+                                    </div>
+                                    {conv.business_name && (
+                                        <p className="text-xs text-zinc-500 truncate mb-1">{conv.business_name}</p>
+                                    )}
+                                    <div className="flex items-center gap-1">
+                                        <PackageBadge pkg={conv.package_interest} />
+                                        <span className="text-xs text-zinc-300 font-mono ml-auto">
+                                            {new Date(conv.updated_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
+                                        </span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Panel de conversación */}
+                    {!selected ? (
+                        <div className="flex-1 flex items-center justify-center text-zinc-300">
+                            <div className="text-center">
+                                <p className="font-display text-2xl mb-2">Albi Dashboard</p>
+                                <p className="text-sm font-mono">Selecciona una conversación</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col overflow-hidden">
+
+                            {/* Header de la conversación */}
+                            <div className="h-14 border-b border-zinc-200 flex items-center justify-between px-4 flex-shrink-0">
+                                <div>
+                                    <p className="font-medium text-sm text-zinc-900">
+                                        {selected.name || (selected.channel === 'facebook' ? 'Usuario de Facebook' : selected.phone)}
+                                    </p>
+                                    <p className="text-xs text-zinc-400 font-mono">
+                                        {selected.channel === 'facebook' ? 'Facebook Messenger' : selected.phone}
+                                        {selected.business_name && ` · ${selected.business_name}`}
+                                        {selected.business_type && ` · ${selected.business_type}`}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <PackageBadge pkg={selected.package_interest} />
+                                    <StatusBadge status={selected.status} />
+                                    {selected.status === 'human' && (
+                                        <button
+                                            onClick={() => changeStatus('bot')}
+                                            className="text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-600 px-3 py-1.5 rounded-full font-mono transition-colors"
+                                        >
+                                            Devolver al bot
+                                        </button>
+                                    )}
+                                    {selected.status !== 'closed' && (
+                                        <button
+                                            onClick={() => changeStatus('closed')}
+                                            className="text-xs border border-zinc-200 hover:border-zinc-400 text-zinc-400 px-3 py-1.5 rounded-full font-mono transition-colors"
+                                        >
+                                            Cerrar
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Mensajes */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
+                                {messages.map(msg => (
+                                    <div
+                                        key={msg.id}
+                                        className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
+                                    >
+                                        <div
+                                            className={`max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                                                msg.role === 'user'
+                                                    ? 'bg-white border border-zinc-200 text-zinc-900 rounded-tl-sm'
+                                                    : msg.role === 'bot'
+                                                        ? 'bg-zinc-900 text-white rounded-tr-sm'
+                                                        : 'bg-zinc-700 text-white rounded-tr-sm'
+                                            }`}
+                                        >
+                                            {msg.role !== 'user' && (
+                                                <p className={`text-xs mb-1 font-mono ${msg.role === 'bot' ? 'text-zinc-400' : 'text-zinc-300'}`}>
+                                                    {msg.role === 'bot' ? 'Albi' : 'Alex'}
+                                                </p>
+                                            )}
+                                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                                            <p className={`text-xs mt-1 ${msg.role === 'user' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                                {new Date(msg.created_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            {/* Input de respuesta */}
+                            <div className="border-t border-zinc-200 p-4 flex-shrink-0 bg-white">
+                                {selected.status === 'closed' ? (
+                                    <div className="text-center text-xs text-zinc-400 font-mono py-2">
+                                        Conversación cerrada
+                                        <button onClick={() => changeStatus('human')} className="ml-2 text-zinc-600 underline">
+                                            Reabrir
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-3 items-end">
+                                        <textarea
+                                            value={reply}
+                                            onChange={(e) => setReply(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault()
+                                                    handleSend()
+                                                }
+                                            }}
+                                            placeholder={
+                                                selected.status === 'bot'
+                                                    ? 'El bot está respondiendo. Escribe para tomar control...'
+                                                    : 'Escribe tu respuesta... (Enter para enviar)'
+                                            }
+                                            rows={2}
+                                            className="flex-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-zinc-400 transition-colors resize-none"
+                                        />
+                                        <button
+                                            onClick={handleSend}
+                                            disabled={!reply.trim() || sending}
+                                            className="bg-zinc-900 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                                        >
+                                            {sending ? '...' : 'Enviar'}
+                                        </button>
+                                    </div>
+                                )}
+                                {selected.status === 'bot' && reply.trim() && (
+                                    <p className="text-xs text-amber-600 font-mono mt-1.5">
+                                        ⚡ Al enviar, tomarás control de esta conversación
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
