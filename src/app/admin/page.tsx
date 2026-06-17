@@ -551,14 +551,16 @@ export default function AdminPage() {
                                             {fbConnecting ? 'Conectando...' : 'Conectar Facebook'}
                                         </button>
                                     )}
-                                    <button
-                                        disabled
-                                        className="text-xs font-mono px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-400 cursor-not-allowed flex items-center gap-1.5"
-                                        title="Próximamente"
-                                    >
-                                        <WhatsAppIcon size={12} />
-                                        Conectar WhatsApp (pronto)
-                                    </button>
+                                    {!selected.channels.some(c => c.channel === 'whatsapp' && c.status === 'active') && (
+                                        <button
+                                            disabled
+                                            className="text-xs font-mono px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-400 cursor-not-allowed flex items-center gap-1.5"
+                                            title="Próximamente"
+                                        >
+                                            <WhatsAppIcon size={12} />
+                                            Conectar WhatsApp (pronto)
+                                        </button>
+                                    )}
                                 </div>
 
                                 {fbConnectError && (
