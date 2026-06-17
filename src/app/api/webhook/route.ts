@@ -1,16 +1,53 @@
 // app/api/webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac, timingSafeEqual } from 'crypto'
 import Groq from 'groq-sdk'
 import { createServiceClient } from '@/lib/supabase/server'
-import { getAlbiSystemPrompt, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN } from '@/lib/albi-prompt'
+import { getBotSystemPrompt, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN, type BusinessContext } from '@/lib/albi-prompt'
 import { processConversationalBooking } from '@/lib/booking-parser'
 
+type ChannelRow = {
+    business_id: string
+    phone_number_id: string
+    access_token: string
+    alb_businesses: {
+        name: string
+        alb_business_settings: {
+            bot_name: string
+            business_description: string
+            offerings: string
+            qualifying_questions: string
+            tone_instructions: string
+            default_language: string
+            escalation_msg_es: string | null
+            escalation_msg_en: string | null
+            notify_phone: string | null
+        }[]
+    }
+}
 
+// ─── Validar firma X-Hub-Signature-256 ────────────────────────────────────────
+function validateSignature(rawBody: string, signatureHeader: string | null): boolean {
+    const appSecret = process.env.WHATSAPP_APP_SECRET
+    if (!appSecret) {
+        console.error('[WA] WHATSAPP_APP_SECRET no configurado — rechazando por seguridad')
+        return false
+    }
+    if (!signatureHeader) return false
+
+    const [scheme, receivedSig] = signatureHeader.split('=')
+    if (scheme !== 'sha256' || !receivedSig) return false
+
+    const expected = createHmac('sha256', appSecret).update(rawBody).digest('hex')
+
+    const a = Buffer.from(receivedSig)
+    const b = Buffer.from(expected)
+    if (a.length !== b.length) return false
+    return timingSafeEqual(a, b)
+}
 
 // ─── Enviar mensaje por Meta Directo ─────────────────────────────────────────
-async function sendWhatsAppMessage(to: string, message: string) {
-    const phoneId = process.env.WHATSAPP_PHONE_ID;
-    
+async function sendWhatsAppMessage(to: string, message: string, phoneNumberId: string, accessToken: string) {
     // Normalizar números de México para la API de prueba de Meta
     // Meta recibe 521XXX... pero la whitelist suele tener 52XXX...
     let finalTo = to;
@@ -18,11 +55,11 @@ async function sendWhatsAppMessage(to: string, message: string) {
         finalTo = '52' + finalTo.substring(3);
     }
 
-    const res = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
+    const res = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
+            'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
             messaging_product: 'whatsapp',
@@ -36,13 +73,17 @@ async function sendWhatsAppMessage(to: string, message: string) {
     if (data.error) {
         console.error('Meta API Error:', data.error);
     }
-    return data;
+    return data
 }
 
-// ─── Notificar a Alex por WhatsApp ────────────────────────────────────────────
-async function notifyAlex(phone: string, reason: string, summary: string) {
-    const message = `🔔 *Lead necesita atención humana*\n\n📱 Número: ${phone}\n❓ Motivo: ${reason}\n📝 Resumen: ${summary}\n\n👉 Entra al dashboard: https://albatrosia.com/dashboard`
-    await sendWhatsAppMessage(process.env.ALEX_WHATSAPP_NUMBER!, message)
+// ─── Notificar al dueño del negocio cuando el bot escala ─────────────────────
+async function notifyBusinessOwner(notifyPhone: string | null, phoneNumberId: string, accessToken: string, reason: string, summary: string) {
+    if (!notifyPhone) {
+        console.warn('[WA] Escalación sin notify_phone configurado — no se envía alerta')
+        return
+    }
+    const message = `🔔 *Lead necesita atención humana*\n\n❓ Motivo: ${reason}\n📝 Resumen: ${summary}\n\n👉 Entra al dashboard para responder`
+    await sendWhatsAppMessage(notifyPhone, message, phoneNumberId, accessToken)
 }
 
 // ─── Procesar respuesta de Groq ───────────────────────────────────────────────
@@ -78,10 +119,29 @@ function extractJsonData(text: string): { data?: Record<string, string>, escalat
     return { data, escalate, reason, summary, cleanText }
 }
 
+function toBusinessContext(settings: ChannelRow['alb_businesses']['alb_business_settings'][number]): BusinessContext {
+    return {
+        botName: settings.bot_name,
+        businessDescription: settings.business_description,
+        offerings: settings.offerings,
+        qualifyingQuestions: settings.qualifying_questions,
+        toneInstructions: settings.tone_instructions,
+        defaultLanguage: settings.default_language,
+    }
+}
+
 // ─── Webhook handler ──────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json()
+        const rawBody = await req.text()
+        const signature = req.headers.get('x-hub-signature-256')
+
+        if (!validateSignature(rawBody, signature)) {
+            console.warn('[WA] Firma inválida — rechazando request')
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+        }
+
+        const body = JSON.parse(rawBody)
         const supabase = createServiceClient()
 
         // Extraer datos del mensaje entrante de Meta
@@ -89,25 +149,48 @@ export async function POST(req: NextRequest) {
         const changes = entry?.changes?.[0]
         const value = changes?.value
         const message = value?.messages?.[0]
+        const phoneNumberId = value?.metadata?.phone_number_id
 
-        if (!message || message.type !== 'text') {
+        if (!message || message.type !== 'text' || !phoneNumberId) {
             return NextResponse.json({ ok: true })
         }
 
         const phone = message.from
         const userText = message.text.body
 
+        // ─── Resolver a qué negocio pertenece este número de WhatsApp ─────────────
+        const { data: channelRowRaw } = await supabase
+            .from('alb_business_channels')
+            .select('business_id, phone_number_id, access_token, alb_businesses(name, alb_business_settings(*))')
+            .eq('channel', 'whatsapp')
+            .eq('phone_number_id', phoneNumberId)
+            .eq('status', 'active')
+            .maybeSingle()
+        const channelRow = channelRowRaw as unknown as ChannelRow | null
+
+        if (!channelRow) {
+            console.warn('[WA] phone_number_id sin negocio asociado:', phoneNumberId)
+            return NextResponse.json({ ok: true })
+        }
+
+        const businessId = channelRow.business_id
+        const accessToken = channelRow.access_token
+        const settings = channelRow.alb_businesses.alb_business_settings[0]
+        const businessCtx = toBusinessContext(settings)
+
         // ─── Buscar o crear conversación ─────────────────────────────────────────
         let { data: conversation } = await supabase
             .from('alb_conversations')
             .select('*')
+            .eq('business_id', businessId)
+            .eq('channel', 'whatsapp')
             .eq('phone', phone)
-            .single()
+            .maybeSingle()
 
         if (!conversation) {
             const { data: newConv } = await supabase
                 .from('alb_conversations')
-                .insert({ phone, status: 'bot', unread: true })
+                .insert({ business_id: businessId, phone, status: 'bot', unread: true, channel: 'whatsapp' })
                 .select()
                 .single()
             conversation = newConv
@@ -117,6 +200,7 @@ export async function POST(req: NextRequest) {
         if (conversation.status === 'human') {
             // Solo guardar el mensaje y marcar como no leído
             await supabase.from('alb_messages').insert({
+                business_id: businessId,
                 conversation_id: conversation.id,
                 role: 'user',
                 content: userText,
@@ -130,6 +214,7 @@ export async function POST(req: NextRequest) {
 
         // ─── Guardar mensaje del usuario ─────────────────────────────────────────
         await supabase.from('alb_messages').insert({
+            business_id: businessId,
             conversation_id: conversation.id,
             role: 'user',
             content: userText,
@@ -148,12 +233,12 @@ export async function POST(req: NextRequest) {
             content: m.content,
         }))
 
-        // ─── Llamar a Groq con Albi ───────────────────────────────────────────────
+        // ─── Llamar a Groq con el prompt de este negocio ──────────────────────────
         const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || '' })
         const completion = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
             messages: [
-                { role: 'system', content: getAlbiSystemPrompt() },
+                { role: 'system', content: getBotSystemPrompt(businessCtx) },
                 ...chatHistory,
             ],
             max_tokens: 500,
@@ -180,10 +265,13 @@ export async function POST(req: NextRequest) {
 
         // ─── Manejar escalación ───────────────────────────────────────────────────
         if (escalate) {
-            const lang = conversation.language || 'es'
-            const escalationMsg = lang === 'en' ? ALBI_ESCALATION_MESSAGE_EN : ALBI_ESCALATION_MESSAGE_ES
+            const lang = conversation.language || settings.default_language || 'es'
+            const escalationMsg = lang === 'en'
+                ? (settings.escalation_msg_en || ALBI_ESCALATION_MESSAGE_EN)
+                : (settings.escalation_msg_es || ALBI_ESCALATION_MESSAGE_ES)
 
             await supabase.from('alb_messages').insert({
+                business_id: businessId,
                 conversation_id: conversation.id,
                 role: 'bot',
                 content: escalationMsg,
@@ -194,8 +282,8 @@ export async function POST(req: NextRequest) {
                 .update({ status: 'human', unread: true, updated_at: new Date().toISOString() })
                 .eq('id', conversation.id)
 
-            await sendWhatsAppMessage(phone, escalationMsg)
-            await notifyAlex(phone, reason, summary)
+            await sendWhatsAppMessage(phone, escalationMsg, phoneNumberId, accessToken)
+            await notifyBusinessOwner(settings.notify_phone, phoneNumberId, accessToken, reason, summary)
 
             return NextResponse.json({ ok: true })
         }
@@ -205,11 +293,13 @@ export async function POST(req: NextRequest) {
             const finalMessage = await processConversationalBooking(
                 cleanText,
                 conversation.id,
-                conversation.language || 'es',
-                phone
+                conversation.language || settings.default_language || 'es',
+                phone,
+                businessId
             )
 
             await supabase.from('alb_messages').insert({
+                business_id: businessId,
                 conversation_id: conversation.id,
                 role: 'bot',
                 content: finalMessage,
@@ -220,7 +310,7 @@ export async function POST(req: NextRequest) {
                 .update({ updated_at: new Date().toISOString() })
                 .eq('id', conversation.id)
 
-            await sendWhatsAppMessage(phone, finalMessage)
+            await sendWhatsAppMessage(phone, finalMessage, phoneNumberId, accessToken)
         }
 
         return NextResponse.json({ ok: true })

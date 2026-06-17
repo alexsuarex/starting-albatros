@@ -3,44 +3,58 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 import Groq from 'groq-sdk'
 import { createServiceClient } from '@/lib/supabase/server'
-import { getAlbiSystemPrompt, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN } from '@/lib/albi-prompt'
+import { getBotSystemPrompt, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN, type BusinessContext } from '@/lib/albi-prompt'
 import { processConversationalBooking } from '@/lib/booking-parser'
+
+type BusinessSettingsRow = {
+    bot_name: string
+    business_description: string
+    offerings: string
+    qualifying_questions: string
+    tone_instructions: string
+    default_language: string
+    escalation_msg_es: string | null
+    escalation_msg_en: string | null
+    notify_phone: string | null
+}
+
+type ChannelRow = {
+    business_id: string
+    page_id: string
+    access_token: string
+    alb_businesses: {
+        name: string
+        alb_business_settings: BusinessSettingsRow[]
+    }
+}
 
 // ─── Validar firma X-Hub-Signature-256 ────────────────────────────────────────
 function validateSignature(rawBody: string, signatureHeader: string | null): boolean {
     const appSecret = process.env.META_APP_SECRET
     if (!appSecret) {
-        console.warn('[FB] META_APP_SECRET no configurado — omitiendo validación')
-        return true
+        console.error('[FB] META_APP_SECRET no configurado — rechazando por seguridad')
+        return false
     }
-    if (!signatureHeader) {
-        // Permitir temporalmente sin firma para diagnóstico
-        console.warn('[FB] Sin X-Hub-Signature-256 — permitiendo para diagnóstico')
-        return true
-    }
+    if (!signatureHeader) return false
+
     const [scheme, receivedSig] = signatureHeader.split('=')
-    if (scheme !== 'sha256' || !receivedSig) {
-        console.warn('[FB] Formato de firma inválido:', signatureHeader)
-        return true // permitir para diagnóstico
-    }
+    if (scheme !== 'sha256' || !receivedSig) return false
 
-    const expected = createHmac('sha256', appSecret)
-        .update(rawBody)
-        .digest('hex')
+    const expected = createHmac('sha256', appSecret).update(rawBody).digest('hex')
 
-    const match = receivedSig === expected
-    console.log('[FB] Validación firma:', match ? '✅ OK' : '❌ FALLÓ', '| Header:', signatureHeader?.substring(0, 20) + '...')
-    return true // temporalmente siempre pasar — para diagnóstico
+    const a = Buffer.from(receivedSig)
+    const b = Buffer.from(expected)
+    if (a.length !== b.length) return false
+    return timingSafeEqual(a, b)
 }
 
 // ─── Enviar mensaje por Messenger ─────────────────────────────────────────────
-async function sendMessengerMessage(psid: string, message: string) {
-    const pageId = process.env.FACEBOOK_PAGE_ID || 'me'
+async function sendMessengerMessage(psid: string, message: string, pageId: string, accessToken: string) {
     const res = await fetch(`https://graph.facebook.com/v25.0/${pageId}/messages`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.FACEBOOK_PAGE_ACCESS_TOKEN}`,
+            'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
             recipient: { id: psid },
@@ -55,27 +69,43 @@ async function sendMessengerMessage(psid: string, message: string) {
     return data
 }
 
-// ─── Notificar a Alex por WhatsApp ────────────────────────────────────────────
-async function notifyAlex(psid: string, reason: string, summary: string) {
-    const phoneId = process.env.WHATSAPP_PHONE_ID
-    const message = `🔔 *Lead de Facebook necesita atención*\n\n👤 ID: ${psid}\n❓ Motivo: ${reason}\n📝 Resumen: ${summary}\n\n👉 Dashboard: https://albatrosia.com/dashboard`
-    await fetch(`https://graph.facebook.com/v25.0/${phoneId}/messages`, {
+// ─── Notificar al dueño del negocio (vía su propio canal de WhatsApp) ────────
+async function notifyBusinessOwner(supabase: ReturnType<typeof createServiceClient>, businessId: string, notifyPhone: string | null, reason: string, summary: string) {
+    if (!notifyPhone) {
+        console.warn('[FB] Escalación sin notify_phone configurado — no se envía alerta')
+        return
+    }
+    const { data: waChannel } = await supabase
+        .from('alb_business_channels')
+        .select('phone_number_id, access_token')
+        .eq('business_id', businessId)
+        .eq('channel', 'whatsapp')
+        .eq('status', 'active')
+        .maybeSingle()
+
+    if (!waChannel) {
+        console.warn('[FB] Negocio sin canal de WhatsApp activo — no se puede notificar la escalación de Facebook')
+        return
+    }
+
+    const message = `🔔 *Lead de Facebook necesita atención*\n\n❓ Motivo: ${reason}\n📝 Resumen: ${summary}\n\n👉 Entra al dashboard para responder`
+    await fetch(`https://graph.facebook.com/v25.0/${waChannel.phone_number_id}/messages`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
+            'Authorization': `Bearer ${waChannel.access_token}`,
         },
         body: JSON.stringify({
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
-            to: process.env.ALEX_WHATSAPP_NUMBER,
+            to: notifyPhone,
             type: 'text',
             text: { body: message },
         }),
     })
 }
 
-// ─── Extraer JSON del response de Albi ───────────────────────────────────────
+// ─── Extraer JSON del response del bot ───────────────────────────────────────
 function extractJsonData(text: string): {
     data?: Record<string, string>
     escalate: boolean
@@ -112,14 +142,45 @@ function extractJsonData(text: string): {
     return { data, escalate, reason, summary, cleanText }
 }
 
+function toBusinessContext(settings: BusinessSettingsRow): BusinessContext {
+    return {
+        botName: settings.bot_name,
+        businessDescription: settings.business_description,
+        offerings: settings.offerings,
+        qualifyingQuestions: settings.qualifying_questions,
+        toneInstructions: settings.tone_instructions,
+        defaultLanguage: settings.default_language,
+    }
+}
+
 // ─── Procesar eventos del webhook (async, fuera del tiempo de respuesta) ──────
 async function processWebhookEvents(body: any) {
     const supabase = createServiceClient()
 
     for (const entry of body.entry || []) {
-        for (const event of entry.messaging || []) {
-            console.log('[FB] Evento recibido — is_echo:', event.message?.is_echo, '| tiene texto:', !!event.message?.text)
+        const pageId = entry.id as string | undefined
+        if (!pageId) continue
 
+        const { data: channelRowRaw } = await supabase
+            .from('alb_business_channels')
+            .select('business_id, page_id, access_token, alb_businesses(name, alb_business_settings(*))')
+            .eq('channel', 'facebook')
+            .eq('page_id', pageId)
+            .eq('status', 'active')
+            .maybeSingle()
+        const channelRow = channelRowRaw as unknown as ChannelRow | null
+
+        if (!channelRow) {
+            console.warn('[FB] page_id sin negocio asociado:', pageId)
+            continue
+        }
+
+        const businessId = channelRow.business_id
+        const accessToken = channelRow.access_token
+        const settings = channelRow.alb_businesses.alb_business_settings[0]
+        const businessCtx = toBusinessContext(settings)
+
+        for (const event of entry.messaging || []) {
             // Ignorar mensajes enviados por la propia página (echo)
             if (event.message?.is_echo) continue
             // Ignorar eventos sin texto (imágenes, stickers, etc.)
@@ -127,12 +188,12 @@ async function processWebhookEvents(body: any) {
 
             const psid = event.sender.id as string
             const userText = event.message.text as string
-            console.log('[FB] Mensaje de PSID:', psid, '| Texto:', userText)
 
             // ─── Buscar o crear conversación ──────────────────────────────────
             let { data: conversation } = await supabase
                 .from('alb_conversations')
                 .select('*')
+                .eq('business_id', businessId)
                 .eq('phone', psid)
                 .eq('channel', 'facebook')
                 .maybeSingle()
@@ -140,7 +201,7 @@ async function processWebhookEvents(body: any) {
             if (!conversation) {
                 const { data: newConv } = await supabase
                     .from('alb_conversations')
-                    .insert({ phone: psid, status: 'bot', unread: true, channel: 'facebook' })
+                    .insert({ business_id: businessId, phone: psid, status: 'bot', unread: true, channel: 'facebook' })
                     .select()
                     .single()
                 conversation = newConv
@@ -151,6 +212,7 @@ async function processWebhookEvents(body: any) {
             // Si está en modo humano, solo guardar y marcar como no leído
             if (conversation.status === 'human') {
                 await supabase.from('alb_messages').insert({
+                    business_id: businessId,
                     conversation_id: conversation.id,
                     role: 'user',
                     content: userText,
@@ -164,6 +226,7 @@ async function processWebhookEvents(body: any) {
 
             // ─── Guardar mensaje del usuario ──────────────────────────────────
             await supabase.from('alb_messages').insert({
+                business_id: businessId,
                 conversation_id: conversation.id,
                 role: 'user',
                 content: userText,
@@ -182,12 +245,12 @@ async function processWebhookEvents(body: any) {
                 content: m.content,
             }))
 
-            // ─── Llamar a Groq / Albi ─────────────────────────────────────────
+            // ─── Llamar a Groq con el prompt de este negocio ───────────────────
             const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || '' })
             const completion = await groq.chat.completions.create({
                 model: 'llama-3.3-70b-versatile',
                 messages: [
-                    { role: 'system', content: getAlbiSystemPrompt() },
+                    { role: 'system', content: getBotSystemPrompt(businessCtx) },
                     ...chatHistory,
                 ],
                 max_tokens: 500,
@@ -214,10 +277,13 @@ async function processWebhookEvents(body: any) {
 
             // ─── Escalación ───────────────────────────────────────────────────
             if (escalate) {
-                const lang = conversation.language || 'es'
-                const escalationMsg = lang === 'en' ? ALBI_ESCALATION_MESSAGE_EN : ALBI_ESCALATION_MESSAGE_ES
+                const lang = conversation.language || settings.default_language || 'es'
+                const escalationMsg = lang === 'en'
+                    ? (settings.escalation_msg_en || ALBI_ESCALATION_MESSAGE_EN)
+                    : (settings.escalation_msg_es || ALBI_ESCALATION_MESSAGE_ES)
 
                 await supabase.from('alb_messages').insert({
+                    business_id: businessId,
                     conversation_id: conversation.id,
                     role: 'bot',
                     content: escalationMsg,
@@ -226,8 +292,8 @@ async function processWebhookEvents(body: any) {
                     .from('alb_conversations')
                     .update({ status: 'human', unread: true, updated_at: new Date().toISOString() })
                     .eq('id', conversation.id)
-                await sendMessengerMessage(psid, escalationMsg)
-                await notifyAlex(psid, reason, summary)
+                await sendMessengerMessage(psid, escalationMsg, pageId, accessToken)
+                await notifyBusinessOwner(supabase, businessId, settings.notify_phone, reason, summary)
                 continue
             }
 
@@ -236,10 +302,13 @@ async function processWebhookEvents(body: any) {
                 const finalMessage = await processConversationalBooking(
                     cleanText,
                     conversation.id,
-                    conversation.language || 'es'
+                    conversation.language || settings.default_language || 'es',
+                    undefined,
+                    businessId
                 )
 
                 await supabase.from('alb_messages').insert({
+                    business_id: businessId,
                     conversation_id: conversation.id,
                     role: 'bot',
                     content: finalMessage,
@@ -248,7 +317,7 @@ async function processWebhookEvents(body: any) {
                     .from('alb_conversations')
                     .update({ updated_at: new Date().toISOString() })
                     .eq('id', conversation.id)
-                await sendMessengerMessage(psid, finalMessage)
+                await sendMessengerMessage(psid, finalMessage, pageId, accessToken)
             }
         }
     }
@@ -257,24 +326,22 @@ async function processWebhookEvents(body: any) {
 // ─── Webhook handler ──────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
     try {
-        console.log('[FB] POST recibido ✅')
         const rawBody = await req.text()
         const signature = req.headers.get('x-hub-signature-256')
-        console.log('[FB] Signature header:', signature ? signature.substring(0, 30) + '...' : 'AUSENTE')
 
-        validateSignature(rawBody, signature)
+        if (!validateSignature(rawBody, signature)) {
+            console.warn('[FB] Firma inválida — rechazando request')
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+        }
 
         const body = JSON.parse(rawBody)
-        console.log('[FB] object:', body.object, '| entries:', body.entry?.length)
 
         if (body.object !== 'page') {
-            console.log('[FB] Ignorado — object no es page:', body.object)
             return NextResponse.json({ ok: true })
         }
 
         await processWebhookEvents(body)
 
-        console.log('[FB] Procesamiento completado ✅')
         return NextResponse.json({ ok: true })
     } catch (error) {
         console.error('[FB] Error crítico:', error)

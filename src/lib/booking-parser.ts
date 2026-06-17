@@ -15,12 +15,14 @@ function timeToMinutes(time: string): number {
 
 async function checkSlotAvailability(
   date: string,
-  time: string
+  time: string,
+  businessId: string
 ): Promise<{ available: boolean; nextSlot?: string }> {
   const supabase = createServiceClient()
   const { data } = await supabase
     .from('alb_appointments')
     .select('appointment_time')
+    .eq('business_id', businessId)
     .eq('appointment_date', date)
     .neq('status', 'cancelled')
 
@@ -47,7 +49,8 @@ export async function processConversationalBooking(
   assistantMessage: string,
   conversationId: string,
   lang: 'es' | 'en' = 'es',
-  fallbackPhone?: string
+  fallbackPhone: string | undefined,
+  businessId: string
 ): Promise<string> {
   const bookingRegex = /\[CREATE_BOOKING:\s*([^\]]+)\]/
   const match = assistantMessage.match(bookingRegex)
@@ -71,7 +74,7 @@ export async function processConversationalBooking(
     return cleanMessage
   }
 
-  const { available, nextSlot } = await checkSlotAvailability(date, time)
+  const { available, nextSlot } = await checkSlotAvailability(date, time, businessId)
 
   if (!available) {
     const notice =
@@ -84,6 +87,7 @@ export async function processConversationalBooking(
   try {
     const supabase = createServiceClient()
     const { error } = await supabase.from('alb_appointments').insert([{
+      business_id: businessId,
       conversation_id: conversationId,
       client_name: name,
       client_phone: phone,

@@ -30,40 +30,53 @@
 ```
 src/
 ├── app/
-│   ├── dashboard/page.tsx          — Dashboard principal (conversaciones WA + FB en pestañas)
+│   ├── dashboard/page.tsx          — Dashboard principal (conversaciones WA + FB en pestañas, agenda)
+│   ├── signup/page.tsx             — Alta interna de negocios nuevos (Fase 1, sin enlace público)
 │   ├── api/
 │   │   ├── webhook/
-│   │   │   ├── whatsapp/route.ts   — Webhook de WhatsApp (funciona en producción)
-│   │   │   └── facebook/route.ts   — Webhook de Facebook Messenger (en configuración)
-│   │   └── send-message/
-│   │       ├── route.ts            — Enviar mensaje manual por WhatsApp
-│   │       └── facebook/route.ts   — Enviar mensaje manual por Facebook
+│   │   │   ├── route.ts            — Webhook de WhatsApp, multi-tenant (detecta negocio por phone_number_id)
+│   │   │   └── facebook/route.ts   — Webhook de Facebook Messenger, multi-tenant (detecta negocio por page_id)
+│   │   ├── send-message/
+│   │   │   ├── route.ts            — Enviar mensaje manual por WhatsApp (resuelve canal/token por negocio)
+│   │   │   └── facebook/route.ts   — Enviar mensaje manual por Facebook (idem)
+│   │   └── signup/route.ts         — Crea negocio + usuario owner (solo invocable por miembros de Albatros Dev)
 │   └── page.tsx                    — Landing page pública
+├── proxy.ts                        — Protección server-side de /dashboard (Next 16: reemplaza middleware.ts)
 └── lib/
-    ├── albi-prompt.ts              — System prompt de Albi + mensajes de escalación
+    ├── albi-prompt.ts              — getBotSystemPrompt(BusinessContext) — framework fijo + contenido por negocio
+    ├── booking-parser.ts           — Booking conversacional, ahora escopado por business_id
     └── supabase/server.ts          — Cliente Supabase (server + service role)
 ```
 
 ---
 
-## Base de datos Supabase — Tablas principales
+## Base de datos Supabase — multi-tenant (Fase 1, 2026-06-16)
+
+Esquema nuevo en `supabase/migrations/0001_multi_tenant_schema.sql` (sin secretos, versionado en git)
++ `supabase/seed_albatros.local.sql` (con tokens reales, **gitignored**, correr en Supabase Studio):
 
 ```sql
-alb_conversations (
-  id, phone, name, business_name, business_type,
-  package_interest, language, status (bot|human),
-  unread, channel (whatsapp|facebook), updated_at, created_at
-)
+alb_businesses (id, name, slug, plan, active, created_at)
+alb_business_members (id, business_id, user_id, role, created_at)        -- quién administra qué negocio
+alb_business_settings (id, business_id, bot_name, business_description,
+  offerings, qualifying_questions, tone_instructions, welcome_message,
+  escalation_msg_es, escalation_msg_en, default_language, notify_phone)  -- prompt por negocio
+alb_business_channels (id, business_id, channel, status, phone_number_id,
+  waba_id, phone_display, page_id, access_token, connected_at)          -- canales conectados por negocio
 
-alb_messages (
-  id, conversation_id, role (user|bot), content, created_at
-)
+alb_conversations (..., business_id)   -- ahora NOT NULL + UNIQUE(business_id, channel, phone)
+alb_messages (..., business_id)        -- denormalizado para RLS simple
+alb_appointments (..., business_id)    -- ya existía nullable, ahora NOT NULL
 ```
 
-**Migración ya aplicada:**
-```sql
-ALTER TABLE alb_conversations ADD COLUMN IF NOT EXISTS channel TEXT NOT NULL DEFAULT 'whatsapp';
-```
+RLS habilitado en todas las tablas multi-tenant vía `alb_business_members`. El primer negocio
+sembrado es "Albatros Dev" (slug `albatros-dev`), con Alex (`alex@lapazbay.com`) como owner —
+todas las conversaciones/mensajes/citas existentes quedan asociados a ese negocio.
+
+**⚠️ Estado al cierre de esta sesión:** el código (webhooks, prompt, dashboard, signup) ya está
+escrito y compila, pero las dos migraciones SQL **todavía no se han corrido** contra la base de
+datos real — Alex las ejecuta a mano en el SQL Editor de Supabase Studio. Hasta que eso pase, no
+desplegar este código (asume que `business_id` ya existe).
 
 ---
 
@@ -84,6 +97,10 @@ WHATSAPP_PHONE_ID=1056520984217523
 WHATSAPP_WABA_ID=4476193322609314
 WHATSAPP_VERIFY_TOKEN=albatros_secret_2024
 ALEX_WHATSAPP_NUMBER=526121397356
+WHATSAPP_APP_SECRET=                          ← NUEVO, FALTA AGREGAR. App Secret de Albatros-WSA
+                                                 (Meta App Dashboard → Settings → Basic). Sin esto,
+                                                 el webhook de WhatsApp rechaza TODO con 401 — Albi
+                                                 deja de responder por completo hasta que se agregue.
 
 # Facebook Messenger (app: Albatros-IA-Platform — en configuración)
 FACEBOOK_PAGE_ACCESS_TOKEN=EAGQf11uBGo0BR...  ← Token de Albatros-IA-Platform
@@ -152,24 +169,38 @@ FACEBOOK_APP_ID=28182507484682893              ← ID de Albatros-IA-Platform
 ## Pendiente por resolver
 
 1. **Crear cuenta de revisor en Supabase** para el proceso de App Review de Meta (cuando se quiera publicar para el público general).
-2. **Considerar limpiar logs de diagnóstico** en `src/app/api/webhook/facebook/route.ts` (los `console.log('[FB] ...')` y reactivar la validación X-Hub-Signature-256 real — actualmente siempre devuelve `true`).
+2. ~~Considerar limpiar logs de diagnóstico y reactivar la validación X-Hub-Signature-256 real~~ — hecho en la sesión de Fase 1 (2026-06-16): ambos webhooks ahora rechazan con 401 si la firma no es válida.
+3. **Correr la migración multi-tenant** (ver siguiente sección) — el código ya está escrito pero la base de datos todavía no.
+4. **Agregar `WHATSAPP_APP_SECRET`** a `.env.local` y Vercel antes de desplegar — sin esto el webhook de WhatsApp rechaza todo.
+5. **Revisar el contenido sembrado de `alb_business_settings`** para Albatros Dev — es una migración manual de redacción desde `albi-prompt.ts`, vale la pena confirmar que el tono/precios quedaron exactos.
 
 ---
 
 ## Próximos pasos del roadmap
 
-### Inmediato
-- [ ] Confirmar que Albi responde en Facebook Messenger
-- [ ] Grabar video de demostración para App Review de Meta (para cuando se quiera publicar)
+### Inmediato (para activar lo que se construyó en esta sesión)
+- [ ] Correr `supabase/migrations/0001_multi_tenant_schema.sql` en el SQL Editor de Supabase Studio
+- [ ] Correr `supabase/seed_albatros.local.sql` justo después (mismo SQL Editor)
+- [ ] Agregar `WHATSAPP_APP_SECRET` (App Secret de Albatros-WSA) a `.env.local` y Vercel
+- [ ] Desplegar el código nuevo en el mismo release que la migración
+- [ ] Smoke test: WhatsApp real, Messenger real, una cita, una escalación — confirmar que el dashboard de Alex sigue mostrando todo
 
-### Fase 1 — Multi-tenant SaaS (próxima sesión de desarrollo)
-- [ ] Agregar tabla `businesses` y `business_settings` en Supabase
-- [ ] Agregar `business_id` a `alb_conversations`
-- [ ] Webhook multi-tenant (detectar negocio por page_id o phone_id)
-- [ ] UI para crear y configurar negocios
-- [ ] Primer cliente piloto
+### Fase 1 — Multi-tenant SaaS ✅ código listo (2026-06-16), pendiente correr migración
+- [x] Agregar tablas `alb_businesses`, `alb_business_members`, `alb_business_settings`, `alb_business_channels`
+- [x] Agregar `business_id` a `alb_conversations`, `alb_messages`, `alb_appointments`
+- [x] Webhook multi-tenant (detecta negocio por `page_id`/`phone_number_id`)
+- [x] Prompt por negocio (`getBotSystemPrompt`, separa framework técnico de contenido)
+- [x] RLS — el dashboard ya filtra automáticamente por negocio sin cambios de UI
+- [x] `src/app/signup/page.tsx` + `/api/signup` — alta interna de negocios (sin self-registro público todavía)
+- [ ] Primer cliente piloto real (usar `/signup` para darlo de alta a mano)
 
-Ver detalles completos en: `SAAS_PLAN.md`
+### Fase 2 — Conexión self-service (siguiente sesión de desarrollo)
+- [ ] Botón "Conectar con Facebook" (Facebook Login for Business) para Messenger
+- [ ] WhatsApp Embedded Signup (requiere crear una Configuración en el Meta App Dashboard primero)
+- [ ] Self-registro público (hoy `/signup` es de uso interno)
+- El esquema de `alb_business_channels` ya está listo para esto — no necesita cambios.
+
+Ver detalles completos en: `SAAS_PLAN.md` y `/Users/alejandrosuarezhernandez/.claude/plans/elegant-coalescing-horizon.md`
 
 ---
 
