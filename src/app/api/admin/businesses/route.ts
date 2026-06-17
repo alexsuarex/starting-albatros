@@ -26,6 +26,22 @@ type MemberRow = {
     created_at: string
 }
 
+type SettingsRow = {
+    business_id: string
+    bot_name: string
+    default_language: string
+    notify_phone: string | null
+}
+
+type BusinessRow = {
+    id: string
+    name: string
+    slug: string
+    plan: string
+    active: boolean
+    created_at: string
+}
+
 export async function GET() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -37,21 +53,24 @@ export async function GET() {
     }
 
     // ─── Negocios ────────────────────────────────────────────────────────────
-    const { data: businesses, error: bizError } = await service
+    const { data: businessesRaw, error: bizError } = await service
         .from('alb_businesses')
         .select('id, name, slug, plan, active, created_at')
         .order('created_at', { ascending: true })
 
-    if (bizError || !businesses) {
+    if (bizError || !businessesRaw) {
         return NextResponse.json({ error: bizError?.message || 'Could not load businesses' }, { status: 500 })
     }
+    const businesses = businessesRaw as BusinessRow[]
 
     // ─── Settings (uno por negocio) ──────────────────────────────────────────
     const { data: settings } = await service
         .from('alb_business_settings')
         .select('business_id, bot_name, default_language, notify_phone')
 
-    const settingsByBiz = new Map((settings || []).map(s => [s.business_id, s]))
+    const settingsByBiz = new Map<string, SettingsRow>(
+        ((settings || []) as SettingsRow[]).map(s => [s.business_id, s])
+    )
 
     // ─── Canales ─────────────────────────────────────────────────────────────
     const { data: channels } = await service
