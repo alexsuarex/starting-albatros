@@ -6,24 +6,48 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { getBotSystemPrompt, ALBI_ESCALATION_MESSAGE_ES, ALBI_ESCALATION_MESSAGE_EN, type BusinessContext } from '@/lib/albi-prompt'
 import { processConversationalBooking } from '@/lib/booking-parser'
 
+type BusinessSettingsRow = {
+    bot_name: string
+    business_description: string
+    offerings: string
+    qualifying_questions: string
+    tone_instructions: string
+    default_language: string
+    escalation_msg_es: string | null
+    escalation_msg_en: string | null
+    notify_phone: string | null
+}
+
 type ChannelRow = {
     business_id: string
     phone_number_id: string
     access_token: string
     alb_businesses: {
         name: string
-        alb_business_settings: {
-            bot_name: string
-            business_description: string
-            offerings: string
-            qualifying_questions: string
-            tone_instructions: string
-            default_language: string
-            escalation_msg_es: string | null
-            escalation_msg_en: string | null
-            notify_phone: string | null
-        }[]
-    }
+        // Supabase puede devolver el embed como array o como objeto único —
+        // aceptamos ambos para no crashear según cómo lo resuelva.
+        alb_business_settings: BusinessSettingsRow[] | BusinessSettingsRow | null
+    } | null
+}
+
+// Defaults espejo del schema (supabase/migrations/0001_multi_tenant_schema.sql)
+const FALLBACK_SETTINGS: BusinessSettingsRow = {
+    bot_name: 'Asistente',
+    business_description: '',
+    offerings: '',
+    qualifying_questions: '',
+    tone_instructions: '',
+    default_language: 'es',
+    escalation_msg_es: 'Un momento, te conecto con un humano 🙌',
+    escalation_msg_en: 'One moment, connecting you with a human 🙌',
+    notify_phone: null,
+}
+
+function extractSettings(channelRow: ChannelRow): BusinessSettingsRow | null {
+    const raw = channelRow.alb_businesses?.alb_business_settings
+    if (!raw) return null
+    if (Array.isArray(raw)) return raw[0] ?? null
+    return raw
 }
 
 // ─── Validar firma X-Hub-Signature-256 ────────────────────────────────────────
@@ -119,7 +143,7 @@ function extractJsonData(text: string): { data?: Record<string, string>, escalat
     return { data, escalate, reason, summary, cleanText }
 }
 
-function toBusinessContext(settings: ChannelRow['alb_businesses']['alb_business_settings'][number]): BusinessContext {
+function toBusinessContext(settings: BusinessSettingsRow): BusinessContext {
     return {
         botName: settings.bot_name,
         businessDescription: settings.business_description,
@@ -175,7 +199,15 @@ export async function POST(req: NextRequest) {
 
         const businessId = channelRow.business_id
         const accessToken = channelRow.access_token
-        const settings = channelRow.alb_businesses.alb_business_settings[0]
+        const resolvedSettings = extractSettings(channelRow)
+        if (!resolvedSettings) {
+            console.warn('[WA] Negocio sin fila en alb_business_settings — usando defaults', {
+                businessId,
+                phoneNumberId,
+                businessName: channelRow.alb_businesses?.name,
+            })
+        }
+        const settings = resolvedSettings ?? FALLBACK_SETTINGS
         const businessCtx = toBusinessContext(settings)
 
         // ─── Buscar o crear conversación ─────────────────────────────────────────

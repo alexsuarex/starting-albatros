@@ -24,8 +24,33 @@ type ChannelRow = {
     access_token: string
     alb_businesses: {
         name: string
-        alb_business_settings: BusinessSettingsRow[]
-    }
+        // Supabase puede devolver el embed como array (one-to-many) o como
+        // objeto único (one-to-one cuando detecta el UNIQUE en business_id).
+        // Aceptamos ambos para no crashear según cómo lo resuelva.
+        alb_business_settings: BusinessSettingsRow[] | BusinessSettingsRow | null
+    } | null
+}
+
+// Defaults espejo del schema (supabase/migrations/0001_multi_tenant_schema.sql)
+// Se usan SOLO si un negocio quedó sin fila en alb_business_settings — el
+// webhook nunca debe crashear por eso.
+const FALLBACK_SETTINGS: BusinessSettingsRow = {
+    bot_name: 'Asistente',
+    business_description: '',
+    offerings: '',
+    qualifying_questions: '',
+    tone_instructions: '',
+    default_language: 'es',
+    escalation_msg_es: 'Un momento, te conecto con un humano 🙌',
+    escalation_msg_en: 'One moment, connecting you with a human 🙌',
+    notify_phone: null,
+}
+
+function extractSettings(channelRow: ChannelRow): BusinessSettingsRow | null {
+    const raw = channelRow.alb_businesses?.alb_business_settings
+    if (!raw) return null
+    if (Array.isArray(raw)) return raw[0] ?? null
+    return raw
 }
 
 // ─── Validar firma X-Hub-Signature-256 ────────────────────────────────────────
@@ -177,7 +202,15 @@ async function processWebhookEvents(body: any) {
 
         const businessId = channelRow.business_id
         const accessToken = channelRow.access_token
-        const settings = channelRow.alb_businesses.alb_business_settings[0]
+        const resolvedSettings = extractSettings(channelRow)
+        if (!resolvedSettings) {
+            console.warn('[FB] Negocio sin fila en alb_business_settings — usando defaults', {
+                businessId,
+                pageId,
+                businessName: channelRow.alb_businesses?.name,
+            })
+        }
+        const settings = resolvedSettings ?? FALLBACK_SETTINGS
         const businessCtx = toBusinessContext(settings)
 
         for (const event of entry.messaging || []) {
