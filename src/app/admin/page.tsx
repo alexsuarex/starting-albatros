@@ -45,6 +45,19 @@ type Member = {
     email: string | null
 }
 
+type BusinessSettings = {
+    bot_name: string
+    business_description: string
+    offerings: string
+    qualifying_questions: string
+    tone_instructions: string
+    welcome_message: string | null
+    escalation_msg_es: string
+    escalation_msg_en: string
+    default_language: string
+    notify_phone: string | null
+}
+
 type AdminBusiness = {
     id: string
     name: string
@@ -53,17 +66,26 @@ type AdminBusiness = {
     active: boolean
     created_at: string
     is_platform: boolean
-    settings: {
-        bot_name: string
-        default_language: string
-        notify_phone: string | null
-    } | null
+    settings: BusinessSettings | null
     channels: Channel[]
     members: Member[]
     counts: {
         conversations: number
         appointments: number
     }
+}
+
+const DEFAULT_SETTINGS: BusinessSettings = {
+    bot_name: 'Asistente',
+    business_description: '',
+    offerings: '',
+    qualifying_questions: '',
+    tone_instructions: '',
+    welcome_message: null,
+    escalation_msg_es: 'Un momento, te conecto con un humano 🙌',
+    escalation_msg_en: 'One moment, connecting you with a human 🙌',
+    default_language: 'es',
+    notify_phone: null,
 }
 
 function WhatsAppIcon({ size = 14 }: { size?: number }) {
@@ -103,6 +125,62 @@ function formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function BotPreviewRow({ label, value }: { label: string; value: string | null }) {
+    const empty = !value || value.trim() === ''
+    return (
+        <div>
+            <p className="text-[11px] font-mono text-zinc-400 uppercase tracking-wide mb-1">{label}</p>
+            {empty ? (
+                <p className="text-xs font-mono text-zinc-300">—</p>
+            ) : (
+                <p className="text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed">{value}</p>
+            )}
+        </div>
+    )
+}
+
+function BotField({
+    label,
+    hint,
+    value,
+    onChange,
+    rows = 1,
+    placeholder,
+}: {
+    label: string
+    hint?: string
+    value: string
+    onChange: (v: string) => void
+    rows?: number
+    placeholder?: string
+}) {
+    return (
+        <div>
+            <div className="flex items-baseline justify-between mb-1">
+                <label className="text-xs font-mono text-zinc-500 uppercase tracking-wide">{label}</label>
+                {hint && <span className="text-[11px] font-mono text-zinc-300">{hint}</span>}
+            </div>
+            {rows === 1 ? (
+                <input
+                    type="text"
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    placeholder={placeholder}
+                    className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-900 placeholder-zinc-300 focus:outline-none focus:border-zinc-400"
+                />
+            ) : (
+                <textarea
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    rows={rows}
+                    placeholder={placeholder}
+                    className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-900 placeholder-zinc-300 focus:outline-none focus:border-zinc-400 leading-relaxed resize-y"
+                />
+            )}
+        </div>
+    )
+}
+
 export default function AdminPage() {
     const [businesses, setBusinesses] = useState<AdminBusiness[]>([])
     const [selected, setSelected] = useState<AdminBusiness | null>(null)
@@ -114,6 +192,12 @@ export default function AdminPage() {
     const [fbConnecting, setFbConnecting] = useState(false)
     const [fbPageOptions, setFbPageOptions] = useState<PageOption[] | null>(null)
     const [fbConnectError, setFbConnectError] = useState('')
+
+    // ─── Estado del editor de bot/prompt ─────────────────────────────────────
+    const [editingBot, setEditingBot] = useState<AdminBusiness | null>(null)
+    const [botDraft, setBotDraft] = useState<BusinessSettings>(DEFAULT_SETTINGS)
+    const [botSaving, setBotSaving] = useState(false)
+    const [botSaveError, setBotSaveError] = useState('')
 
     const router = useRouter()
     const supabase = createClient()
@@ -265,6 +349,55 @@ export default function AdminPage() {
         } catch (e: any) {
             setFbConnectError(e?.message || 'Error de red')
             setFbConnecting(false)
+        }
+    }
+
+    // ─── Editor de bot/prompt ────────────────────────────────────────────────
+    function openBotEditor(business: AdminBusiness) {
+        setBotDraft(business.settings || DEFAULT_SETTINGS)
+        setBotSaveError('')
+        setEditingBot(business)
+    }
+
+    async function saveBot() {
+        if (!editingBot) return
+        if (botDraft.bot_name.trim() === '') {
+            setBotSaveError('El nombre del bot no puede estar vacío')
+            return
+        }
+        setBotSaving(true)
+        setBotSaveError('')
+        try {
+            const res = await fetch(`/api/admin/businesses/${editingBot.id}/settings`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bot_name: botDraft.bot_name.trim(),
+                    business_description: botDraft.business_description,
+                    offerings: botDraft.offerings,
+                    qualifying_questions: botDraft.qualifying_questions,
+                    tone_instructions: botDraft.tone_instructions,
+                    welcome_message: botDraft.welcome_message ?? '',
+                    escalation_msg_es: botDraft.escalation_msg_es,
+                    escalation_msg_en: botDraft.escalation_msg_en,
+                    default_language: botDraft.default_language,
+                    notify_phone: botDraft.notify_phone ?? '',
+                }),
+            })
+            const data = await res.json()
+            if (!res.ok) {
+                setBotSaveError(data.error || 'No se pudo guardar')
+                setBotSaving(false)
+                return
+            }
+            const updatedSettings: BusinessSettings = data.settings || botDraft
+            setBusinesses(prev => prev.map(b => b.id === editingBot.id ? { ...b, settings: updatedSettings } : b))
+            setSelected(prev => prev && prev.id === editingBot.id ? { ...prev, settings: updatedSettings } : prev)
+            setEditingBot(null)
+            setBotSaving(false)
+        } catch (e: any) {
+            setBotSaveError(e?.message || 'Error de red')
+            setBotSaving(false)
         }
     }
 
@@ -463,25 +596,42 @@ export default function AdminPage() {
                             </section>
 
                             {/* Bot */}
-                            {selected.settings && (
-                                <section className="mb-8">
-                                    <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wide mb-3">Bot</h2>
-                                    <div className="border border-zinc-200 rounded-xl px-4 py-3 space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-zinc-400 font-mono">Nombre</span>
-                                            <span className="text-zinc-900">{selected.settings.bot_name}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-zinc-400 font-mono">Idioma por defecto</span>
-                                            <span className="text-zinc-900 font-mono uppercase">{selected.settings.default_language}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-zinc-400 font-mono">Notificación a</span>
-                                            <span className="text-zinc-900 font-mono">{selected.settings.notify_phone || '—'}</span>
-                                        </div>
+                            <section className="mb-8">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wide">Bot</h2>
+                                    <button
+                                        onClick={() => openBotEditor(selected)}
+                                        className="text-xs font-mono px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-700 hover:bg-zinc-50 transition-colors"
+                                    >
+                                        Editar
+                                    </button>
+                                </div>
+                                <div className="border border-zinc-200 rounded-xl px-4 py-3 space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-zinc-400 font-mono">Nombre</span>
+                                        <span className="text-zinc-900">{selected.settings?.bot_name || DEFAULT_SETTINGS.bot_name}</span>
                                     </div>
-                                </section>
-                            )}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-zinc-400 font-mono">Idioma por defecto</span>
+                                        <span className="text-zinc-900 font-mono uppercase">{selected.settings?.default_language || DEFAULT_SETTINGS.default_language}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-zinc-400 font-mono">Notificación a</span>
+                                        <span className="text-zinc-900 font-mono">{selected.settings?.notify_phone || '—'}</span>
+                                    </div>
+                                </div>
+                                {selected.settings && (
+                                    <div className="mt-3 border border-zinc-200 rounded-xl px-4 py-3 space-y-3">
+                                        <BotPreviewRow label="Descripción del negocio" value={selected.settings.business_description} />
+                                        <BotPreviewRow label="Oferta / Servicios" value={selected.settings.offerings} />
+                                        <BotPreviewRow label="Preguntas calificadoras" value={selected.settings.qualifying_questions} />
+                                        <BotPreviewRow label="Instrucciones de tono" value={selected.settings.tone_instructions} />
+                                        <BotPreviewRow label="Mensaje de bienvenida" value={selected.settings.welcome_message} />
+                                        <BotPreviewRow label="Escalación (ES)" value={selected.settings.escalation_msg_es} />
+                                        <BotPreviewRow label="Escalación (EN)" value={selected.settings.escalation_msg_en} />
+                                    </div>
+                                )}
+                            </section>
                         </div>
                     </div>
                 )}
@@ -494,6 +644,146 @@ export default function AdminPage() {
                     strategy="afterInteractive"
                     crossOrigin="anonymous"
                 />
+            )}
+
+            {/* Modal de edición del bot/prompt */}
+            {editingBot && (
+                <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-6">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+                        <div className="px-6 pt-6 pb-3 border-b border-zinc-100 flex items-start justify-between gap-4">
+                            <div>
+                                <h3 className="font-display text-lg font-semibold text-zinc-900">
+                                    Editar bot de {editingBot.name}
+                                </h3>
+                                <p className="text-xs text-zinc-400 font-mono mt-1">
+                                    Estos campos se inyectan en el system prompt del modelo.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => { setEditingBot(null); setBotSaveError('') }}
+                                disabled={botSaving}
+                                className="text-xs text-zinc-400 hover:text-zinc-900 transition-colors font-mono disabled:opacity-50"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+
+                        <div className="px-6 py-5 overflow-y-auto space-y-5">
+                            <div className="grid grid-cols-2 gap-3">
+                                <BotField
+                                    label="Nombre del bot"
+                                    hint="ej: Albi, Claudia"
+                                    value={botDraft.bot_name}
+                                    onChange={v => setBotDraft({ ...botDraft, bot_name: v })}
+                                    placeholder="Asistente"
+                                />
+                                <div>
+                                    <label className="text-xs font-mono text-zinc-500 uppercase tracking-wide mb-1 block">Idioma por defecto</label>
+                                    <select
+                                        value={botDraft.default_language}
+                                        onChange={e => setBotDraft({ ...botDraft, default_language: e.target.value })}
+                                        className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:border-zinc-400 bg-white"
+                                    >
+                                        <option value="es">Español</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <BotField
+                                label="Descripción del negocio"
+                                hint="qué hace, dónde está, a quién atiende"
+                                value={botDraft.business_description}
+                                onChange={v => setBotDraft({ ...botDraft, business_description: v })}
+                                rows={4}
+                                placeholder="Somos un gimnasio especializado en entrenamiento funcional ubicado en La Paz, BCS..."
+                            />
+
+                            <BotField
+                                label="Oferta / Servicios"
+                                hint="paquetes, precios, horarios"
+                                value={botDraft.offerings}
+                                onChange={v => setBotDraft({ ...botDraft, offerings: v })}
+                                rows={4}
+                                placeholder="Ofrecemos: Membresía mensual $X, Clases sueltas $Y, Pase semanal $Z..."
+                            />
+
+                            <BotField
+                                label="Preguntas calificadoras"
+                                hint="qué debe averiguar el bot antes de agendar"
+                                value={botDraft.qualifying_questions}
+                                onChange={v => setBotDraft({ ...botDraft, qualifying_questions: v })}
+                                rows={4}
+                                placeholder="Pregunta nombre, qué objetivo busca (bajar peso, ganar masa, etc.), si ya entrenó antes..."
+                            />
+
+                            <BotField
+                                label="Instrucciones de tono"
+                                hint="cómo debe hablar el bot"
+                                value={botDraft.tone_instructions}
+                                onChange={v => setBotDraft({ ...botDraft, tone_instructions: v })}
+                                rows={3}
+                                placeholder="Habla cercano y motivador, sin abusar de emojis. Tutea al cliente. Respuestas cortas."
+                            />
+
+                            <BotField
+                                label="Mensaje de bienvenida (opcional)"
+                                hint="se envía al primer mensaje del lead"
+                                value={botDraft.welcome_message ?? ''}
+                                onChange={v => setBotDraft({ ...botDraft, welcome_message: v })}
+                                rows={2}
+                                placeholder="¡Hola! Soy Albi, asistente del gimnasio. ¿En qué te puedo ayudar?"
+                            />
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <BotField
+                                    label="Escalación (ES)"
+                                    hint="cuando pasa a humano"
+                                    value={botDraft.escalation_msg_es}
+                                    onChange={v => setBotDraft({ ...botDraft, escalation_msg_es: v })}
+                                    rows={3}
+                                />
+                                <BotField
+                                    label="Escalación (EN)"
+                                    hint="cuando pasa a humano"
+                                    value={botDraft.escalation_msg_en}
+                                    onChange={v => setBotDraft({ ...botDraft, escalation_msg_en: v })}
+                                    rows={3}
+                                />
+                            </div>
+
+                            <BotField
+                                label="Teléfono de notificación"
+                                hint="opcional, con código de país"
+                                value={botDraft.notify_phone ?? ''}
+                                onChange={v => setBotDraft({ ...botDraft, notify_phone: v })}
+                                placeholder="526121234567"
+                            />
+                        </div>
+
+                        <div className="px-6 py-4 border-t border-zinc-100 flex items-center justify-between gap-3">
+                            {botSaveError ? (
+                                <p className="text-xs text-red-500 font-mono">{botSaveError}</p>
+                            ) : <span />}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => { setEditingBot(null); setBotSaveError('') }}
+                                    disabled={botSaving}
+                                    className="text-xs font-mono px-3 py-1.5 rounded-full text-zinc-500 hover:text-zinc-900 transition-colors disabled:opacity-50"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={saveBot}
+                                    disabled={botSaving}
+                                    className="text-xs font-mono px-4 py-1.5 rounded-full bg-zinc-900 text-white hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                                >
+                                    {botSaving ? 'Guardando...' : 'Guardar'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Modal de selección de página (cuando el usuario autorizó >1 página) */}

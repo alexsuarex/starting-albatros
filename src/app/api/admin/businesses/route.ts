@@ -29,6 +29,13 @@ type MemberRow = {
 type SettingsRow = {
     business_id: string
     bot_name: string
+    business_description: string
+    offerings: string
+    qualifying_questions: string
+    tone_instructions: string
+    welcome_message: string | null
+    escalation_msg_es: string
+    escalation_msg_en: string
     default_language: string
     notify_phone: string | null
 }
@@ -66,7 +73,7 @@ export async function GET() {
     // ─── Settings (uno por negocio) ──────────────────────────────────────────
     const { data: settings } = await service
         .from('alb_business_settings')
-        .select('business_id, bot_name, default_language, notify_phone')
+        .select('business_id, bot_name, business_description, offerings, qualifying_questions, tone_instructions, welcome_message, escalation_msg_es, escalation_msg_en, default_language, notify_phone')
 
     const settingsByBiz = new Map<string, SettingsRow>(
         ((settings || []) as SettingsRow[]).map(s => [s.business_id, s])
