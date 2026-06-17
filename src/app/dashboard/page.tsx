@@ -1,5 +1,4 @@
 'use client'
-export const dynamic = 'force-dynamic'
 // app/dashboard/page.tsx
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -142,6 +141,9 @@ export default function Dashboard() {
     const [todayApptCount, setTodayApptCount] = useState(0)
 
     const [user, setUser] = useState<any>(null)
+    const [isPlatformMember, setIsPlatformMember] = useState(false)
+    const [currentBusiness, setCurrentBusiness] = useState<{ id: string; name: string } | null>(null)
+    const [noBusiness, setNoBusiness] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
     const supabase = createClient()
@@ -154,25 +156,59 @@ export default function Dashboard() {
         })
     }, [])
 
-    // ─── Cargar conversaciones ────────────────────────────────────────────────
+    // ─── Detectar si el usuario es miembro de Albatros Dev (muestra botón Admin) ─
     useEffect(() => {
         if (!user) return
+        fetch('/api/admin/me')
+            .then(r => r.json())
+            .then(d => setIsPlatformMember(!!d.isPlatformMember))
+            .catch(() => setIsPlatformMember(false))
+    }, [user?.id])
+
+    // ─── Cargar el negocio del usuario (defensa en profundidad: filtrar por business_id) ─
+    useEffect(() => {
+        if (!user) return
+        fetch('/api/me/businesses')
+            .then(r => r.json())
+            .then(d => {
+                const biz = d.businesses?.[0]
+                if (biz) {
+                    setCurrentBusiness({ id: biz.id, name: biz.name })
+                } else {
+                    setNoBusiness(true)
+                }
+            })
+            .catch(() => setNoBusiness(true))
+    }, [user?.id])
+
+    // ─── Cargar conversaciones ────────────────────────────────────────────────
+    useEffect(() => {
+        if (!currentBusiness) return
         loadConversations()
 
         const sub = supabase
-            .channel('alb_conversations_sub')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'alb_conversations' }, () => {
-                loadConversations()
-            })
+            .channel(`alb_conversations_sub_${currentBusiness.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'alb_conversations',
+                    filter: `business_id=eq.${currentBusiness.id}`,
+                },
+                () => { loadConversations() }
+            )
             .subscribe()
 
         return () => { supabase.removeChannel(sub) }
-    }, [user])
+    }, [currentBusiness?.id])
 
     async function loadConversations() {
+        if (!currentBusiness) return
         const { data } = await supabase
             .from('alb_conversations')
             .select('*')
+            .eq('business_id', currentBusiness.id)
             .order('updated_at', { ascending: false })
         setConversations((data || []).map(c => ({ ...c, channel: (c.channel || 'whatsapp') as Channel })))
     }
@@ -201,10 +237,12 @@ export default function Dashboard() {
     }, [selected?.id])
 
     async function loadMessages() {
+        if (!currentBusiness || !selected) return
         const { data } = await supabase
             .from('alb_messages')
             .select('*')
-            .eq('conversation_id', selected!.id)
+            .eq('business_id', currentBusiness.id)
+            .eq('conversation_id', selected.id)
             .order('created_at', { ascending: true })
         setMessages(data || [])
         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
@@ -212,34 +250,44 @@ export default function Dashboard() {
 
     // ─── Contador de citas de hoy (para badge en botón Agenda) ───────────────
     useEffect(() => {
-        if (!user) return
+        if (!currentBusiness) return
         supabase
             .from('alb_appointments')
             .select('id', { count: 'exact', head: true })
+            .eq('business_id', currentBusiness.id)
             .eq('appointment_date', getLocalDateStr())
             .eq('status', 'scheduled')
             .then(({ count }) => setTodayApptCount(count || 0))
-    }, [user])
+    }, [currentBusiness?.id])
 
     // ─── Cargar citas ─────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!user || view !== 'agenda') return
+        if (!currentBusiness || view !== 'agenda') return
         loadAppointments()
 
         const sub = supabase
-            .channel('alb_appointments_sub')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'alb_appointments' }, () => {
-                loadAppointments()
-            })
+            .channel(`alb_appointments_sub_${currentBusiness.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'alb_appointments',
+                    filter: `business_id=eq.${currentBusiness.id}`,
+                },
+                () => { loadAppointments() }
+            )
             .subscribe()
 
         return () => { supabase.removeChannel(sub) }
-    }, [user, view, agendaDate])
+    }, [currentBusiness?.id, view, agendaDate])
 
     async function loadAppointments() {
+        if (!currentBusiness) return
         const { data } = await supabase
             .from('alb_appointments')
             .select('*, alb_conversations(id, phone, channel)')
+            .eq('business_id', currentBusiness.id)
             .eq('appointment_date', agendaDate)
             .order('appointment_time', { ascending: true })
         setAppointments(data || [])
@@ -275,10 +323,11 @@ export default function Dashboard() {
 
     // ─── Enviar respuesta manual ──────────────────────────────────────────────
     async function handleSend() {
-        if (!reply.trim() || !selected || sending) return
+        if (!reply.trim() || !selected || sending || !currentBusiness) return
         setSending(true)
 
         await supabase.from('alb_messages').insert({
+            business_id: currentBusiness.id,
             conversation_id: selected.id,
             role: 'human',
             content: reply.trim(),
@@ -291,7 +340,7 @@ export default function Dashboard() {
         await fetch(apiPath, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: selected.phone, message: reply.trim() }),
+            body: JSON.stringify({ to: selected.phone, message: reply.trim(), conversationId: selected.id }),
         })
 
         setReply('')
@@ -320,13 +369,34 @@ export default function Dashboard() {
     const waAlerts = conversations.filter(c => c.channel === 'whatsapp' && c.status === 'human' && c.unread).length
     const fbAlerts = conversations.filter(c => c.channel === 'facebook' && c.status === 'human' && c.unread).length
 
+    if (noBusiness) {
+        return (
+            <div className="h-screen flex items-center justify-center bg-white px-6">
+                <div className="text-center max-w-md">
+                    <p className="font-display text-2xl text-zinc-900 mb-2">Sin negocio asignado</p>
+                    <p className="text-sm text-zinc-500 font-mono mb-6">
+                        Tu cuenta no está asociada a ningún negocio. Contacta al administrador para que te dé acceso.
+                    </p>
+                    <button
+                        onClick={handleLogout}
+                        className="text-xs bg-zinc-900 text-white px-4 py-2 rounded-full font-mono hover:bg-zinc-700 transition-colors"
+                    >
+                        Cerrar sesión
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="h-screen flex flex-col bg-white overflow-hidden">
 
             {/* Top nav */}
             <div className="h-14 border-b border-zinc-200 flex items-center justify-between px-4 flex-shrink-0">
                 <div className="flex items-center gap-2">
-                    <span className="font-display text-base font-semibold text-zinc-900">Albatros Dev</span>
+                    <span className="font-display text-base font-semibold text-zinc-900">
+                        {currentBusiness?.name || 'Cargando...'}
+                    </span>
                     <span className="font-mono text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">dashboard</span>
                     {(waAlerts + fbAlerts) > 0 && (
                         <span className="bg-amber-500 text-white text-xs font-mono w-5 h-5 rounded-full flex items-center justify-center">
@@ -335,6 +405,14 @@ export default function Dashboard() {
                     )}
                 </div>
                 <div className="flex items-center gap-3">
+                    {isPlatformMember && (
+                        <button
+                            onClick={() => router.push('/admin')}
+                            className="text-xs font-mono px-3 py-1.5 rounded-full transition-colors text-zinc-400 hover:text-zinc-900 border border-zinc-200"
+                        >
+                            Admin
+                        </button>
+                    )}
                     <button
                         onClick={() => setView(view === 'agenda' ? 'inbox' : 'agenda')}
                         className={`text-xs font-mono px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
