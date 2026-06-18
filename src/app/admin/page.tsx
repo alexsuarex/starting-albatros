@@ -29,6 +29,14 @@ type PageOption = {
     access_token: string
 }
 
+type WhatsAppPhoneOption = {
+    phone_number_id: string
+    display_phone_number: string
+    verified_name: string | null
+    waba_id: string
+    waba_name: string | null
+}
+
 type Channel = {
     channel: 'whatsapp' | 'facebook'
     status: 'active' | 'disabled' | 'pending'
@@ -193,6 +201,12 @@ export default function AdminPage() {
     const [fbPageOptions, setFbPageOptions] = useState<PageOption[] | null>(null)
     const [fbConnectError, setFbConnectError] = useState('')
 
+    // ─── Estado del flujo de conexión a WhatsApp ─────────────────────────────
+    const [waConnecting, setWaConnecting] = useState(false)
+    const [waPhoneOptions, setWaPhoneOptions] = useState<WhatsAppPhoneOption[] | null>(null)
+    const [waPendingToken, setWaPendingToken] = useState<string | null>(null)
+    const [waConnectError, setWaConnectError] = useState('')
+
     // ─── Estado del editor de bot/prompt ─────────────────────────────────────
     const [editingBot, setEditingBot] = useState<AdminBusiness | null>(null)
     const [botDraft, setBotDraft] = useState<BusinessSettings>(DEFAULT_SETTINGS)
@@ -206,19 +220,43 @@ export default function AdminPage() {
     const metaFbConfigId = process.env.NEXT_PUBLIC_META_FB_CONFIG_ID
     const facebookConfigured = !!metaAppId && !!metaFbConfigId
 
+    // FB Login y WhatsApp Embedded Signup viven en apps de Meta distintas
+    // (Albatros-IA-Platform vs Albatros-WSA). El SDK de Facebook solo puede
+    // estar inicializado con un appId a la vez, así que cada flujo re-llama
+    // FB.init con el suyo antes de FB.login (ver ensureFBInitFor abajo).
+    const metaWaAppId = process.env.NEXT_PUBLIC_META_WA_APP_ID
+    const metaWaConfigId = process.env.NEXT_PUBLIC_META_WA_CONFIG_ID
+    const whatsappConfigured = !!metaWaAppId && !!metaWaConfigId
+    const anyMetaConfigured = facebookConfigured || whatsappConfigured
+
     // ─── Inicializar el SDK cuando carga ──────────────────────────────────────
     useEffect(() => {
-        if (!facebookConfigured) return
+        if (!anyMetaConfigured) return
         window.fbAsyncInit = function () {
-            window.FB?.init({
-                appId: metaAppId!,
-                cookie: true,
-                xfbml: false,
-                version: 'v25.0',
-            })
+            // Init con cualquier appId disponible — cada flujo re-inicializa
+            // con el suyo antes de llamar a FB.login.
+            const bootAppId = metaAppId || metaWaAppId
+            if (bootAppId) {
+                window.FB?.init({
+                    appId: bootAppId,
+                    cookie: true,
+                    xfbml: false,
+                    version: 'v25.0',
+                })
+            }
             setFbSdkReady(true)
         }
-    }, [facebookConfigured, metaAppId])
+    }, [anyMetaConfigured, metaAppId, metaWaAppId])
+
+    function ensureFBInitFor(appId: string) {
+        if (!window.FB) return
+        window.FB.init({
+            appId,
+            cookie: true,
+            xfbml: false,
+            version: 'v25.0',
+        })
+    }
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
@@ -266,6 +304,10 @@ export default function AdminPage() {
 
         setFbConnectError('')
         setFbConnecting(true)
+
+        // Asegurar que el SDK apunte a la app de FB (puede haber sido
+        // re-inicializado con la app de WhatsApp en un click anterior).
+        ensureFBInitFor(metaAppId!)
 
         window.FB.login(
             (response) => {
@@ -349,6 +391,109 @@ export default function AdminPage() {
         } catch (e: any) {
             setFbConnectError(e?.message || 'Error de red')
             setFbConnecting(false)
+        }
+    }
+
+    // ─── Flujo de conexión a WhatsApp (Embedded Signup) ──────────────────────
+    function startWhatsAppConnect(business: AdminBusiness) {
+        if (!whatsappConfigured) {
+            setWaConnectError('Falta NEXT_PUBLIC_META_WA_APP_ID o NEXT_PUBLIC_META_WA_CONFIG_ID')
+            return
+        }
+        if (!fbSdkReady || !window.FB) {
+            setWaConnectError('El SDK de Facebook todavía no carga. Reintenta en unos segundos.')
+            return
+        }
+
+        setWaConnectError('')
+        setWaConnecting(true)
+
+        // Apuntar el SDK a la app de WhatsApp (Albatros-WSA), distinta de
+        // la app de FB Login.
+        ensureFBInitFor(metaWaAppId!)
+
+        window.FB.login(
+            (response) => {
+                void (async () => {
+                    const code = response.authResponse?.code
+                    if (!code) {
+                        setWaConnecting(false)
+                        if (response.status !== 'unknown') {
+                            setWaConnectError('El usuario canceló o no se obtuvo código')
+                        }
+                        return
+                    }
+
+                    try {
+                        const res = await fetch(`/api/admin/businesses/${business.id}/connect-whatsapp`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ mode: 'list', code }),
+                        })
+                        const data = await res.json()
+                        if (!res.ok) {
+                            setWaConnectError(data.error || 'No se pudieron obtener los números')
+                            setWaConnecting(false)
+                            return
+                        }
+
+                        const phones = (data.phones || []) as WhatsAppPhoneOption[]
+                        if (phones.length === 0) {
+                            setWaConnectError('La cuenta autorizada no tiene números de WhatsApp accesibles')
+                            setWaConnecting(false)
+                            return
+                        }
+                        setWaPendingToken(data.userToken)
+                        if (phones.length === 1) {
+                            await saveWhatsAppPhone(business.id, phones[0], data.userToken)
+                            return
+                        }
+                        setWaPhoneOptions(phones)
+                        setWaConnecting(false)
+                    } catch (e: any) {
+                        setWaConnectError(e?.message || 'Error de red')
+                        setWaConnecting(false)
+                    }
+                })()
+            },
+            {
+                config_id: metaWaConfigId!,
+                response_type: 'code',
+                override_default_response_type: true,
+            }
+        )
+    }
+
+    async function saveWhatsAppPhone(businessId: string, phone: WhatsAppPhoneOption, userToken: string) {
+        setWaConnecting(true)
+        try {
+            const res = await fetch(`/api/admin/businesses/${businessId}/connect-whatsapp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: 'save',
+                    phoneNumberId: phone.phone_number_id,
+                    wabaId: phone.waba_id,
+                    userToken,
+                    phoneDisplay: phone.display_phone_number,
+                }),
+            })
+            const data = await res.json()
+            if (!res.ok) {
+                setWaConnectError(data.error || 'No se pudo guardar la conexión')
+                setWaConnecting(false)
+                return
+            }
+            setWaPhoneOptions(null)
+            setWaPendingToken(null)
+            setWaConnecting(false)
+            await loadBusinesses()
+            const refreshed = await fetch('/api/admin/businesses').then(r => r.json())
+            const updated = refreshed.businesses?.find((b: AdminBusiness) => b.id === businessId)
+            if (updated) setSelected(updated)
+        } catch (e: any) {
+            setWaConnectError(e?.message || 'Error de red')
+            setWaConnecting(false)
         }
     }
 
@@ -553,12 +698,13 @@ export default function AdminPage() {
                                     )}
                                     {!selected.channels.some(c => c.channel === 'whatsapp' && c.status === 'active') && (
                                         <button
-                                            disabled
-                                            className="text-xs font-mono px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-400 cursor-not-allowed flex items-center gap-1.5"
-                                            title="Próximamente"
+                                            onClick={() => startWhatsAppConnect(selected)}
+                                            disabled={waConnecting || !whatsappConfigured}
+                                            className="text-xs font-mono px-3 py-1.5 rounded-full bg-[#25D366] text-white hover:bg-[#1da851] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                            title={!whatsappConfigured ? 'Faltan env vars NEXT_PUBLIC_META_WA_APP_ID / NEXT_PUBLIC_META_WA_CONFIG_ID' : ''}
                                         >
                                             <WhatsAppIcon size={12} />
-                                            Conectar WhatsApp (pronto)
+                                            {waConnecting ? 'Conectando...' : 'Conectar WhatsApp'}
                                         </button>
                                     )}
                                 </div>
@@ -566,9 +712,17 @@ export default function AdminPage() {
                                 {fbConnectError && (
                                     <p className="text-xs text-red-500 font-mono mt-2">{fbConnectError}</p>
                                 )}
+                                {waConnectError && (
+                                    <p className="text-xs text-red-500 font-mono mt-2">{waConnectError}</p>
+                                )}
                                 {!facebookConfigured && (
                                     <p className="text-xs text-amber-600 font-mono mt-2">
                                         Conexión a Facebook deshabilitada: configura <code>NEXT_PUBLIC_META_APP_ID</code> y <code>NEXT_PUBLIC_META_FB_CONFIG_ID</code> en .env.local
+                                    </p>
+                                )}
+                                {!whatsappConfigured && (
+                                    <p className="text-xs text-amber-600 font-mono mt-2">
+                                        Conexión a WhatsApp deshabilitada: configura <code>NEXT_PUBLIC_META_WA_APP_ID</code> y <code>NEXT_PUBLIC_META_WA_CONFIG_ID</code> en .env.local
                                     </p>
                                 )}
                             </section>
@@ -639,8 +793,10 @@ export default function AdminPage() {
                 )}
             </div>
 
-            {/* Facebook JS SDK — solo se carga si está configurado */}
-            {facebookConfigured && (
+            {/* Facebook JS SDK — se usa tanto para FB Login como para WhatsApp
+                Embedded Signup. Se carga si cualquiera de los dos flujos está
+                configurado. */}
+            {anyMetaConfigured && (
                 <Script
                     src="https://connect.facebook.net/en_US/sdk.js"
                     strategy="afterInteractive"
@@ -815,6 +971,41 @@ export default function AdminPage() {
                         </div>
                         <button
                             onClick={() => { setFbPageOptions(null); setFbConnectError('') }}
+                            className="text-xs text-zinc-400 hover:text-zinc-900 transition-colors font-mono"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de selección de número de WhatsApp (cuando el usuario autorizó >1) */}
+            {waPhoneOptions && selected && (
+                <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-6">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                        <h3 className="font-display text-lg font-semibold text-zinc-900 mb-1">
+                            Elige un número de WhatsApp
+                        </h3>
+                        <p className="text-xs text-zinc-400 font-mono mb-5">
+                            Estos son los números que autorizaste. Selecciona cuál conectar a {selected.name}.
+                        </p>
+                        <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
+                            {waPhoneOptions.map(p => (
+                                <button
+                                    key={p.phone_number_id}
+                                    onClick={() => waPendingToken && saveWhatsAppPhone(selected.id, p, waPendingToken)}
+                                    disabled={waConnecting || !waPendingToken}
+                                    className="w-full text-left border border-zinc-200 hover:border-zinc-400 rounded-xl px-4 py-3 transition-colors disabled:opacity-50"
+                                >
+                                    <p className="text-sm font-medium text-zinc-900">{p.display_phone_number}</p>
+                                    <p className="text-xs text-zinc-400 font-mono">
+                                        {p.verified_name || p.waba_name || 'WABA'} · {p.phone_number_id}
+                                    </p>
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            onClick={() => { setWaPhoneOptions(null); setWaPendingToken(null); setWaConnectError('') }}
                             className="text-xs text-zinc-400 hover:text-zinc-900 transition-colors font-mono"
                         >
                             Cancelar
