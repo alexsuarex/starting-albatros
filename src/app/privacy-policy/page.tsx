@@ -44,21 +44,33 @@ Finalidades secundarias (para las cuales puedes negarte sin afectar el servicio)
     title: "4. Uso de WhatsApp e IA",
     content: `Nuestro servicio de chatbot opera a través de la API de WhatsApp Business (Meta Platforms). Al contratar el servicio de atención con IA, los mensajes de tus clientes son procesados por modelos de inteligencia artificial para generar respuestas automáticas.
 
-Los mensajes están sujetos también a las políticas de privacidad de Meta (WhatsApp) y del proveedor de IA utilizado. No almacenamos el contenido de las conversaciones de tus clientes más allá del tiempo necesario para operar el servicio.`,
+El proveedor de IA activo es Google Gemini API (Google LLC), con el modelo fijo gemini-3.1-flash-lite y modalidad de pago mediante un proyecto de Google Cloud con facturación activa. Gemini procesa el contexto conversacional necesario para responder dentro del chatbot. No enviamos a Gemini datos crudos, agregados, anonimizados ni derivados de Google Calendar o de otras Google Workspace APIs; la disponibilidad y las operaciones de calendario se procesan fuera del modelo de IA.
+
+GroqCloud permanece únicamente como respaldo heredado inactivo. OpenAI y Anthropic están declarados como opciones no implementadas. Estos proveedores no procesan respuestas en producción ni reciben datos de la aplicación o de Google Workspace. No almacenamos el contenido de las conversaciones de tus clientes más allá del tiempo necesario para operar el servicio.`,
   },
   {
-    title: "5. Transferencia de datos",
+    title: "5. Uso de Google Calendar y datos de Google Workspace",
+    content: `Cuando un cliente conecta Google Calendar con Albatros Dev, usamos los datos recibidos de Google Workspace APIs únicamente para operar funciones visibles de agenda, disponibilidad, reservaciones, cambios, cancelaciones, confirmaciones y recordatorios solicitados por el usuario.
+
+Los datos que podemos procesar incluyen identificadores de calendarios conectados, disponibilidad, metadatos de eventos, horarios, asistentes, ubicación, notas del evento cuando sean necesarias y tokens OAuth para mantener la integración autorizada.
+
+No vendemos datos de Google Calendar o Google Workspace, no los usamos para publicidad, retargeting, scoring crediticio, brokers de datos ni fines comerciales secundarios. Tampoco usamos datos de Google Calendar o Google Workspace para crear, entrenar o mejorar modelos de inteligencia artificial o machine learning generalizados.
+
+The use of information received from Google Workspace scopes will adhere to the Google User Data Policy, including the Limited Use requirements.`,
+  },
+  {
+    title: "6. Transferencia de datos",
     content: `Tus datos pueden ser transferidos a los siguientes terceros estrictamente necesarios para la prestación del servicio:
 
 — Proveedores de infraestructura cloud (Supabase, Vercel)
 — Meta Platforms (para la integración de WhatsApp Business)
-— Proveedores de modelos de IA para el procesamiento de respuestas
-— Google (para la gestión de Google Business Profile)
+— Google Gemini API, en modalidad de pago, para el procesamiento de respuestas del chatbot, excluyendo datos recibidos de Google Calendar o Google Workspace APIs
+— Google (para Google Business Profile y Google Calendar cuando conectas esas integraciones)
 
 No vendemos, rentamos ni cedemos tus datos personales a terceros con fines comerciales.`,
   },
   {
-    title: "6. Derechos ARCO",
+    title: "7. Derechos ARCO",
     content: `Tienes derecho a Acceder, Rectificar, Cancelar u Oponerte (ARCO) al tratamiento de tus datos personales en cualquier momento. Para ejercer tus derechos:
 
 1. Envíanos un mensaje por WhatsApp al +1 (555) 629-1595
@@ -68,22 +80,22 @@ No vendemos, rentamos ni cedemos tus datos personales a terceros con fines comer
 Responderemos en un plazo máximo de 20 días hábiles conforme a la LFPDPPP.`,
   },
   {
-    title: "7. Seguridad de los datos",
+    title: "8. Seguridad de los datos",
     content: `Implementamos medidas técnicas y organizativas para proteger tus datos: conexiones SSL/TLS, autenticación segura, acceso restringido por roles y almacenamiento cifrado. Sin embargo, ningún sistema es 100% seguro. En caso de una brecha de seguridad que afecte tus derechos, te notificaremos conforme a la ley.`,
   },
   {
-    title: "8. Cookies y tecnologías de rastreo",
+    title: "9. Cookies y tecnologías de rastreo",
     content: `Nuestro sitio web utiliza cookies técnicas esenciales para su funcionamiento. Actualmente no usamos cookies de seguimiento publicitario de terceros. Si esto cambia, actualizaremos este aviso y te informaremos.`,
   },
   {
-    title: "9. Conservación de datos",
+    title: "10. Conservación de datos",
     content: `Conservamos tus datos durante el tiempo que dure la relación comercial y el periodo legal requerido (generalmente 5 años para efectos fiscales). Al cancelar el servicio, eliminamos o anonimizamos tus datos en un plazo de 90 días, salvo obligación legal en contrario.`,
   },
   {
-    title: "10. Cambios a este aviso",
+    title: "11. Cambios a este aviso",
     content: `Podemos actualizar este aviso en cualquier momento. Los cambios significativos serán notificados por WhatsApp o correo electrónico. La versión vigente siempre estará disponible en albatrosia.com/privacy-policy.
 
-Última actualización: mayo de 2026.`,
+Última actualización: julio de 2026.`,
   },
 ];
 
@@ -191,6 +203,7 @@ export default function PrivacyPolicy() {
               <p className="font-mono-custom text-xs text-zinc-400 uppercase tracking-widest mb-4">Legal</p>
               <ul className="space-y-2.5 text-sm text-zinc-500">
                 <li><Link href="/privacy-policy" className="text-zinc-900 font-medium">Aviso de Privacidad</Link></li>
+                <li><Link href="/google-api-disclosure" className="hover:text-zinc-900 transition-colors">Datos de Google API</Link></li>
                 <li><Link href="/terms" className="hover:text-zinc-900 transition-colors">Términos y Condiciones</Link></li>
                 <li><Link href="/data-deletion" className="hover:text-zinc-900 transition-colors">Eliminación de Datos</Link></li>
               </ul>
