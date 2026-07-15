@@ -681,6 +681,11 @@ function Footer() {
                 </a>
               </li>
               <li>
+                <a href="/google-api-disclosure" className="hover:text-zinc-900 transition-colors">
+                  {t.footer.googleApiDisclosure}
+                </a>
+              </li>
+              <li>
                 <a href="/terms" className="hover:text-zinc-900 transition-colors">
                   {t.footer.terms}
                 </a>
