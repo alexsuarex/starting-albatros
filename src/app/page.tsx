@@ -331,15 +331,16 @@ function Servicios() {
 }
 
 // ─── Precios ──────────────────────────────────────────────────────────────────
-// ─── Precios ──────────────────────────────────────────────────────────────────
 function Precios() {
-  const { t, wa, lang, currency, setCurrency } = useLanguage();
+  const { t, wa, currency } = useLanguage();
 
-  const getWaLink = (name: string) => {
-    if (name === "Presencia Digital" || name === "Digital Presence") return wa.presencia;
-    if (name === "Atención WhatsApp IA" || name === "WhatsApp AI Support") return wa.negocioActivo;
-    return wa.turismoPro;
-  };
+  const pkgKeyByIdx = ["whatsappIA", "multicanalIA", "negocioAutonomoIA"] as const;
+  const pkgWaByIdx = [wa.whatsappIA, wa.multicanalIA, wa.negocioAutonomoIA];
+
+  const addonKeyByIdx = ["agendaInteligente", "sitioWebProfesional"] as const;
+  const addonWaByIdx = [wa.agendaInteligente, wa.sitioWebProfesional];
+
+  const suffix = PRICING_BY_CURRENCY[currency].suffix;
 
   return (
     <section id="precios" className="py-24 px-6 bg-zinc-50 scroll-mt-16">
@@ -353,9 +354,8 @@ function Precios() {
 
         <div className="grid md:grid-cols-3 gap-6 stagger">
           {t.precios.paquetes.map((p, idx) => {
-            const pkgKey = idx === 0 ? 'presencia' : idx === 1 ? 'negocioActivo' : 'turismoPro';
+            const pkgKey = pkgKeyByIdx[idx];
             const priceInfo = PRICING_BY_CURRENCY[currency].paquetes[pkgKey];
-            const suffix = PRICING_BY_CURRENCY[currency].suffix;
 
             return (
               <div
@@ -398,7 +398,7 @@ function Precios() {
                 </ul>
 
                 <a
-                  href={getWaLink(p.name)}
+                  href={pkgWaByIdx[idx]}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-colors ${
@@ -415,7 +415,77 @@ function Precios() {
           })}
         </div>
 
-        <p className="text-xs text-zinc-400 font-mono-custom mt-8 fade-in">
+        <p className="text-zinc-500 text-sm md:text-base leading-relaxed max-w-2xl mt-12 fade-in">
+          {t.precios.bottomNote}
+        </p>
+
+        <div className="mt-20">
+          <h3 className="font-display text-2xl md:text-3xl font-semibold text-zinc-900 mb-2 fade-in">
+            {t.precios.addonsTitle}
+          </h3>
+          <p className="text-zinc-500 mb-10 fade-in">
+            {t.precios.addonsSubtitle}
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-6 stagger">
+            {t.precios.addons.map((a, idx) => {
+              const addonKey = addonKeyByIdx[idx];
+              const priceInfo = PRICING_BY_CURRENCY[currency].addons[addonKey];
+
+              return (
+                <div
+                  key={a.name}
+                  className="fade-in relative bg-white rounded-lg p-8 flex flex-col border border-zinc-200"
+                >
+                  <h4 className="font-display text-lg font-semibold text-zinc-900 mb-1">
+                    {a.name}
+                  </h4>
+                  <div className="mb-6">
+                    {priceInfo.setup ? (
+                      <>
+                        <span className="text-2xl font-semibold text-zinc-900">
+                          {priceInfo.setup} {suffix}
+                        </span>
+                        <span className="text-zinc-400 text-sm ml-1">{t.precios.setup}</span>
+                        <div className="text-zinc-500 text-sm mt-1">
+                          + {priceInfo.monthly} {suffix} / {t.precios.monthly}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-2xl font-semibold text-zinc-900">
+                          {priceInfo.monthly} {suffix}
+                        </span>
+                        <span className="text-zinc-400 text-sm ml-1">/ {t.precios.monthly}</span>
+                      </>
+                    )}
+                  </div>
+
+                  <ul className="space-y-2 mb-8 flex-1">
+                    {a.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2 text-sm text-zinc-600">
+                        <span className="text-zinc-900">✓</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a
+                    href={addonWaByIdx[idx]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium border border-zinc-200 text-zinc-700 hover:border-zinc-400 transition-colors"
+                  >
+                    <WhatsAppIcon size={16} />
+                    {t.precios.addonsCta}
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <p className="text-xs text-zinc-400 font-mono-custom mt-12 fade-in">
           {t.precios.note.replace("USD", currency)}
         </p>
       </div>

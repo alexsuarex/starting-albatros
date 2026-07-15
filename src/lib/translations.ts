@@ -16,52 +16,72 @@ export const PRICING_BY_CURRENCY = {
     symbol: '$',
     suffix: 'USD',
     paquetes: {
-      presencia: { setup: "$250", monthly: "$60" },
-      negocioActivo: { setup: "$450", monthly: "$120" },
-      turismoPro: { setup: "$700", monthly: "$180" }
+      whatsappIA: { setup: "$149", monthly: "$49" },
+      multicanalIA: { setup: "$249", monthly: "$99" },
+      negocioAutonomoIA: { setup: "$499", monthly: "$199" }
+    },
+    addons: {
+      agendaInteligente: { setup: "", monthly: "$39" },
+      sitioWebProfesional: { setup: "$249", monthly: "$25" }
     }
   },
   MXN: {
     symbol: '$',
     suffix: 'MXN',
     paquetes: {
-      presencia: { setup: "$4,999", monthly: "$1,199" },
-      negocioActivo: { setup: "$8,999", monthly: "$2,399" },
-      turismoPro: { setup: "$13,999", monthly: "$3,599" }
+      whatsappIA: { setup: "$2,990", monthly: "$990" },
+      multicanalIA: { setup: "$4,990", monthly: "$1,990" },
+      negocioAutonomoIA: { setup: "$9,990", monthly: "$3,990" }
+    },
+    addons: {
+      agendaInteligente: { setup: "", monthly: "$790" },
+      sitioWebProfesional: { setup: "$4,990", monthly: "$490" }
     }
   },
   CLP: {
     symbol: '$',
     suffix: 'CLP',
     paquetes: {
-      presencia: { setup: "$239,990", monthly: "$59,990" },
-      negocioActivo: { setup: "$429,990", monthly: "$119,990" },
-      turismoPro: { setup: "$669,990", monthly: "$179,990" }
+      whatsappIA: { setup: "$144,990", monthly: "$47,990" },
+      multicanalIA: { setup: "$239,990", monthly: "$95,990" },
+      negocioAutonomoIA: { setup: "$479,990", monthly: "$191,990" }
+    },
+    addons: {
+      agendaInteligente: { setup: "", monthly: "$37,990" },
+      sitioWebProfesional: { setup: "$239,990", monthly: "$23,990" }
     }
   },
   COP: {
     symbol: '$',
     suffix: 'COP',
     paquetes: {
-      presencia: { setup: "$999,000", monthly: "$240,000" },
-      negocioActivo: { setup: "$1,790,000", monthly: "$470,000" },
-      turismoPro: { setup: "$2,790,000", monthly: "$690,000" }
+      whatsappIA: { setup: "$599,000", monthly: "$199,000" },
+      multicanalIA: { setup: "$999,000", monthly: "$399,000" },
+      negocioAutonomoIA: { setup: "$1,990,000", monthly: "$799,000" }
+    },
+    addons: {
+      agendaInteligente: { setup: "", monthly: "$159,000" },
+      sitioWebProfesional: { setup: "$999,000", monthly: "$99,000" }
     }
   }
 };
 
 export const WA_LINKS = {
   es: {
-    general: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+Dev",
-    presencia: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Presencia+Digital+de+Albatros+Dev",
-    negocioActivo: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Atenci%C3%B3n+WhatsApp+IA+de+Albatros+Dev",
-    turismoPro: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Reservas+%26+Pagos+de+Albatros+Dev",
+    general: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+saber+m%C3%A1s+sobre+Albatros+IA",
+    whatsappIA: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+WhatsApp+IA+de+Albatros+IA",
+    multicanalIA: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Multicanal+IA+de+Albatros+IA",
+    negocioAutonomoIA: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+paquete+Negocio+Aut%C3%B3nomo+IA+de+Albatros+IA",
+    agendaInteligente: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+add-on+Agenda+Inteligente+de+Albatros+IA",
+    sitioWebProfesional: "https://wa.me/5216121670637?text=Hola%2C+me+interesa+el+add-on+Sitio+Web+Profesional+de+Albatros+IA",
   },
   en: {
-    general: "https://wa.me/5216121670637?text=Hi%2C+I%27d+like+to+know+more+about+Albatros+Dev",
-    presencia: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Digital+Presence+package+from+Albatros+Dev",
-    negocioActivo: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+WhatsApp+AI+Support+package+from+Albatros+Dev",
-    turismoPro: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Bookings+%26+Payments+package+from+Albatros+Dev",
+    general: "https://wa.me/5216121670637?text=Hi%2C+I%27d+like+to+know+more+about+Albatros+AI",
+    whatsappIA: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+WhatsApp+AI+package+from+Albatros+AI",
+    multicanalIA: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Omnichannel+AI+package+from+Albatros+AI",
+    negocioAutonomoIA: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Autonomous+Business+AI+package+from+Albatros+AI",
+    agendaInteligente: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Smart+Scheduling+add-on+from+Albatros+AI",
+    sitioWebProfesional: "https://wa.me/5216121670637?text=Hi%2C+I%27m+interested+in+the+Professional+Website+add-on+from+Albatros+AI",
   }
 };
 
@@ -140,60 +160,95 @@ export const translations = {
       ]
     },
     precios: {
-      title: "Precios de fundador.",
-      subtitle: "Solo para los primeros 5 clientes beta. Después suben.",
+      title: "Precios de Fundador",
+      subtitle: "Solo para los primeros 5 clientes beta. Después subirán a precio comercial.",
       setup: "setup",
       monthly: "mes",
       recommended: "Recomendado",
       cta: "Quiero este paquete",
+      addonsTitle: "Add-ons",
+      addonsSubtitle: "Suma capacidades extra a cualquier plan.",
+      addonsCta: "Agregar a mi plan",
+      bottomNote: "Todos los planes incluyen configuración inicial, entrenamiento de IA y soporte durante la implementación.",
       note: "* Precios en USD. Precio beta disponible para los primeros 5 clientes. Sujeto a cambio al lanzamiento oficial.",
       paquetes: [
         {
-          name: "Presencia Digital",
-          setup: "$250",
-          monthly: "$60",
+          name: "WhatsApp IA",
           featured: false,
           features: [
-            { label: "Sitio web Next.js (código a la medida, 5 secciones)", included: true },
-            { label: "Dominio + SSL incluido", included: true },
-            { label: "Google Maps optimizado", included: true },
-            { label: "SEO local básico", included: true },
-            { label: "Chatbot WhatsApp con IA", included: false },
-            { label: "Sistema de reservaciones", included: false },
-            { label: "Integración de pagos", included: false },
+            { label: "WhatsApp Business conectado", included: true },
+            { label: "IA entrenada para tu negocio", included: true },
+            { label: "Respuestas automáticas 24/7", included: true },
+            { label: "Captura de prospectos", included: true },
+            { label: "Preguntas frecuentes automatizadas", included: true },
+            { label: "Transferencia a humano", included: true },
+            { label: "Reporte básico mensual", included: true },
+            { label: "Soporte básico", included: true },
+            { label: "Facebook Messenger", included: false },
+            { label: "Instagram", included: false },
+            { label: "Google Business", included: false },
+            { label: "Agenda automática", included: false },
           ],
         },
         {
-          name: "Atención WhatsApp IA",
-          setup: "$450",
-          monthly: "$120",
+          name: "Multicanal IA",
           featured: true,
           features: [
-            { label: "Sitio web Next.js (código a la medida, 5 secciones)", included: true },
-            { label: "Dominio + SSL incluido", included: true },
-            { label: "Google Maps optimizado", included: true },
-            { label: "SEO local básico", included: true },
-            { label: "Chatbot WhatsApp con IA", included: true },
-            { label: "Sistema de reservaciones", included: false },
-            { label: "Integración de pagos", included: false },
+            { label: "WhatsApp IA", included: true },
+            { label: "Facebook Messenger IA", included: true },
+            { label: "Instagram IA", included: true },
+            { label: "Google Business optimizado", included: true },
+            { label: "Respuesta automática a reseñas", included: true },
+            { label: "Captura de prospectos", included: true },
+            { label: "IA entrenada para tu negocio", included: true },
+            { label: "Reporte mensual", included: true },
+            { label: "Soporte prioritario", included: true },
+            { label: "Agenda automática", included: false },
+            { label: "CRM", included: false },
           ],
         },
         {
-          name: "Reservas & Pagos",
-          setup: "$700",
-          monthly: "$180",
+          name: "Negocio Autónomo IA",
           featured: false,
           features: [
-            { label: "Sitio web Next.js (código a la medida, 5 secciones)", included: true },
-            { label: "Dominio + SSL incluido", included: true },
-            { label: "Google Maps optimizado", included: true },
-            { label: "SEO local básico", included: true },
-            { label: "Chatbot WhatsApp con IA", included: true },
-            { label: "Sistema de reservaciones", included: true },
-            { label: "Integración de pagos", included: true },
+            { label: "WhatsApp IA", included: true },
+            { label: "Facebook IA", included: true },
+            { label: "Instagram IA", included: true },
+            { label: "Google Business", included: true },
+            { label: "Agenda Inteligente", included: true },
+            { label: "Google Calendar conectado", included: true },
+            { label: "Confirmaciones automáticas", included: true },
+            { label: "Recordatorios automáticos", included: true },
+            { label: "CRM integrado", included: true },
+            { label: "Seguimiento de prospectos", included: true },
+            { label: "Automatizaciones personalizadas", included: true },
+            { label: "Dashboard de métricas", included: true },
+            { label: "Soporte prioritario", included: true },
           ],
         },
-      ]
+      ],
+      addons: [
+        {
+          name: "Agenda Inteligente",
+          features: [
+            "Agendamiento automático",
+            "Google Calendar",
+            "Reagendaciones",
+            "Cancelaciones",
+            "Recordatorios",
+          ],
+        },
+        {
+          name: "Sitio Web Profesional",
+          features: [
+            "Sitio web profesional",
+            "Dominio",
+            "SSL",
+            "Hosting",
+            "SEO básico",
+          ],
+        },
+      ],
     },
     demoAlbi: {
       title1: "Tu futuro mejor empleado,",
@@ -337,60 +392,95 @@ export const translations = {
       ]
     },
     precios: {
-      title: "Founder's pricing.",
-      subtitle: "Only for the first 5 beta clients. Prices will increase afterward.",
+      title: "Founder Pricing",
+      subtitle: "Only for the first 5 beta clients. Prices will rise to commercial rates after.",
       setup: "setup",
       monthly: "month",
       recommended: "Recommended",
       cta: "I want this package",
+      addonsTitle: "Add-ons",
+      addonsSubtitle: "Stack extra capabilities on top of any plan.",
+      addonsCta: "Add to my plan",
+      bottomNote: "Every plan includes initial setup, AI training, and support throughout implementation.",
       note: "* Prices in USD. Beta pricing available for the first 5 clients. Subject to change upon official launch.",
       paquetes: [
         {
-          name: "Digital Presence",
-          setup: "$250",
-          monthly: "$60",
+          name: "WhatsApp AI",
           featured: false,
           features: [
-            { label: "Next.js website (custom code, 5 sections)", included: true },
-            { label: "Domain + SSL included", included: true },
-            { label: "Optimized Google Maps", included: true },
-            { label: "Basic local SEO", included: true },
-            { label: "AI WhatsApp Chatbot", included: false },
-            { label: "Booking system", included: false },
-            { label: "Payment integration", included: false },
+            { label: "WhatsApp Business connected", included: true },
+            { label: "AI trained for your business", included: true },
+            { label: "Automatic 24/7 replies", included: true },
+            { label: "Lead capture", included: true },
+            { label: "Automated FAQs", included: true },
+            { label: "Human handoff", included: true },
+            { label: "Basic monthly report", included: true },
+            { label: "Basic support", included: true },
+            { label: "Facebook Messenger", included: false },
+            { label: "Instagram", included: false },
+            { label: "Google Business", included: false },
+            { label: "Automatic scheduling", included: false },
           ],
         },
         {
-          name: "WhatsApp AI Support",
-          setup: "$450",
-          monthly: "$120",
+          name: "Omnichannel AI",
           featured: true,
           features: [
-            { label: "Next.js website (custom code, 5 sections)", included: true },
-            { label: "Domain + SSL included", included: true },
-            { label: "Optimized Google Maps", included: true },
-            { label: "Basic local SEO", included: true },
-            { label: "AI WhatsApp Chatbot", included: true },
-            { label: "Booking system", included: false },
-            { label: "Payment integration", included: false },
+            { label: "WhatsApp AI", included: true },
+            { label: "Facebook Messenger AI", included: true },
+            { label: "Instagram AI", included: true },
+            { label: "Optimized Google Business", included: true },
+            { label: "Automatic review replies", included: true },
+            { label: "Lead capture", included: true },
+            { label: "AI trained for your business", included: true },
+            { label: "Monthly report", included: true },
+            { label: "Priority support", included: true },
+            { label: "Automatic scheduling", included: false },
+            { label: "CRM", included: false },
           ],
         },
         {
-          name: "Bookings & Payments",
-          setup: "$700",
-          monthly: "$180",
+          name: "Autonomous Business AI",
           featured: false,
           features: [
-            { label: "Next.js website (custom code, 5 sections)", included: true },
-            { label: "Domain + SSL included", included: true },
-            { label: "Optimized Google Maps", included: true },
-            { label: "Basic local SEO", included: true },
-            { label: "AI WhatsApp Chatbot", included: true },
-            { label: "Booking system", included: true },
-            { label: "Payment integration", included: true },
+            { label: "WhatsApp AI", included: true },
+            { label: "Facebook AI", included: true },
+            { label: "Instagram AI", included: true },
+            { label: "Google Business", included: true },
+            { label: "Smart Scheduling", included: true },
+            { label: "Google Calendar connected", included: true },
+            { label: "Automatic confirmations", included: true },
+            { label: "Automatic reminders", included: true },
+            { label: "Integrated CRM", included: true },
+            { label: "Lead tracking", included: true },
+            { label: "Custom automations", included: true },
+            { label: "Metrics dashboard", included: true },
+            { label: "Priority support", included: true },
           ],
         },
-      ]
+      ],
+      addons: [
+        {
+          name: "Smart Scheduling",
+          features: [
+            "Automatic booking",
+            "Google Calendar",
+            "Reschedules",
+            "Cancellations",
+            "Reminders",
+          ],
+        },
+        {
+          name: "Professional Website",
+          features: [
+            "Professional website",
+            "Domain",
+            "SSL",
+            "Hosting",
+            "Basic SEO",
+          ],
+        },
+      ],
     },
     demoAlbi: {
       title1: "Your future best employee,",
