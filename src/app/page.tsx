@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Language, translations, WA_LINKS, Currency, CURRENCIES, PRICING_BY_CURRENCY } from "@/lib/translations";
+import { Language, translations, WA_LINKS, Currency, PRICING_BY_CURRENCY } from "@/lib/translations";
 
 // ─── Contexto de Idioma ───────────────────────────────────────────────────────
 const LanguageContext = createContext<{
@@ -53,7 +53,7 @@ function useFadeIn() {
 }
 
 // ─── Albatros SVG ─────────────────────────────────────────────────────────────
-function AlbatosSVG() {
+export function AlbatosSVG() {
   return (
     <svg
       viewBox="0 0 400 220"
@@ -310,7 +310,7 @@ function Hero() {
             </a>
           </div>
           <div className="signal-checks" aria-label="Beneficios principales">
-            {t.hero.pillars.map((pillar, index) => (
+            {t.hero.pillars.map((pillar) => (
               <span key={pillar}>
                 <b>✓</b>
                 {pillar}
@@ -842,12 +842,13 @@ export default function Home() {
   const [currency, setCurrency] = useState<Currency>("USD");
 
   useEffect(() => {
+    const initializationTimer = window.setTimeout(() => {
     // 1. Detectar e inicializar idioma
     const savedLang = localStorage.getItem("albi-lang") as Language;
     if (savedLang === "es" || savedLang === "en") {
       setLang(savedLang);
     } else {
-      const browserLang = navigator.language || (navigator as any).userLanguage || "es";
+      const browserLang = navigator.language || "es";
       if (browserLang.startsWith("en")) {
         setLang("en");
       } else {
@@ -863,7 +864,7 @@ export default function Home() {
     }
 
     // Fallback rápido por locale del navegador antes de geolocalizar por IP
-    const browserLangGeo = navigator.language || (navigator as any).userLanguage || "es";
+    const browserLangGeo = navigator.language || "es";
     let initialCurrency: Currency = "USD";
     if (browserLangGeo.toLowerCase().includes("-mx")) {
       initialCurrency = "MXN";
@@ -897,6 +898,9 @@ export default function Home() {
       }
     };
     detectIPCurrency();
+    }, 0);
+
+    return () => window.clearTimeout(initializationTimer);
   }, []);
 
   const handleLanguageChange = (newLang: Language) => {

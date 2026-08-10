@@ -1,8 +1,9 @@
 'use client'
 // app/dashboard/page.tsx
-import { useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Channel = 'whatsapp' | 'facebook'
@@ -140,13 +141,26 @@ export default function Dashboard() {
     const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null)
     const [todayApptCount, setTodayApptCount] = useState(0)
 
-    const [user, setUser] = useState<any>(null)
+    const [user, setUser] = useState<User | null>(null)
     const [isPlatformMember, setIsPlatformMember] = useState(false)
     const [currentBusiness, setCurrentBusiness] = useState<{ id: string; name: string } | null>(null)
     const [noBusiness, setNoBusiness] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
+    const userId = user?.id
+    const businessId = currentBusiness?.id
+    const selectedId = selected?.id
+
+    const loadConversations = useCallback(async () => {
+        if (!businessId) return
+        const { data } = await supabase
+            .from('alb_conversations')
+            .select('*')
+            .eq('business_id', businessId)
+            .order('updated_at', { ascending: false })
+        setConversations((data || []).map(c => ({ ...c, channel: (c.channel || 'whatsapp') as Channel })))
+    }, [businessId, supabase])
 
     // ─── Auth check ──────────────────────────────────────────────────────────
     useEffect(() => {
@@ -154,20 +168,20 @@ export default function Dashboard() {
             if (!data.user) router.push('/login')
             else setUser(data.user)
         })
-    }, [])
+    }, [router, supabase])
 
     // ─── Detectar si el usuario es miembro de Albatros Dev (muestra botón Admin) ─
     useEffect(() => {
-        if (!user) return
+        if (!userId) return
         fetch('/api/admin/me')
             .then(r => r.json())
             .then(d => setIsPlatformMember(!!d.isPlatformMember))
             .catch(() => setIsPlatformMember(false))
-    }, [user?.id])
+    }, [userId])
 
     // ─── Cargar el negocio del usuario (defensa en profundidad: filtrar por business_id) ─
     useEffect(() => {
-        if (!user) return
+        if (!userId) return
         fetch('/api/me/businesses')
             .then(r => r.json())
             .then(d => {
@@ -179,54 +193,61 @@ export default function Dashboard() {
                 }
             })
             .catch(() => setNoBusiness(true))
-    }, [user?.id])
+    }, [userId])
 
     // ─── Cargar conversaciones ────────────────────────────────────────────────
     useEffect(() => {
-        if (!currentBusiness) return
-        loadConversations()
+        if (!businessId) return
+        const initialLoadTimer = window.setTimeout(() => {
+            void loadConversations()
+        }, 0)
 
         const sub = supabase
-            .channel(`alb_conversations_sub_${currentBusiness.id}`)
+            .channel(`alb_conversations_sub_${businessId}`)
             .on(
                 'postgres_changes',
                 {
                     event: '*',
                     schema: 'public',
                     table: 'alb_conversations',
-                    filter: `business_id=eq.${currentBusiness.id}`,
+                    filter: `business_id=eq.${businessId}`,
                 },
                 () => { loadConversations() }
             )
             .subscribe()
 
-        return () => { supabase.removeChannel(sub) }
-    }, [currentBusiness?.id])
-
-    async function loadConversations() {
-        if (!currentBusiness) return
-        const { data } = await supabase
-            .from('alb_conversations')
-            .select('*')
-            .eq('business_id', currentBusiness.id)
-            .order('updated_at', { ascending: false })
-        setConversations((data || []).map(c => ({ ...c, channel: (c.channel || 'whatsapp') as Channel })))
-    }
+        return () => {
+            window.clearTimeout(initialLoadTimer)
+            void supabase.removeChannel(sub)
+        }
+    }, [businessId, loadConversations, supabase])
 
     // ─── Cargar mensajes de conversación seleccionada ─────────────────────────
     useEffect(() => {
-        if (!selected) return
-        loadMessages()
+        if (!businessId || !selectedId) return
 
-        supabase.from('alb_conversations').update({ unread: false }).eq('id', selected.id)
+        const loadMessages = async () => {
+            const { data } = await supabase
+                .from('alb_messages')
+                .select('*')
+                .eq('business_id', businessId)
+                .eq('conversation_id', selectedId)
+                .order('created_at', { ascending: true })
+            setMessages(data || [])
+            setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+        }
+
+        void loadMessages()
+
+        void supabase.from('alb_conversations').update({ unread: false }).eq('id', selectedId)
 
         const sub = supabase
-            .channel(`messages-${selected.id}`)
+            .channel(`messages-${selectedId}`)
             .on('postgres_changes', {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'alb_messages',
-                filter: `conversation_id=eq.${selected.id}`,
+                filter: `conversation_id=eq.${selectedId}`,
             }, (payload) => {
                 setMessages(prev => [...prev, payload.new as Message])
                 setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
@@ -234,64 +255,52 @@ export default function Dashboard() {
             .subscribe()
 
         return () => { supabase.removeChannel(sub) }
-    }, [selected?.id])
-
-    async function loadMessages() {
-        if (!currentBusiness || !selected) return
-        const { data } = await supabase
-            .from('alb_messages')
-            .select('*')
-            .eq('business_id', currentBusiness.id)
-            .eq('conversation_id', selected.id)
-            .order('created_at', { ascending: true })
-        setMessages(data || [])
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
-    }
+    }, [businessId, selectedId, supabase])
 
     // ─── Contador de citas de hoy (para badge en botón Agenda) ───────────────
     useEffect(() => {
-        if (!currentBusiness) return
+        if (!businessId) return
         supabase
             .from('alb_appointments')
             .select('id', { count: 'exact', head: true })
-            .eq('business_id', currentBusiness.id)
+            .eq('business_id', businessId)
             .eq('appointment_date', getLocalDateStr())
             .eq('status', 'scheduled')
             .then(({ count }) => setTodayApptCount(count || 0))
-    }, [currentBusiness?.id])
+    }, [businessId, supabase])
 
     // ─── Cargar citas ─────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!currentBusiness || view !== 'agenda') return
-        loadAppointments()
+        if (!businessId || view !== 'agenda') return
+
+        const loadAppointments = async () => {
+            const { data } = await supabase
+                .from('alb_appointments')
+                .select('*, alb_conversations(id, phone, channel)')
+                .eq('business_id', businessId)
+                .eq('appointment_date', agendaDate)
+                .order('appointment_time', { ascending: true })
+            setAppointments(data || [])
+        }
+
+        void loadAppointments()
 
         const sub = supabase
-            .channel(`alb_appointments_sub_${currentBusiness.id}`)
+            .channel(`alb_appointments_sub_${businessId}`)
             .on(
                 'postgres_changes',
                 {
                     event: '*',
                     schema: 'public',
                     table: 'alb_appointments',
-                    filter: `business_id=eq.${currentBusiness.id}`,
+                    filter: `business_id=eq.${businessId}`,
                 },
                 () => { loadAppointments() }
             )
             .subscribe()
 
         return () => { supabase.removeChannel(sub) }
-    }, [currentBusiness?.id, view, agendaDate])
-
-    async function loadAppointments() {
-        if (!currentBusiness) return
-        const { data } = await supabase
-            .from('alb_appointments')
-            .select('*, alb_conversations(id, phone, channel)')
-            .eq('business_id', currentBusiness.id)
-            .eq('appointment_date', agendaDate)
-            .order('appointment_time', { ascending: true })
-        setAppointments(data || [])
-    }
+    }, [agendaDate, businessId, supabase, view])
 
     async function updateApptStatus(id: string, status: 'completed' | 'cancelled') {
         await supabase.from('alb_appointments').update({ status }).eq('id', id)

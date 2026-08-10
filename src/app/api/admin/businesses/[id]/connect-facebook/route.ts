@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { isPlatformMember } from '@/lib/platform-auth'
+import { getErrorMessage } from '@/lib/error-message'
 
 const GRAPH_VERSION = 'v25.0'
 const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_VERSION}`
@@ -24,6 +25,14 @@ type FacebookPage = {
     name: string
     access_token: string
     category?: string
+}
+
+type ConnectFacebookBody = {
+    mode?: 'list' | 'save'
+    code?: unknown
+    pageId?: unknown
+    pageAccessToken?: unknown
+    pageName?: unknown
 }
 
 async function exchangeCodeForUserToken(code: string): Promise<string> {
@@ -99,16 +108,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         return NextResponse.json({ error: 'Business not found' }, { status: 404 })
     }
 
-    let body: any
+    let body: ConnectFacebookBody
     try {
-        body = await req.json()
+        body = await req.json() as ConnectFacebookBody
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
 
     // ─── Modo 'list': intercambiar code y devolver páginas ──────────────────
     if (body.mode === 'list') {
-        if (!body.code) return NextResponse.json({ error: 'code required' }, { status: 400 })
+        if (typeof body.code !== 'string' || !body.code) {
+            return NextResponse.json({ error: 'code required' }, { status: 400 })
+        }
         try {
             const userToken = await exchangeCodeForUserToken(body.code)
             const pages = await listPagesForUser(userToken)
@@ -123,15 +134,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
                     access_token: p.access_token,
                 })),
             })
-        } catch (e: any) {
-            return NextResponse.json({ error: e.message || 'Token exchange failed' }, { status: 400 })
+        } catch (error: unknown) {
+            return NextResponse.json({ error: getErrorMessage(error, 'Token exchange failed') }, { status: 400 })
         }
     }
 
     // ─── Modo 'save': guardar la página seleccionada ────────────────────────
     if (body.mode === 'save') {
         const { pageId, pageAccessToken, pageName } = body
-        if (!pageId || !pageAccessToken || !pageName) {
+        if (
+            typeof pageId !== 'string' || !pageId ||
+            typeof pageAccessToken !== 'string' || !pageAccessToken ||
+            typeof pageName !== 'string' || !pageName
+        ) {
             return NextResponse.json({ error: 'pageId, pageAccessToken, pageName required' }, { status: 400 })
         }
 
@@ -151,8 +166,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         try {
             await subscribePageToApp(pageId, pageAccessToken)
-        } catch (e: any) {
-            return NextResponse.json({ error: `No se pudo suscribir el webhook: ${e.message}` }, { status: 400 })
+        } catch (error: unknown) {
+            return NextResponse.json({ error: `No se pudo suscribir el webhook: ${getErrorMessage(error, 'Error desconocido')}` }, { status: 400 })
         }
 
         // Upsert del canal — si ya existía para este negocio, lo refrescamos
