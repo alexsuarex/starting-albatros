@@ -131,6 +131,46 @@ function WhatsAppIcon({ size = 20 }: { size?: number }) {
   );
 }
 
+function ConversationPreview({
+  isEnglish,
+  variant,
+}: {
+  isEnglish: boolean;
+  variant: number;
+}) {
+  const conversations = isEnglish
+    ? [
+        { business: "Albatros · WhatsApp", status: "AI active · 24/7", incoming: "Hi, do you have availability this afternoon?", outgoing: "Yes. I can help you choose the best option. What time works for you?", followUp: "4:30 PM, please.", confirmation: "Lead registered and notified" },
+        { business: "Magnolia Spa · Instagram", status: "Albatros active · 24/7", incoming: "Hi, can I book a facial for tomorrow?", outgoing: "Of course. I have availability at 4:30 and 6:00. Which time do you prefer?", followUp: "6 PM, please.", confirmation: "Appointment created in Google Calendar" },
+        { business: "Unified inbox · Albatros", status: "Albatros active · 24/7", incoming: "Hi, do you have availability this afternoon?", outgoing: "Yes. I have availability at 4:30 and 6:00. Which time do you prefer?", followUp: "6 PM, please.", confirmation: "Appointment created in Google Calendar" },
+      ]
+    : [
+        { business: "Albatros · WhatsApp", status: "IA activa · 24/7", incoming: "Hola, ¿tienen disponibilidad esta tarde?", outgoing: "Sí. Puedo ayudarte a elegir la mejor opción. ¿Qué horario prefieres?", followUp: "A las 4:30, por favor.", confirmation: "Prospecto registrado y notificado" },
+        { business: "Spa Magnolia · Instagram", status: "Albatros activo · 24/7", incoming: "Hola, ¿tienen limpieza dental mañana por la tarde?", outgoing: "Sí. Tengo disponibilidad a las 4:30 y 6:00. ¿Cuál horario prefieres?", followUp: "A las 6, por favor.", confirmation: "Cita creada en Google Calendar" },
+        { business: "Bandeja unificada · Albatros", status: "Albatros activo · 24/7", incoming: "Hola, ¿tienen limpieza dental mañana por la tarde?", outgoing: "Sí. Tengo disponibilidad a las 4:30 y 6:00. ¿Cuál horario prefieres?", followUp: "A las 6, por favor.", confirmation: "Cita creada en Google Calendar" },
+      ];
+  const copy = conversations[variant];
+
+  return (
+    <div className="conversation-preview" aria-label={copy.business}>
+      <div className="conversation-header">
+        <span>{copy.business}</span>
+        <small>{copy.status}</small>
+      </div>
+      <div className="conversation-thread">
+        <p className="chat-bubble chat-incoming">{copy.incoming}</p>
+        <p className="chat-bubble chat-outgoing">{copy.outgoing}</p>
+        <p className="chat-bubble chat-incoming chat-short">{copy.followUp}</p>
+      </div>
+      <div className="conversation-success">
+        <span>✓</span>
+        {copy.confirmation}
+        <b>{isEnglish ? "now" : "ahora"}</b>
+      </div>
+    </div>
+  );
+}
+
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 function Nav() {
   const navRef = useRef<HTMLElement>(null);
@@ -153,15 +193,13 @@ function Nav() {
   return (
     <nav
       ref={navRef}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm transition-all duration-200"
+      className="aurora-nav fixed top-0 left-0 right-0 z-50 transition-all duration-200"
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#hero" className="flex items-center gap-2">
-          <span className="font-display text-lg font-semibold tracking-tight text-zinc-900">
-            Albatros Dev
-          </span>
-          <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">
-            beta
+        <a href="#hero" className="brand-lockup flex items-center gap-2">
+          <Image src="/albatros-monogram.png" alt="" width={32} height={32} className="brand-monogram" />
+          <span className="font-display text-lg font-semibold tracking-[0.08em] text-zinc-900">
+            ALBATROS
           </span>
         </a>
 
@@ -204,53 +242,93 @@ function Nav() {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function Hero() {
-  const { t, wa } = useLanguage();
-
+  const { t, wa, lang } = useLanguage();
+  const isEnglish = lang === "en";
+  const slides = isEnglish
+    ? [
+        { label: "01 · Clear signal", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
+        { label: "02 · Human receptionist", kicker: "YOUR BUSINESS, ALWAYS WELL ATTENDED", title1: "A receptionist", title2: "who never keeps people waiting.", description: "While you take care of your customers, Albatros replies to messages, resolves questions, and fills your schedule in your business's voice.", primary: "See how it would serve my business", accent: "green" },
+        { label: "03 · Control center", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Every conversation,", title2: "under control.", description: "Centralize your channels, activate AI agents, and turn conversations into measurable opportunities from one platform.", primary: "Request a demo", accent: "orange" },
+      ]
+    : [
+        { label: "01 · Señal clara", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
+        { label: "02 · Recepcionista humana", kicker: "TU NEGOCIO SIEMPRE BIEN ATENDIDO", title1: "Una recepcionista que", title2: "nunca deja esperando.", description: "Mientras tú atiendes a tus clientes, Albatros contesta mensajes, resuelve dudas y llena tu agenda con el tono de tu negocio.", primary: "Ver cómo atendería mi negocio", accent: "green" },
+        { label: "03 · Centro de control", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Cada conversación,", title2: "bajo control.", description: "Centraliza tus canales, activa agentes de IA y convierte conversaciones en oportunidades medibles desde una sola plataforma.", primary: "Solicitar una demo", accent: "orange" },
+      ];
   return (
     <section
       id="hero"
-      className="min-h-screen flex flex-col justify-center pt-16 px-6"
+      className="signal-hero min-h-screen flex flex-col justify-center pt-16 px-6 relative isolate overflow-hidden"
     >
-      <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center py-20">
-        <div>
-          <p className="font-mono-custom text-xs text-zinc-400 mb-6 tracking-widest uppercase">
-            {t.hero.kicker}
+      <span id="signal-slide-1" className="signal-carousel-target" aria-hidden="true" />
+      <span id="signal-slide-2" className="signal-carousel-target" aria-hidden="true" />
+      <span id="signal-slide-3" className="signal-carousel-target" aria-hidden="true" />
+      <div className="signal-tabs max-w-6xl mx-auto w-full" role="tablist" aria-label={isEnglish ? "Albatros highlights" : "Características de Albatros"}>
+        {slides.map((item, index) => (
+          <a
+            key={item.label}
+            role="tab"
+            aria-label={item.label}
+            href={`#signal-slide-${index + 1}`}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+      <div className="signal-shell max-w-6xl mx-auto w-full relative z-10">
+        <div className="signal-carousel-viewport">
+          <div className="signal-carousel-track">
+          {slides.map((slide, index) => (
+          <div className={`signal-carousel-panel signal-content signal-slide-${index} signal-accent-${slide.accent} grid md:grid-cols-2 gap-10 lg:gap-16 items-center`} key={slide.label}>
+          <div className="signal-copy relative z-10">
+          <p className="signal-kicker font-mono-custom text-xs mb-6 tracking-widest uppercase">
+            {slide.kicker}
           </p>
-          <h1 className="font-display text-4xl md:text-6xl font-semibold leading-[1.1] text-zinc-900 mb-6">
-            {t.hero.title1}
+          <h1 className="signal-title font-sans text-4xl md:text-6xl font-semibold leading-[1.03] mb-6">
+            {slide.title1}
             <br />
-            {t.hero.title2}
+            <span>{slide.title2}</span>
           </h1>
-          <p className="text-zinc-500 text-base md:text-lg leading-relaxed mb-8 max-w-md">
-            {t.hero.description}
+          <p className="signal-description text-base md:text-lg leading-relaxed mb-8 max-w-md">
+            {slide.description}
           </p>
           <div className="flex flex-wrap gap-3">
             <a
               href="#precios"
-              className="bg-zinc-900 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-zinc-700 transition-colors"
+              className="cta-primary px-6 py-3 rounded-full text-sm font-medium"
             >
-              {t.hero.viewPackages}
+              {slide.primary}
             </a>
             <a
               href={wa.general}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 border border-zinc-200 text-zinc-700 px-6 py-3 rounded-full text-sm font-medium hover:border-zinc-400 transition-colors"
+              className="cta-secondary flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium"
             >
               <WhatsAppIcon size={16} />
               {t.hero.talkToAlbi}
             </a>
           </div>
+          <div className="signal-checks" aria-label="Beneficios principales">
+            {t.hero.pillars.map((pillar, index) => (
+              <span key={pillar}>
+                <b>✓</b>
+                {pillar}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center justify-center">
-          <Image
-            src="/hero-mockup.png"
-            alt={t.hero.altHero}
-            width={600}
-            height={300}
-            className="w-full max-w-lg mx-auto"
-            priority
-          />
+        <div className="signal-demo flex items-center justify-center">
+          <ConversationPreview isEnglish={isEnglish} variant={index} />
+        </div>
+        <ul className="signal-promises" aria-label="Cómo funciona Albatros">
+          <li>{lang === "en" ? "Answer real questions, not generic replies." : "Responde preguntas reales, no respuestas genéricas."}</li>
+          <li>{lang === "en" ? "Capture leads and notify your team automatically." : "Captura prospectos y notifica a tu equipo automáticamente."}</li>
+          <li>{lang === "en" ? "Your team takes over when human judgment is needed." : "Tu equipo entra cuando se necesita criterio humano."}</li>
+        </ul>
+        </div>
+        ))}
+        </div>
         </div>
       </div>
     </section>
@@ -262,7 +340,7 @@ function Problema() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-24 px-6 bg-zinc-50 scroll-mt-16">
+    <section className="aurora-problem py-24 px-6 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-16 fade-in">
           {t.problema.title1}
@@ -273,7 +351,7 @@ function Problema() {
           {t.problema.puntos.map((p) => (
             <div
               key={p.num}
-              className="fade-in relative border border-zinc-200 bg-white p-8 rounded-lg overflow-hidden"
+              className="premium-card fade-in relative p-8 rounded-2xl overflow-hidden"
             >
               <span className="absolute top-4 right-4 font-mono-custom text-6xl font-bold text-zinc-100 select-none leading-none">
                 {p.num}
@@ -297,7 +375,7 @@ function Servicios() {
   const { t } = useLanguage();
 
   return (
-    <section id="servicios" className="py-24 px-6 scroll-mt-16">
+    <section id="servicios" className="aurora-services py-24 px-6 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-4 fade-in">
           {t.servicios.title1}
@@ -307,7 +385,7 @@ function Servicios() {
         </h2>
         <div className="grid md:grid-cols-3 gap-6 stagger">
           {t.servicios.puntos.map((s) => (
-            <div key={s.num} className="fade-in relative p-8 border border-zinc-200 rounded-lg">
+            <div key={s.num} className="premium-card service-card fade-in relative p-8 rounded-2xl">
               <span className="absolute top-4 right-4 font-mono-custom text-6xl font-bold text-zinc-100 select-none leading-none">
                 {s.num}
               </span>
@@ -332,7 +410,7 @@ function Servicios() {
 
 // ─── Precios ──────────────────────────────────────────────────────────────────
 function Precios() {
-  const { t, wa, currency } = useLanguage();
+  const { t, wa } = useLanguage();
 
   const pkgKeyByIdx = ["whatsappIA", "multicanalIA", "negocioAutonomoIA"] as const;
   const pkgWaByIdx = [wa.whatsappIA, wa.multicanalIA, wa.negocioAutonomoIA];
@@ -340,10 +418,11 @@ function Precios() {
   const addonKeyByIdx = ["agendaInteligente", "sitioWebProfesional"] as const;
   const addonWaByIdx = [wa.agendaInteligente, wa.sitioWebProfesional];
 
+  const currency: Currency = "MXN";
   const suffix = PRICING_BY_CURRENCY[currency].suffix;
 
   return (
-    <section id="precios" className="py-24 px-6 bg-zinc-50 scroll-mt-16">
+    <section id="precios" className="aurora-pricing py-24 px-6 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-3 fade-in">
           {t.precios.title}
@@ -360,14 +439,14 @@ function Precios() {
             return (
               <div
                 key={p.name}
-                className={`fade-in relative bg-white rounded-lg p-8 flex flex-col ${
+                className={`premium-card pricing-card fade-in relative rounded-2xl p-8 flex flex-col ${
                   p.featured
-                    ? "border-2 border-zinc-900 shadow-lg"
-                    : "border border-zinc-200"
+                    ? "featured-card"
+                    : ""
                 }`}
               >
                 {p.featured && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs font-mono-custom px-3 py-1 rounded-full whitespace-nowrap">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 featured-badge text-xs font-mono-custom px-3 py-1 rounded-full whitespace-nowrap">
                     {t.precios.recommended}
                   </span>
                 )}
@@ -376,11 +455,11 @@ function Precios() {
                 </h3>
                 <div className="mb-6">
                   <span className="text-3xl font-semibold text-zinc-900">
-                    {priceInfo.setup} {suffix}
+                    {priceInfo.monthly} {suffix}
                   </span>
-                  <span className="text-zinc-400 text-sm ml-1">{t.precios.setup}</span>
+                  <span className="text-zinc-400 text-sm ml-1">/ {t.precios.monthly}</span>
                   <div className="text-zinc-500 text-sm mt-1">
-                    + {priceInfo.monthly} {suffix} / {t.precios.monthly}
+                    + {priceInfo.setup} {suffix} {t.precios.setup}
                   </div>
                 </div>
 
@@ -403,8 +482,8 @@ function Precios() {
                   rel="noopener noreferrer"
                   className={`flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-colors ${
                     p.featured
-                      ? "bg-zinc-900 text-white hover:bg-zinc-700"
-                      : "border border-zinc-200 text-zinc-700 hover:border-zinc-400"
+                      ? "cta-primary text-white"
+                      : "cta-outline"
                   }`}
                 >
                   <WhatsAppIcon size={16} />
@@ -435,7 +514,7 @@ function Precios() {
               return (
                 <div
                   key={a.name}
-                  className="fade-in relative bg-white rounded-lg p-8 flex flex-col border border-zinc-200"
+                  className="premium-card fade-in relative rounded-2xl p-8 flex flex-col"
                 >
                   <h4 className="font-display text-lg font-semibold text-zinc-900 mb-1">
                     {a.name}
@@ -498,7 +577,7 @@ function DemoAlbi() {
   const { t, wa } = useLanguage();
 
   return (
-    <section className="py-24 px-6">
+    <section className="aurora-demo py-24 px-6">
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-4 fade-in">
           {t.demoAlbi.title1}
@@ -512,7 +591,7 @@ function DemoAlbi() {
           href={wa.general}
           target="_blank"
           rel="noopener noreferrer"
-          className="fade-in inline-flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-700 transition-colors"
+          className="cta-primary fade-in inline-flex items-center gap-3 px-8 py-4 rounded-full text-base font-medium"
         >
           <WhatsAppIcon size={20} />
           {t.demoAlbi.btn}
@@ -530,7 +609,7 @@ function Sobre() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-24 px-6 bg-zinc-900 text-white">
+    <section className="aurora-about py-24 px-6 text-white">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold mb-6 fade-in">
           {t.sobre.title1}
@@ -542,7 +621,7 @@ function Sobre() {
         </p>
         <div className="grid grid-cols-2 gap-6 stagger">
           {t.sobre.stats.map((s) => (
-            <div key={s.label} className="fade-in border border-zinc-800 rounded-lg p-6">
+            <div key={s.label} className="stat-card fade-in rounded-2xl p-6">
               <div className="font-display text-2xl font-semibold text-white mb-2">
                 {s.num}
               </div>
@@ -560,7 +639,7 @@ function FAQ() {
   const { t } = useLanguage();
 
   return (
-    <section id="faq" className="py-24 px-6 scroll-mt-16">
+    <section id="faq" className="aurora-faq py-24 px-6 scroll-mt-16">
       <div className="max-w-3xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-16 fade-in">
           {t.faq.title}
@@ -587,7 +666,7 @@ function CTAFinal() {
   const { t, wa } = useLanguage();
 
   return (
-    <section className="py-24 px-6 bg-zinc-50 text-center">
+    <section className="aurora-final py-24 px-6 text-center">
       <div className="max-w-2xl mx-auto">
         <h2 className="font-display text-4xl md:text-5xl font-semibold text-zinc-900 mb-4 fade-in">
           {t.ctaFinal.title1}
@@ -603,7 +682,7 @@ function CTAFinal() {
           href={wa.general}
           target="_blank"
           rel="noopener noreferrer"
-          className="fade-in inline-flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-700 transition-colors"
+          className="cta-primary fade-in inline-flex items-center gap-3 px-8 py-4 rounded-full text-base font-medium"
         >
           <WhatsAppIcon size={20} />
           {t.ctaFinal.btn}
@@ -621,18 +700,16 @@ function Footer() {
   const { t, wa } = useLanguage();
 
   return (
-    <footer className="py-16 px-6 border-t border-zinc-200">
+    <footer className="aurora-footer py-16 px-6">
       <div className="max-w-6xl mx-auto">
         {/* Columns */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="font-display text-base font-semibold text-zinc-900">
-                Albatros Dev
-              </span>
-              <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">
-                beta
+            <div className="brand-lockup flex items-center gap-2 mb-3">
+              <Image src="/albatros-monogram.png" alt="" width={30} height={30} className="brand-monogram" />
+              <span className="font-display text-base font-semibold tracking-[0.08em] text-zinc-900">
+                ALBATROS
               </span>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
@@ -750,7 +827,7 @@ function FloatingWA() {
       href={wa.general}
       target="_blank"
       rel="noopener noreferrer"
-      className="md:hidden fixed bottom-6 right-6 z-50 bg-zinc-900 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-zinc-700 transition-colors"
+      className="floating-whatsapp md:hidden fixed bottom-6 right-6 z-50 text-white w-14 h-14 rounded-full flex items-center justify-center"
       aria-label="Hablar con Albi por WhatsApp"
     >
       <WhatsAppIcon size={24} />
@@ -846,8 +923,31 @@ export default function Home() {
         setCurrency: handleCurrencyChange,
       }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfessionalService",
+            name: "Albatros Dev",
+            url: "https://www.albatrosia.com",
+            logo: "https://www.albatrosia.com/albatros.png",
+            description:
+              "Sitios web, optimización de presencia en Google y automatización de atención al cliente con IA.",
+            email: "hola@albatrosia.com",
+            areaServed: "Worldwide",
+            knowsAbout: [
+              "Diseño web",
+              "SEO local",
+              "Google Business Profile",
+              "Automatización con IA",
+              "Chatbots para WhatsApp",
+            ],
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <Nav />
-      <main>
+      <main className="signal-page">
         <Hero />
         <Problema />
         <Servicios />

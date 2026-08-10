@@ -21,20 +21,58 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Albatros Dev — Agencia digital en La Paz, BCS",
+  metadataBase: new URL("https://www.albatrosia.com"),
+  title: {
+    default: "Albatros Dev | Sitios web, SEO y automatización con IA",
+    template: "%s | Albatros Dev",
+  },
   description:
-    "Sitios web, Google Maps y chatbots con IA para negocios en La Paz y Los Cabos. Versión beta disponible.",
+    "Creamos sitios web de alto rendimiento, optimizamos tu presencia en Google y automatizamos la atención al cliente con IA.",
   keywords: [
-    "agencia digital La Paz",
-    "sitio web La Paz BCS",
-    "chatbot WhatsApp México",
-    "SEO local Baja California Sur",
+    "diseño web profesional",
+    "automatización con IA",
+    "chatbot para WhatsApp",
+    "SEO local",
+    "Google Business Profile",
+    "agencia digital",
   ],
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
-    title: "Albatros Dev — Agencia digital en La Paz, BCS",
+    title: "Albatros Dev | Sitios web, SEO y automatización con IA",
     description:
-      "Sitios web, Google Maps y chatbots con IA para negocios locales.",
+      "Sitios web de alto rendimiento, presencia en Google y atención automatizada con IA para tu negocio.",
+    url: "/",
+    siteName: "Albatros Dev",
     locale: "es_MX",
+    type: "website",
+    images: [
+      {
+        url: "/albatros.png",
+        width: 1024,
+        height: 1024,
+        alt: "Albatros Dev",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Albatros Dev | Sitios web, SEO y automatización con IA",
+    description:
+      "Sitios web de alto rendimiento, presencia en Google y atención automatizada con IA.",
+    images: ["/albatros.png"],
   },
 };
 

@@ -37,9 +37,6 @@ export default function LoginPage() {
                         <span className="font-display text-xl font-semibold text-zinc-900">
                             Albatros Dev
                         </span>
-                        <span className="font-mono text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">
-                            beta
-                        </span>
                     </div>
                     <p className="text-sm text-zinc-400 font-mono">Acceso equipo interno</p>
                 </div>

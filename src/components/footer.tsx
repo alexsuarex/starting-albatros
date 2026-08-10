@@ -10,12 +10,9 @@ export function Footer() {
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-baseline gap-2 mb-3">
+            <div className="flex items-baseline mb-3">
               <span className="font-display text-base font-bold tracking-tight text-[#0A0A0A]">
                 Albatros Dev
-              </span>
-              <span className="font-mono text-[11px] text-[#999999]">
-                [beta]
               </span>
             </div>
             <p className="text-xs text-[#999999] leading-relaxed">
