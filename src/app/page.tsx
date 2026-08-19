@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, createContext, useContext } from "react";
+import { useCallback, useEffect, useRef, useState, createContext, useContext } from "react";
 import Image from "next/image";
 import {
   Accordion,
@@ -31,89 +31,32 @@ function useLanguage() {
 // ─── Scroll animation hook ────────────────────────────────────────────────────
 function useFadeIn() {
   useEffect(() => {
-    const els = document.querySelectorAll(".fade-in");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) return;
 
-    // First, mark elements as ready (hides them)
+    const els = document.querySelectorAll(".fade-in");
+    const sections = document.querySelectorAll(".signal-page > section:not(#hero)");
+
     els.forEach((el) => el.classList.add("fade-ready"));
+    sections.forEach((section) => section.classList.add("section-reveal-ready"));
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add("visible");
+            e.target.classList.add(
+              e.target.classList.contains("section-reveal-ready") ? "section-visible" : "visible",
+            );
             observer.unobserve(e.target);
           }
         });
       },
-      { threshold: 0.1 }
+      { rootMargin: "0px 0px -8%", threshold: 0.08 },
     );
     els.forEach((el) => observer.observe(el));
+    sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
   }, []);
-}
-
-// ─── Albatros SVG ─────────────────────────────────────────────────────────────
-export function AlbatosSVG() {
-  return (
-    <svg
-      viewBox="0 0 400 220"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full max-w-lg mx-auto opacity-60"
-      aria-hidden="true"
-    >
-      {/* Cuerpo */}
-      <path
-        d="M200 110 C180 100 160 95 130 100 C100 105 70 115 40 125"
-        stroke="#0a0a0a"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      {/* Ala izquierda superior */}
-      <path
-        d="M200 110 C210 90 240 70 280 55 C320 40 360 38 390 42"
-        stroke="#0a0a0a"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      {/* Ala izquierda inferior */}
-      <path
-        d="M200 110 C215 115 250 118 290 112 C330 106 365 95 390 85"
-        stroke="#0a0a0a"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      {/* Ala derecha superior */}
-      <path
-        d="M200 110 C185 90 155 72 120 60 C85 48 50 46 20 50"
-        stroke="#0a0a0a"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      {/* Ala derecha inferior */}
-      <path
-        d="M200 110 C180 118 148 122 112 116 C76 110 45 98 20 88"
-        stroke="#0a0a0a"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      {/* Cola */}
-      <path
-        d="M130 100 C120 108 112 115 108 125 M130 100 C122 110 118 120 120 132"
-        stroke="#0a0a0a"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      {/* Cabeza y pico */}
-      <circle cx="128" cy="97" r="7" stroke="#0a0a0a" strokeWidth="1.2" />
-      <path
-        d="M122 96 L108 93"
-        stroke="#0a0a0a"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 }
 
 // ─── WhatsApp icon ────────────────────────────────────────────────────────────
@@ -199,7 +142,7 @@ function Nav() {
         <a href="#hero" className="brand-lockup flex items-center gap-2">
           <Image src="/albatros-monogram.png" alt="" width={32} height={32} className="brand-monogram" />
           <span className="font-display text-lg font-semibold tracking-[0.08em] text-zinc-900">
-            ALBATROS
+            ALBATROS IA
           </span>
         </a>
 
@@ -241,20 +184,58 @@ function Nav() {
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+const HERO_SLIDE_INTERVAL_MS = 6000;
+
 function Hero() {
   const { t, wa, lang } = useLanguage();
   const isEnglish = lang === "en";
+  const [activeSlide, setActiveSlide] = useState(0);
+  const carouselTimerRef = useRef<number | null>(null);
   const slides = isEnglish
     ? [
-        { label: "01 · Clear signal", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
-        { label: "02 · Human receptionist", kicker: "YOUR BUSINESS, ALWAYS WELL ATTENDED", title1: "A receptionist", title2: "who never keeps people waiting.", description: "While you take care of your customers, Albatros replies to messages, resolves questions, and fills your schedule in your business's voice.", primary: "See how it would serve my business", accent: "green" },
-        { label: "03 · Control center", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Every conversation,", title2: "under control.", description: "Centralize your channels, activate AI agents, and turn conversations into measurable opportunities from one platform.", primary: "Request a demo", accent: "orange" },
+        { label: "Clear signal", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
+        { label: "Human receptionist", kicker: "YOUR BUSINESS, ALWAYS WELL ATTENDED", title1: "A receptionist", title2: "who never keeps people waiting.", description: "While you take care of your customers, Albatros replies to messages, resolves questions, and fills your schedule in your business's voice.", primary: "See how it would serve my business", accent: "green" },
+        { label: "Control center", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Every conversation,", title2: "under control.", description: "Centralize your channels, activate AI agents, and turn conversations into measurable opportunities from one platform.", primary: "Request a demo", accent: "orange" },
       ]
     : [
-        { label: "01 · Señal clara", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
-        { label: "02 · Recepcionista humana", kicker: "TU NEGOCIO SIEMPRE BIEN ATENDIDO", title1: "Una recepcionista que", title2: "nunca deja esperando.", description: "Mientras tú atiendes a tus clientes, Albatros contesta mensajes, resuelve dudas y llena tu agenda con el tono de tu negocio.", primary: "Ver cómo atendería mi negocio", accent: "green" },
-        { label: "03 · Centro de control", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Cada conversación,", title2: "bajo control.", description: "Centraliza tus canales, activa agentes de IA y convierte conversaciones en oportunidades medibles desde una sola plataforma.", primary: "Solicitar una demo", accent: "orange" },
+        { label: "Señal clara", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
+        { label: "Recepcionista humana", kicker: "TU NEGOCIO SIEMPRE BIEN ATENDIDO", title1: "Una recepcionista que", title2: "nunca deja esperando.", description: "Mientras tú atiendes a tus clientes, Albatros contesta mensajes, resuelve dudas y llena tu agenda con el tono de tu negocio.", primary: "Ver cómo atendería mi negocio", accent: "green" },
+        { label: "Centro de control", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Cada conversación,", title2: "bajo control.", description: "Centraliza tus canales, activa agentes de IA y convierte conversaciones en oportunidades medibles desde una sola plataforma.", primary: "Solicitar una demo", accent: "orange" },
       ];
+
+  useEffect(() => {
+    const syncSlideWithHash = () => {
+      const match = window.location.hash.match(/^#signal-slide-([1-3])$/);
+      if (match) setActiveSlide(Number(match[1]) - 1);
+    };
+
+    syncSlideWithHash();
+    window.addEventListener("hashchange", syncSlideWithHash);
+    return () => window.removeEventListener("hashchange", syncSlideWithHash);
+  }, []);
+
+  const scheduleNextSlide = useCallback(() => {
+    if (carouselTimerRef.current !== null) {
+      window.clearTimeout(carouselTimerRef.current);
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    carouselTimerRef.current = window.setTimeout(() => {
+      carouselTimerRef.current = null;
+      setActiveSlide((current) => (current + 1) % slides.length);
+    }, HERO_SLIDE_INTERVAL_MS);
+  }, [slides.length]);
+
+  useEffect(() => {
+    scheduleNextSlide();
+    return () => {
+      if (carouselTimerRef.current !== null) {
+        window.clearTimeout(carouselTimerRef.current);
+      }
+    };
+  }, [activeSlide, scheduleNextSlide]);
+
   return (
     <section
       id="hero"
@@ -263,23 +244,21 @@ function Hero() {
       <span id="signal-slide-1" className="signal-carousel-target" aria-hidden="true" />
       <span id="signal-slide-2" className="signal-carousel-target" aria-hidden="true" />
       <span id="signal-slide-3" className="signal-carousel-target" aria-hidden="true" />
-      <div className="signal-tabs max-w-6xl mx-auto w-full" role="tablist" aria-label={isEnglish ? "Albatros highlights" : "Características de Albatros"}>
-        {slides.map((item, index) => (
-          <a
-            key={item.label}
-            role="tab"
-            aria-label={item.label}
-            href={`#signal-slide-${index + 1}`}
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
       <div className="signal-shell max-w-6xl mx-auto w-full relative z-10">
         <div className="signal-carousel-viewport">
-          <div className="signal-carousel-track">
+          <div
+            className="signal-carousel-track"
+            style={{ transform: `translateX(-${activeSlide * 33.333333}%)` }}
+          >
           {slides.map((slide, index) => (
-          <div className={`signal-carousel-panel signal-content signal-slide-${index} signal-accent-${slide.accent} grid md:grid-cols-2 gap-10 lg:gap-16 items-center`} key={slide.label}>
+          <div
+            id={`signal-panel-${index + 1}`}
+            role="tabpanel"
+            aria-labelledby={`signal-tab-${index + 1}`}
+            aria-hidden={activeSlide !== index}
+            className={`signal-carousel-panel signal-content signal-slide-${index} signal-accent-${slide.accent} grid md:grid-cols-2 gap-10 lg:gap-16 items-center`}
+            key={slide.label}
+          >
           <div className="signal-copy relative z-10">
           <p className="signal-kicker font-mono-custom text-xs mb-6 tracking-widest uppercase">
             {slide.kicker}
@@ -329,6 +308,47 @@ function Hero() {
         </div>
         ))}
         </div>
+        </div>
+        <div
+          className="signal-carousel-dots"
+          role="tablist"
+          aria-label={isEnglish ? "Albatros highlights" : "Características de Albatros"}
+        >
+          {slides.map((item, index) => (
+            <button
+              key={item.label}
+              id={`signal-tab-${index + 1}`}
+              type="button"
+              role="tab"
+              aria-label={item.label}
+              aria-controls={`signal-panel-${index + 1}`}
+              aria-selected={activeSlide === index}
+              tabIndex={activeSlide === index ? 0 : -1}
+              className={activeSlide === index ? "is-active" : undefined}
+              onClick={() => {
+                setActiveSlide(index);
+                scheduleNextSlide();
+              }}
+              onKeyDown={(event) => {
+                if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+
+                event.preventDefault();
+                const nextIndex = event.key === "Home"
+                  ? 0
+                  : event.key === "End"
+                    ? slides.length - 1
+                    : (index + (event.key === "ArrowRight" ? 1 : -1) + slides.length) % slides.length;
+
+                setActiveSlide(nextIndex);
+                scheduleNextSlide();
+                event.currentTarget.parentElement
+                  ?.querySelectorAll<HTMLButtonElement>("button")
+                  [nextIndex]?.focus();
+              }}
+            >
+              <span className="sr-only">{item.label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </section>
@@ -523,11 +543,11 @@ function Precios() {
                     {priceInfo.setup ? (
                       <>
                         <span className="text-2xl font-semibold text-zinc-900">
-                          {priceInfo.setup} {suffix}
+                          {priceInfo.monthly} {suffix}
                         </span>
-                        <span className="text-zinc-400 text-sm ml-1">{t.precios.setup}</span>
+                        <span className="text-zinc-400 text-sm ml-1">/ {t.precios.monthly}</span>
                         <div className="text-zinc-500 text-sm mt-1">
-                          + {priceInfo.monthly} {suffix} / {t.precios.monthly}
+                          + {priceInfo.setup} {suffix} {t.precios.setup}
                         </div>
                       </>
                     ) : (
@@ -573,6 +593,179 @@ function Precios() {
 }
 
 // ─── Demo Albi ────────────────────────────────────────────────────────────────
+const successStoriesCopy = {
+  es: {
+    eyebrow: "Historias de clientes",
+    title: "Casos de éxito",
+    description:
+      "Un espacio para conocer los negocios que están creciendo con Albatros, contado por sus propios dueños.",
+    photo: "Foto del negocio",
+    business: "Nombre del negocio",
+    quote:
+      "Aquí irá el testimonio del propietario: su experiencia con Albatros, el cambio que vivió su negocio y los resultados que ha conseguido.",
+    link: "Sitio web o fanpage",
+    placeholder: "Espacio para caso de éxito",
+    previous: "Ver caso anterior",
+    next: "Ver siguiente caso",
+    hint: "Desliza para conocer más historias",
+  },
+  en: {
+    eyebrow: "Customer stories",
+    title: "Success stories",
+    description:
+      "A place to meet the businesses growing with Albatros, told in their owners' own words.",
+    photo: "Business photo",
+    business: "Business name",
+    quote:
+      "The owner's story will go here: their experience with Albatros, how their business changed, and the results they have achieved.",
+    link: "Website or Facebook page",
+    placeholder: "Success story space",
+    previous: "View previous story",
+    next: "View next story",
+    hint: "Swipe to discover more stories",
+  },
+} as const;
+
+const successStorySlots = ["blue", "green", "orange"] as const;
+const SUCCESS_STORIES_AUTOPLAY_MS = 5000;
+
+function CarouselArrow({ direction }: { direction: "left" | "right" }) {
+  const path = direction === "left" ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6";
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d={path} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ExternalLinkGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M14 5h5v5M19 5l-8 8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CasosExito() {
+  const { lang } = useLanguage();
+  const copy = successStoriesCopy[lang];
+  const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const lastManualScrollRef = useRef(0);
+
+  const scrollStories = useCallback((direction: -1 | 1) => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const maxScrollLeft = track.scrollWidth - track.clientWidth;
+    const reachedEdge = direction === 1
+      ? track.scrollLeft >= maxScrollLeft - 8
+      : track.scrollLeft <= 8;
+    const nextPosition = reachedEdge
+      ? direction === 1 ? 0 : maxScrollLeft
+      : Math.min(maxScrollLeft, Math.max(0, track.scrollLeft + direction * track.clientWidth * 0.86));
+
+    track.scrollTo({
+      left: nextPosition,
+      behavior: reducedMotion ? "auto" : "smooth",
+    });
+  }, []);
+
+  const handleManualScroll = (direction: -1 | 1) => {
+    lastManualScrollRef.current = Date.now();
+    scrollStories(direction);
+  };
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let isVisible = false;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0.35 },
+    );
+    observer.observe(track);
+
+    const autoplay = window.setInterval(() => {
+      const recentlyUsedControls = Date.now() - lastManualScrollRef.current < SUCCESS_STORIES_AUTOPLAY_MS;
+      const userIsInteracting = track.matches(":hover") || section.contains(document.activeElement);
+
+      if (!document.hidden && isVisible && !recentlyUsedControls && !userIsInteracting) {
+        scrollStories(1);
+      }
+    }, SUCCESS_STORIES_AUTOPLAY_MS);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(autoplay);
+    };
+  }, [scrollStories]);
+
+  return (
+    <section ref={sectionRef} id="casos-exito" className="aurora-success py-8 md:py-10 px-6 scroll-mt-16">
+      <div className="max-w-6xl mx-auto">
+        <header className="success-stories-header fade-in">
+          <div>
+            <p className="success-stories-eyebrow">{copy.eyebrow}</p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold text-zinc-900">
+              {copy.title}
+            </h2>
+            <p className="success-stories-description">{copy.description}</p>
+          </div>
+
+          <div className="success-carousel-controls" aria-label={copy.title}>
+            <button type="button" onClick={() => handleManualScroll(-1)} aria-label={copy.previous}>
+              <CarouselArrow direction="left" />
+            </button>
+            <button type="button" onClick={() => handleManualScroll(1)} aria-label={copy.next}>
+              <CarouselArrow direction="right" />
+            </button>
+          </div>
+        </header>
+
+        <div
+          ref={trackRef}
+          className="success-stories-track stagger"
+          role="region"
+          aria-label={copy.title}
+          tabIndex={0}
+        >
+          {successStorySlots.map((accent, index) => (
+            <article className={`success-story-card success-story-accent-${accent} fade-in`} key={accent}>
+              <div
+                className="success-story-photo"
+                role="img"
+                aria-label={`${copy.photo} ${index + 1}`}
+              >
+                <span>{copy.photo}</span>
+              </div>
+
+              <div className="success-story-content">
+                <span className="success-story-status">{copy.placeholder}</span>
+                <h3 className="font-display">{copy.business}</h3>
+                <blockquote>{copy.quote}</blockquote>
+                <span className="success-story-link-placeholder">
+                  <ExternalLinkGlyph />
+                  {copy.link}
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <p className="success-stories-hint">{copy.hint}</p>
+      </div>
+    </section>
+  );
+}
+
 function DemoAlbi() {
   const { t, wa } = useLanguage();
 
@@ -709,7 +902,7 @@ function Footer() {
             <div className="brand-lockup flex items-center gap-2 mb-3">
               <Image src="/albatros-monogram.png" alt="" width={30} height={30} className="brand-monogram" />
               <span className="font-display text-base font-semibold tracking-[0.08em] text-zinc-900">
-                ALBATROS
+                ALBATROS IA
               </span>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
@@ -956,6 +1149,7 @@ export default function Home() {
         <Problema />
         <Servicios />
         <Precios />
+        <CasosExito />
         <DemoAlbi />
         <Sobre />
         <FAQ />

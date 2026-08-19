@@ -271,6 +271,10 @@ export const translations = {
       title: "Preguntas frecuentes",
       items: [
         {
+          q: "¿Cuánto tiempo tarda en estar listo mi Agente de IA?",
+          a: "Tu agente de IA estará listo el mismo día."
+        },
+        {
           q: "¿Cuánto tiempo tarda en estar listo mi sitio?",
           a: "Entre 5 y 14 días dependiendo del paquete. Presencia Digital en 5–7 días, Reservas & Pagos en 10–14 días."
         },
@@ -288,7 +292,7 @@ export const translations = {
         },
         {
           q: "¿Los precios son en pesos o dólares?",
-          a: "En dólares USD. Aceptamos transferencia bancaria, tarjeta de crédito o métodos de pago locales en tu país."
+          a: "En pesos Mexicanos MXN. Aceptamos transferencia bancaria, tarjeta de crédito o métodos de pago locales en tu país."
         },
       ]
     },
