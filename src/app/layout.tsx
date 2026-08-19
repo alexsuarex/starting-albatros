@@ -23,8 +23,8 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.albatrosia.com"),
   title: {
-    default: "Albatros Dev | Sitios web, SEO y automatización con IA",
-    template: "%s | Albatros Dev",
+    default: "Albatros | Sitios web, SEO y automatización con IA",
+    template: "%s | Albatros",
   },
   description:
     "Creamos sitios web de alto rendimiento, optimizamos tu presencia en Google y automatizamos la atención al cliente con IA.",
