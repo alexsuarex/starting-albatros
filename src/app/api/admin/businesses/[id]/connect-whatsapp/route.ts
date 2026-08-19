@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { isPlatformMember } from '@/lib/platform-auth'
+import { getErrorMessage } from '@/lib/error-message'
 
 const GRAPH_VERSION = 'v25.0'
 const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_VERSION}`
@@ -36,6 +37,15 @@ type PhoneNumberOption = {
     verified_name: string | null
     waba_id: string
     waba_name: string | null
+}
+
+type ConnectWhatsAppBody = {
+    mode?: 'list' | 'save'
+    code?: unknown
+    phoneNumberId?: unknown
+    wabaId?: unknown
+    userToken?: unknown
+    phoneDisplay?: unknown
 }
 
 async function exchangeCodeForUserToken(code: string): Promise<string> {
@@ -157,16 +167,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         return NextResponse.json({ error: 'Business not found' }, { status: 404 })
     }
 
-    let body: any
+    let body: ConnectWhatsAppBody
     try {
-        body = await req.json()
+        body = await req.json() as ConnectWhatsAppBody
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
 
     // ─── Modo 'list': intercambiar code y devolver números ──────────────────
     if (body.mode === 'list') {
-        if (!body.code) return NextResponse.json({ error: 'code required' }, { status: 400 })
+        if (typeof body.code !== 'string' || !body.code) {
+            return NextResponse.json({ error: 'code required' }, { status: 400 })
+        }
         try {
             const userToken = await exchangeCodeForUserToken(body.code)
             const phones = await listPhoneNumbersForUser(userToken)
@@ -174,15 +186,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             // necesitamos en el modo 'save' y no queremos re-intercambiar el
             // code (es de un solo uso).
             return NextResponse.json({ phones, userToken })
-        } catch (e: any) {
-            return NextResponse.json({ error: e.message || 'Token exchange failed' }, { status: 400 })
+        } catch (error: unknown) {
+            return NextResponse.json({ error: getErrorMessage(error, 'Token exchange failed') }, { status: 400 })
         }
     }
 
     // ─── Modo 'save': guardar el número seleccionado ────────────────────────
     if (body.mode === 'save') {
         const { phoneNumberId, wabaId, userToken, phoneDisplay } = body
-        if (!phoneNumberId || !wabaId || !userToken) {
+        if (
+            typeof phoneNumberId !== 'string' || !phoneNumberId ||
+            typeof wabaId !== 'string' || !wabaId ||
+            typeof userToken !== 'string' || !userToken
+        ) {
             return NextResponse.json({ error: 'phoneNumberId, wabaId, userToken required' }, { status: 400 })
         }
 
@@ -202,8 +218,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         try {
             await subscribeWabaToApp(wabaId, userToken)
             await registerPhoneNumber(phoneNumberId, userToken)
-        } catch (e: any) {
-            return NextResponse.json({ error: `Setup falló: ${e.message}` }, { status: 400 })
+        } catch (error: unknown) {
+            return NextResponse.json({ error: `Setup falló: ${getErrorMessage(error, 'Error desconocido')}` }, { status: 400 })
         }
 
         if (existing) {
@@ -212,7 +228,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
                 .update({
                     access_token: userToken,
                     waba_id: wabaId,
-                    phone_display: phoneDisplay || null,
+                    phone_display: typeof phoneDisplay === 'string' ? phoneDisplay : null,
                     status: 'active',
                     updated_at: new Date().toISOString(),
                 })
@@ -229,7 +245,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
                     status: 'active',
                     phone_number_id: phoneNumberId,
                     waba_id: wabaId,
-                    phone_display: phoneDisplay || null,
+                    phone_display: typeof phoneDisplay === 'string' ? phoneDisplay : null,
                     access_token: userToken,
                 })
             if (insertError) {

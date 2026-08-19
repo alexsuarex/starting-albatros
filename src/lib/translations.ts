@@ -94,13 +94,14 @@ export const translations = {
       talkToAlbi: "Hablar con Albi",
     },
     hero: {
-      kicker: "v0.1-beta · Alcance Global · Desde La Paz, BCS",
-      title1: "Tu negocio con Sitio Web,",
-      title2: "Google Maps y Atención con IA 24/7.",
-      description: "En Albatros Dev construimos la presencia digital de tu negocio y automatizamos tu atención al cliente 24/7 para que no pierdas ninguna venta, estés donde estés (México, Chile, Argentina, Colombia, EE. UU. o Canadá).",
+      kicker: "IA CONVERSACIONAL PARA NEGOCIOS",
+      title1: "Convierte mensajes",
+      title2: "en oportunidades confirmadas.",
+      description: "Albatros responde con la información de tu negocio, captura prospectos y automatiza cada conversación para que no pierdas oportunidades.",
       viewPackages: "Ver paquetes",
       talkToAlbi: "Hablar con Albi",
-      altHero: "Presencia digital para tu negocio"
+      altHero: "Persona trabajando con la asistencia de un robot de IA",
+      pillars: ["Messenger", "Instagram", "WhatsApp automatizado"]
     },
     problema: {
       title1: "¿Cuántos clientes perdiste",
@@ -161,7 +162,7 @@ export const translations = {
     },
     precios: {
       title: "Precios de Fundador",
-      subtitle: "Solo para los primeros 5 clientes beta. Después subirán a precio comercial.",
+      subtitle: "Soluciones diseñadas para impulsar la presencia digital de tu negocio.",
       setup: "setup",
       monthly: "mes",
       recommended: "Recomendado",
@@ -170,7 +171,7 @@ export const translations = {
       addonsSubtitle: "Suma capacidades extra a cualquier plan.",
       addonsCta: "Agregar a mi plan",
       bottomNote: "Todos los planes incluyen configuración inicial, entrenamiento de IA y soporte durante la implementación.",
-      note: "* Precios en USD. Precio beta disponible para los primeros 5 clientes. Sujeto a cambio al lanzamiento oficial.",
+      note: "* Precios en USD. Sujetos a cambio sin previo aviso.",
       paquetes: [
         {
           name: "WhatsApp IA",
@@ -197,8 +198,6 @@ export const translations = {
             { label: "WhatsApp IA", included: true },
             { label: "Facebook Messenger IA", included: true },
             { label: "Instagram IA", included: true },
-            { label: "Google Business optimizado", included: true },
-            { label: "Respuesta automática a reseñas", included: true },
             { label: "Captura de prospectos", included: true },
             { label: "IA entrenada para tu negocio", included: true },
             { label: "Reporte mensual", included: true },
@@ -272,6 +271,10 @@ export const translations = {
       title: "Preguntas frecuentes",
       items: [
         {
+          q: "¿Cuánto tiempo tarda en estar listo mi Agente de IA?",
+          a: "Tu agente de IA estará listo el mismo día."
+        },
+        {
           q: "¿Cuánto tiempo tarda en estar listo mi sitio?",
           a: "Entre 5 y 14 días dependiendo del paquete. Presencia Digital en 5–7 días, Reservas & Pagos en 10–14 días."
         },
@@ -289,19 +292,15 @@ export const translations = {
         },
         {
           q: "¿Los precios son en pesos o dólares?",
-          a: "En dólares USD. Aceptamos transferencia bancaria, tarjeta de crédito o métodos de pago locales en tu país."
+          a: "En pesos Mexicanos MXN. Aceptamos transferencia bancaria, tarjeta de crédito o métodos de pago locales en tu país."
         },
-        {
-          q: "¿Qué es el precio beta?",
-          a: "Es el precio de lanzamiento para nuestros primeros 5 clientes de cada región. Una vez completados los lugares, los precios suben al precio regular."
-        }
       ]
     },
     ctaFinal: {
       title1: "Tu negocio puede responder",
       title2: "WhatsApp aunque estés",
       title3: "en la playa.",
-      desc: "Quedan lugares disponibles en la beta. Escríbenos hoy.",
+      desc: "Escríbenos hoy y descubre cómo podemos ayudar a tu negocio.",
       btn: "Hablar con Albi por WhatsApp",
       footer: "Sin compromiso. Te respondemos en minutos."
     },
@@ -327,13 +326,14 @@ export const translations = {
       talkToAlbi: "Chat with Albi",
     },
     hero: {
-      kicker: "v0.1-beta · Global Reach · From La Paz, BCS",
-      title1: "Your Business with a Website,",
-      title2: "Google Maps, and 24/7 AI Support.",
-      description: "At Albatros Dev, we build your digital presence and automate your customer support 24/7 so you never miss a sale, wherever you are (Mexico, Chile, Argentina, Colombia, USA, or Canada).",
+      kicker: "CONVERSATIONAL AI FOR BUSINESSES",
+      title1: "Turn messages",
+      title2: "into confirmed opportunities.",
+      description: "Albatros answers with your business information, captures leads, and automates every conversation so you never miss an opportunity.",
       viewPackages: "View packages",
       talkToAlbi: "Chat with Albi",
-      altHero: "Digital presence for your business"
+      altHero: "Person working with the assistance of an AI robot",
+      pillars: ["Messenger", "Instagram", "Automated WhatsApp"]
     },
     problema: {
       title1: "How many customers did you",
@@ -394,7 +394,7 @@ export const translations = {
     },
     precios: {
       title: "Founder Pricing",
-      subtitle: "Only for the first 5 beta clients. Prices will rise to commercial rates after.",
+      subtitle: "Solutions designed to strengthen your business's digital presence.",
       setup: "setup",
       monthly: "month",
       recommended: "Recommended",
@@ -403,7 +403,7 @@ export const translations = {
       addonsSubtitle: "Stack extra capabilities on top of any plan.",
       addonsCta: "Add to my plan",
       bottomNote: "Every plan includes initial setup, AI training, and support throughout implementation.",
-      note: "* Prices in USD. Beta pricing available for the first 5 clients. Subject to change upon official launch.",
+      note: "* Prices in USD. Subject to change without notice.",
       paquetes: [
         {
           name: "WhatsApp AI",
@@ -430,8 +430,6 @@ export const translations = {
             { label: "WhatsApp AI", included: true },
             { label: "Facebook Messenger AI", included: true },
             { label: "Instagram AI", included: true },
-            { label: "Optimized Google Business", included: true },
-            { label: "Automatic review replies", included: true },
             { label: "Lead capture", included: true },
             { label: "AI trained for your business", included: true },
             { label: "Monthly report", included: true },
@@ -524,17 +522,13 @@ export const translations = {
           q: "Are prices in pesos or dollars?",
           a: "In USD. We accept bank transfers, credit cards, or local payment methods in your country."
         },
-        {
-          q: "What is the beta price?",
-          a: "It is the launch price for our first 5 clients in each region. Once those spots are filled, prices rise to the regular rate."
-        }
       ]
     },
     ctaFinal: {
       title1: "Your business can answer",
       title2: "WhatsApp even while",
       title3: "you are at the beach.",
-      desc: "Spots are still available in the beta. Write to us today.",
+      desc: "Write to us today and discover how we can help your business.",
       btn: "Chat with Albi on WhatsApp",
       footer: "No commitment. We'll reply in minutes."
     },

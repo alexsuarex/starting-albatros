@@ -30,6 +30,11 @@ type ChannelRow = {
     } | null
 }
 
+type HistoryMessage = {
+    role: string
+    content: string
+}
+
 // Defaults espejo del schema (supabase/migrations/0001_multi_tenant_schema.sql)
 const FALLBACK_SETTINGS: BusinessSettingsRow = {
     bot_name: 'Asistente',
@@ -260,8 +265,8 @@ export async function POST(req: NextRequest) {
             .order('created_at', { ascending: false })
             .limit(20)
 
-        const chatHistory = (history || []).reverse().map((m: any) => ({
-            role: m.role === 'user' ? 'user' : 'assistant',
+        const chatHistory = ((history || []) as HistoryMessage[]).reverse().map((m) => ({
+            role: m.role === 'user' ? 'user' as const : 'assistant' as const,
             content: m.content,
         }))
 

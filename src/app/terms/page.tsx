@@ -45,8 +45,6 @@ El inicio formal del proyecto ocurre al confirmar la recepción del pago. Cualqu
 
 Aceptamos pago por transferencia bancaria, tarjeta de crédito/débito, MercadoPago y efectivo en La Paz, BCS.
 
-Los precios beta están disponibles exclusivamente para los primeros 5 clientes. Una vez ocupados esos lugares, los precios suben al precio regular sin previo aviso.
-
 El pago de la mensualidad debe realizarse puntualmente. Pagos con más de 10 días de retraso pueden resultar en la suspensión temporal del servicio.`,
   },
   {
@@ -130,9 +128,6 @@ export default function Terms() {
             <span className="font-display text-lg font-semibold tracking-tight text-zinc-900">
               Albatros Dev
             </span>
-            <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">
-              beta
-            </span>
           </Link>
           <Link
             href="/"
@@ -214,7 +209,6 @@ export default function Terms() {
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-3">
                 <span className="font-display text-base font-semibold text-zinc-900">Albatros Dev</span>
-                <span className="font-mono-custom text-xs text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded">beta</span>
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Agencia digital en La Paz, BCS. Sitios web, Google Maps y chatbots con IA para negocios locales.

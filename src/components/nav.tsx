@@ -22,11 +22,10 @@ export function Nav() {
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-5">
         {/* Logo */}
-        <a href="#" className="flex items-baseline gap-2">
+        <a href="#" className="flex items-baseline">
           <span className="font-display text-xl font-bold tracking-tight text-[#0A0A0A]">
             Albatros Dev
           </span>
-          <span className="font-mono text-[11px] text-[#999999]">[beta]</span>
         </a>
 
         {/* Nav links — desktop */}

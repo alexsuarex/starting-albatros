@@ -75,10 +75,9 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Beta tag */}
       <div className="mt-auto pt-12">
         <p className="font-mono text-[11px] text-[#999999]">
-          v0.1-beta · La Paz, BCS
+          La Paz, BCS
         </p>
       </div>
     </section>

@@ -4,10 +4,11 @@
 // Panel de administración de la plataforma — solo visible para miembros
 // de "Albatros Dev". Lista todos los negocios con sus miembros, canales y
 // conteos. El botón "Nuevo negocio" reusa la pantalla /signup existente.
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Script from 'next/script'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getErrorMessage } from '@/lib/error-message'
 
 declare global {
     interface Window {
@@ -214,7 +215,7 @@ export default function AdminPage() {
     const [botSaveError, setBotSaveError] = useState('')
 
     const router = useRouter()
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
 
     const metaAppId = process.env.NEXT_PUBLIC_META_APP_ID
     const metaFbConfigId = process.env.NEXT_PUBLIC_META_FB_CONFIG_ID
@@ -258,17 +259,7 @@ export default function AdminPage() {
         })
     }
 
-    useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => {
-            if (!data.user) {
-                router.push('/login')
-                return
-            }
-            loadBusinesses()
-        })
-    }, [])
-
-    async function loadBusinesses() {
+    const loadBusinesses = useCallback(async () => {
         setLoading(true)
         const res = await fetch('/api/admin/businesses')
         if (res.status === 403) {
@@ -284,7 +275,17 @@ export default function AdminPage() {
         const data = await res.json()
         setBusinesses(data.businesses)
         setLoading(false)
-    }
+    }, [router])
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            if (!data.user) {
+                router.push('/login')
+                return
+            }
+            loadBusinesses()
+        })
+    }, [loadBusinesses, router, supabase])
 
     async function handleLogout() {
         await supabase.auth.signOut()
@@ -348,8 +349,8 @@ export default function AdminPage() {
                         }
                         setFbPageOptions(pages)
                         setFbConnecting(false)
-                    } catch (e: any) {
-                        setFbConnectError(e?.message || 'Error de red')
+                    } catch (error: unknown) {
+                        setFbConnectError(getErrorMessage(error, 'Error de red'))
                         setFbConnecting(false)
                     }
                 })()
@@ -388,8 +389,8 @@ export default function AdminPage() {
             const refreshed = await fetch('/api/admin/businesses').then(r => r.json())
             const updated = refreshed.businesses?.find((b: AdminBusiness) => b.id === businessId)
             if (updated) setSelected(updated)
-        } catch (e: any) {
-            setFbConnectError(e?.message || 'Error de red')
+        } catch (error: unknown) {
+            setFbConnectError(getErrorMessage(error, 'Error de red'))
             setFbConnecting(false)
         }
     }
@@ -450,8 +451,8 @@ export default function AdminPage() {
                         }
                         setWaPhoneOptions(phones)
                         setWaConnecting(false)
-                    } catch (e: any) {
-                        setWaConnectError(e?.message || 'Error de red')
+                    } catch (error: unknown) {
+                        setWaConnectError(getErrorMessage(error, 'Error de red'))
                         setWaConnecting(false)
                     }
                 })()
@@ -491,8 +492,8 @@ export default function AdminPage() {
             const refreshed = await fetch('/api/admin/businesses').then(r => r.json())
             const updated = refreshed.businesses?.find((b: AdminBusiness) => b.id === businessId)
             if (updated) setSelected(updated)
-        } catch (e: any) {
-            setWaConnectError(e?.message || 'Error de red')
+        } catch (error: unknown) {
+            setWaConnectError(getErrorMessage(error, 'Error de red'))
             setWaConnecting(false)
         }
     }
@@ -540,8 +541,8 @@ export default function AdminPage() {
             setSelected(prev => prev && prev.id === editingBot.id ? { ...prev, settings: updatedSettings } : prev)
             setEditingBot(null)
             setBotSaving(false)
-        } catch (e: any) {
-            setBotSaveError(e?.message || 'Error de red')
+        } catch (error: unknown) {
+            setBotSaveError(getErrorMessage(error, 'Error de red'))
             setBotSaving(false)
         }
     }

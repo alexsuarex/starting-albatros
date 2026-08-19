@@ -31,6 +31,22 @@ type ChannelRow = {
     } | null
 }
 
+type FacebookWebhookBody = {
+    object?: string
+    entry?: Array<{
+        id?: string
+        messaging?: Array<{
+            sender?: { id?: string }
+            message?: { is_echo?: boolean; text?: string }
+        }>
+    }>
+}
+
+type HistoryMessage = {
+    role: string
+    content: string
+}
+
 // Defaults espejo del schema (supabase/migrations/0001_multi_tenant_schema.sql)
 // Se usan SOLO si un negocio quedó sin fila en alb_business_settings — el
 // webhook nunca debe crashear por eso.
@@ -179,7 +195,7 @@ function toBusinessContext(settings: BusinessSettingsRow): BusinessContext {
 }
 
 // ─── Procesar eventos del webhook (async, fuera del tiempo de respuesta) ──────
-async function processWebhookEvents(body: any) {
+async function processWebhookEvents(body: FacebookWebhookBody) {
     const supabase = createServiceClient()
 
     for (const entry of body.entry || []) {
@@ -219,8 +235,9 @@ async function processWebhookEvents(body: any) {
             // Ignorar eventos sin texto (imágenes, stickers, etc.)
             if (!event.message?.text) continue
 
-            const psid = event.sender.id as string
-            const userText = event.message.text as string
+            const psid = event.sender?.id
+            const userText = event.message.text
+            if (!psid) continue
 
             // ─── Buscar o crear conversación ──────────────────────────────────
             let { data: conversation } = await supabase
@@ -273,8 +290,8 @@ async function processWebhookEvents(body: any) {
                 .order('created_at', { ascending: false })
                 .limit(20)
 
-            const chatHistory = (history || []).reverse().map((m: any) => ({
-                role: m.role === 'user' ? 'user' : 'assistant',
+            const chatHistory = ((history || []) as HistoryMessage[]).reverse().map((m) => ({
+                role: m.role === 'user' ? 'user' as const : 'assistant' as const,
                 content: m.content,
             }))
 
@@ -367,7 +384,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
         }
 
-        const body = JSON.parse(rawBody)
+        const body = JSON.parse(rawBody) as FacebookWebhookBody
 
         if (body.object !== 'page') {
             return NextResponse.json({ ok: true })

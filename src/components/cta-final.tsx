@@ -11,7 +11,7 @@ export function CtaFinal() {
           Tu negocio puede responder WhatsApp aunque estés en la playa.
         </h2>
         <p className="text-[#555555] text-lg leading-relaxed mb-12 max-w-xl mx-auto">
-          Quedan lugares disponibles en la beta. Escríbenos hoy.
+          Escríbenos hoy y descubre cómo podemos ayudar a tu negocio.
         </p>
 
         <a
