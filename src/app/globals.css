@@ -1111,6 +1111,7 @@ h3.fade-in.fade-ready:not(.visible) {
 
 .success-story-accent-green { --story-accent: #57c97b; }
 .success-story-accent-orange { --story-accent: #fb8734; }
+.success-story-accent-teal { --story-accent: #0b7a86; }
 
 .success-story-photo {
   position: relative;
@@ -1516,6 +1517,7 @@ a.success-story-link-placeholder:focus-visible {
 }
 
 .aurora-footer {
+  overflow: hidden;
   color: #536d86;
   background:
     radial-gradient(circle at 86% 12%, rgba(53, 151, 255, 0.14), transparent 24rem),

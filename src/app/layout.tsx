@@ -23,18 +23,18 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.albatrosia.com"),
   title: {
-    default: "Albatros | Sitios web, SEO y automatización con IA",
-    template: "%s | Albatros",
+    default: "Albatros IA | Agentes de IA para WhatsApp y Messenger",
+    template: "%s | Albatros IA",
   },
   description:
-    "Creamos sitios web de alto rendimiento, optimizamos tu presencia en Google y automatizamos la atención al cliente con IA.",
+    "Atiende clientes, captura prospectos y agenda citas automáticamente con agentes de IA para WhatsApp y Messenger.",
   keywords: [
-    "diseño web profesional",
+    "agentes de IA para negocios",
     "automatización con IA",
     "chatbot para WhatsApp",
     "SEO local",
     "Google Business Profile",
-    "agencia digital",
+    "automatización de citas",
   ],
   alternates: {
     canonical: "/",
@@ -51,11 +51,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Albatros Dev | Sitios web, SEO y automatización con IA",
+    title: "Albatros IA | Agentes de IA para WhatsApp y Messenger",
     description:
-      "Sitios web de alto rendimiento, presencia en Google y atención automatizada con IA para tu negocio.",
+      "Responde mensajes, captura prospectos y agenda citas automáticamente con agentes de IA entrenados para tu negocio.",
     url: "/",
-    siteName: "Albatros Dev",
+    siteName: "Albatros IA",
     locale: "es_MX",
     type: "website",
     images: [
@@ -63,15 +63,15 @@ export const metadata: Metadata = {
         url: "/albatros.png",
         width: 1024,
         height: 1024,
-        alt: "Albatros Dev",
+        alt: "Albatros IA",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Albatros Dev | Sitios web, SEO y automatización con IA",
+    title: "Albatros IA | Agentes de IA para WhatsApp y Messenger",
     description:
-      "Sitios web de alto rendimiento, presencia en Google y atención automatizada con IA.",
+      "Responde mensajes, captura prospectos y agenda citas automáticamente con agentes de IA.",
     images: ["/albatros.png"],
   },
 };

@@ -88,90 +88,90 @@ export const WA_LINKS = {
 export const translations = {
   es: {
     nav: {
-      services: "Servicios",
-      pricing: "Precios",
+      services: "Soluciones",
+      pricing: "Planes",
       faq: "FAQ",
-      talkToAlbi: "Hablar con Albi",
+      talkToAlbi: "Probar Albi",
     },
     hero: {
-      kicker: "IA CONVERSACIONAL PARA NEGOCIOS",
-      title1: "Convierte mensajes",
-      title2: "en oportunidades confirmadas.",
-      description: "Albatros responde con la información de tu negocio, captura prospectos y automatiza cada conversación para que no pierdas oportunidades.",
-      viewPackages: "Ver paquetes",
-      talkToAlbi: "Hablar con Albi",
+      kicker: "AGENTES DE IA PARA WHATSAPP Y MESSENGER",
+      title1: "Responde, vende y agenda",
+      title2: "aunque tú no estés disponible.",
+      description: "Albatros aprende tus servicios, precios y horarios para atender cada mensaje, calificar prospectos y reservar citas automáticamente, las 24 horas.",
+      viewPackages: "Ver planes",
+      talkToAlbi: "Probar a Albi por WhatsApp",
       altHero: "Persona trabajando con la asistencia de un robot de IA",
-      pillars: ["Messenger", "Instagram", "WhatsApp automatizado"]
+      pillars: ["Respuestas 24/7", "Prospectos organizados", "Citas automáticas"]
     },
     problema: {
-      title1: "¿Cuántos clientes perdiste",
-      title2: "hoy por no contestar WhatsApp?",
+      title1: "El cliente que espera,",
+      title2: "compra en otro lugar.",
       puntos: [
         {
           num: "01",
-          title: "Sin presencia online",
-          desc: "Un cliente te busca en Google a las 11pm. No te encuentra. Reserva o compra con tu competencia."
+          title: "No te encuentran",
+          desc: "Buscan tus servicios en Google, pero tu sitio o tu ficha no les da una razón clara para contactarte."
         },
         {
           num: "02",
-          title: "WhatsApp saturado",
-          desc: "Respondes cuando puedes. Cuando puedes ya es tarde. El cliente ya se fue con otro proveedor."
+          title: "Te escriben y esperan",
+          desc: "Preguntan por precio, disponibilidad o una cita. Si la respuesta tarda, la conversación se enfría."
         },
         {
           num: "03",
-          title: "Google Maps abandonado",
-          desc: "Tu ficha desactualizada, sin fotos, con horario incorrecto. Primera impresión: mala."
+          title: "Todo depende de ti",
+          desc: "Responder lo mismo, pedir datos y coordinar horarios consume tiempo que deberías dedicar a tu negocio."
         }
       ]
     },
     servicios: {
-      title1: "Tres problemas.",
-      title2: "Tres soluciones.",
+      title1: "De la búsqueda a la cita,",
+      title2: "sin perder al cliente.",
       puntos: [
         {
           num: "01",
-          title: "Sitio web que vende",
+          title: "Convierte visitas en consultas",
           items: [
-            "Sitio React moderno y rápido",
-            "Sistema de reservaciones online",
-            "Integración de pagos (Stripe / MercadoPago)",
-            "Responsive, SSL, dominio incluido"
+            "Un sitio rápido que explica por qué elegirte",
+            "Reservas y pagos sin pasos innecesarios",
+            "Experiencia clara en celular y computadora",
+            "Dominio, SSL y publicación incluidos"
           ]
         },
         {
           num: "02",
-          title: "Google Maps + SEO local",
+          title: "Aparece cuando te buscan",
           items: [
-            "Ficha Google Business optimizada",
-            "Palabras clave para tu ciudad y giro",
-            "Fotos, horarios, reseñas gestionadas",
-            "Reporte mensual de visibilidad"
+            "Perfil de Google Business optimizado",
+            "Búsquedas clave para tu ciudad y giro",
+            "Fotos, horarios y reseñas al día",
+            "Reporte mensual para medir visibilidad"
           ]
         },
         {
           num: "03",
-          title: "Atención con IA 24/7",
+          title: "Responde y agenda 24/7",
           items: [
-            "Chatbot en WhatsApp que responde solo",
-            "Conoce tus servicios, precios y horarios",
-            "Captura leads mientras duermes",
-            "Escala a humano cuando es necesario"
+            "Agente de IA en WhatsApp y Messenger",
+            "Respuestas basadas en la información de tu negocio",
+            "Captura de datos y citas automáticas",
+            "Transferencia a tu equipo cuando hace falta"
           ]
         }
       ]
     },
     precios: {
-      title: "Precios de Fundador",
-      subtitle: "Soluciones diseñadas para impulsar la presencia digital de tu negocio.",
-      setup: "setup",
+      title: "Elige cuánto quieres automatizar",
+      subtitle: "Empieza por WhatsApp o conecta toda tu atención, agenda y seguimiento.",
+      setup: "configuración",
       monthly: "mes",
       recommended: "Recomendado",
-      cta: "Quiero este paquete",
-      addonsTitle: "Add-ons",
-      addonsSubtitle: "Suma capacidades extra a cualquier plan.",
-      addonsCta: "Agregar a mi plan",
-      bottomNote: "Todos los planes incluyen configuración inicial, entrenamiento de IA y soporte durante la implementación.",
-      note: "* Precios en USD. Sujetos a cambio sin previo aviso.",
+      cta: "Elegir este plan",
+      addonsTitle: "Completa tu operación",
+      addonsSubtitle: "Añade agenda automática o una presencia web profesional al plan que elijas.",
+      addonsCta: "Añadir a mi plan",
+      bottomNote: "Todos los planes incluyen configuración inicial, entrenamiento del agente con la información de tu negocio y acompañamiento durante la implementación.",
+      note: "* Precios mostrados en {currency}. Sujetos a cambio sin previo aviso.",
       paquetes: [
         {
           name: "WhatsApp IA",
@@ -250,11 +250,11 @@ export const translations = {
       ],
     },
     demoAlbi: {
-      title1: "Tu futuro mejor empleado,",
-      title2: "trabajando ahora mismo.",
-      desc: "Escríbele a Albi por WhatsApp. Te responderá al instante, en español o inglés. Así de natural y rápida será la atención para tus clientes.",
-      btn: "Hablar con Albi ahora",
-      footer: "responde en segundos · disponible 24/7 · bilingüe"
+      title1: "Prueba la atención",
+      title2: "antes de decidir.",
+      desc: "Escríbele a Albi por WhatsApp y hazle las mismas preguntas que haría uno de tus clientes. Así puedes conocer la experiencia antes de llevarla a tu negocio.",
+      btn: "Probar a Albi por WhatsApp",
+      footer: "Disponible 24/7 · Español e inglés · Sin compromiso"
     },
     sobre: {
       title1: "Construido para el mundo,",
@@ -268,44 +268,48 @@ export const translations = {
       ]
     },
     faq: {
-      title: "Preguntas frecuentes",
+      title: "Antes de empezar",
       items: [
         {
           q: "¿Cuánto tiempo tarda en estar listo mi Agente de IA?",
-          a: "Tu agente de IA estará listo el mismo día."
+          a: "Podemos dejarlo listo el mismo día una vez que recibimos la información de tu negocio y los accesos necesarios."
         },
         {
           q: "¿Cuánto tiempo tarda en estar listo mi sitio?",
-          a: "Entre 5 y 14 días dependiendo del paquete. Presencia Digital en 5–7 días, Reservas & Pagos en 10–14 días."
+          a: "Un sitio web suele estar listo entre 5 y 14 días, según el alcance y la rapidez con la que recibamos tus contenidos."
         },
         {
-          q: "¿Necesito saber de tecnología para usar esto?",
-          a: "No. Nosotros configuramos todo. Tú solo apruebas el resultado y usas el producto final."
+          q: "¿Necesito saber de tecnología para usarlo?",
+          a: "No. Nosotros configuramos los canales, entrenamos al agente y hacemos las pruebas. Tú revisas la información y apruebas la experiencia."
         },
         {
-          q: "¿El chatbot puede atender en inglés a turistas?",
-          a: "Sí. Albi detecta el idioma del cliente y responde en español o inglés automáticamente."
+          q: "¿Puede atender en español e inglés?",
+          a: "Sí. El agente detecta el idioma del cliente y puede responder automáticamente en español o inglés."
         },
         {
-          q: "¿Qué pasa si quiero cancelar el servicio mensual?",
-          a: "Puedes cancelar en cualquier momento con 15 días de aviso. El sitio web sigue siendo tuyo."
+          q: "¿Qué pasa cuando una conversación necesita a una persona?",
+          a: "El agente puede transferir la conversación a tu equipo para que una persona continúe desde el contexto recibido."
         },
         {
-          q: "¿Los precios son en pesos o dólares?",
-          a: "En pesos Mexicanos MXN. Aceptamos transferencia bancaria, tarjeta de crédito o métodos de pago locales en tu país."
+          q: "¿Puedo cancelar el servicio mensual?",
+          a: "Sí. Puedes cancelar el servicio con 15 días de aviso."
+        },
+        {
+          q: "¿En qué moneda están los precios?",
+          a: "La página muestra los precios en MXN. También ofrecemos alternativas de pago para clientes de otros países."
         },
       ]
     },
     ctaFinal: {
-      title1: "Tu negocio puede responder",
-      title2: "WhatsApp aunque estés",
-      title3: "en la playa.",
-      desc: "Escríbenos hoy y descubre cómo podemos ayudar a tu negocio.",
-      btn: "Hablar con Albi por WhatsApp",
-      footer: "Sin compromiso. Te respondemos en minutos."
+      title1: "Tu próximo cliente",
+      title2: "ya está escribiendo.",
+      title3: "Albatros puede responderle.",
+      desc: "Cuéntanos cómo atiendes hoy y te mostraremos qué parte de la conversación puede automatizarse.",
+      btn: "Quiero verlo en mi negocio",
+      footer: "La demostración por WhatsApp es sin compromiso."
     },
     footer: {
-      brandDesc: "Agencia digital con alcance global. Sitios web, Google Maps y chatbots con IA para negocios locales.",
+      brandDesc: "Agentes de IA, sitios web y presencia local para convertir búsquedas y mensajes en oportunidades.",
       menu: "Menú",
       legal: "Legal",
       contact: "Contacto",
@@ -314,96 +318,96 @@ export const translations = {
       terms: "Términos y Condiciones",
       dataDeletion: "Eliminación de Datos",
       address: "La Paz, BCS, México · Soporte Global",
-      bottomLeft: "© 2026 Albatros Dev · Alcance Global",
+      bottomLeft: "© 2026 Albatros IA · La Paz, BCS",
       bottomRight: "Hecho con mucho café ☕ y buen internet ⚡️"
     }
   },
   en: {
     nav: {
-      services: "Services",
-      pricing: "Pricing",
+      services: "Solutions",
+      pricing: "Plans",
       faq: "FAQ",
-      talkToAlbi: "Chat with Albi",
+      talkToAlbi: "Try Albi",
     },
     hero: {
-      kicker: "CONVERSATIONAL AI FOR BUSINESSES",
-      title1: "Turn messages",
-      title2: "into confirmed opportunities.",
-      description: "Albatros answers with your business information, captures leads, and automates every conversation so you never miss an opportunity.",
-      viewPackages: "View packages",
-      talkToAlbi: "Chat with Albi",
+      kicker: "AI AGENTS FOR WHATSAPP AND MESSENGER",
+      title1: "Reply, sell, and book",
+      title2: "even when you are unavailable.",
+      description: "Albatros learns your services, pricing, and hours to answer every message, qualify leads, and book appointments automatically, around the clock.",
+      viewPackages: "View plans",
+      talkToAlbi: "Try Albi on WhatsApp",
       altHero: "Person working with the assistance of an AI robot",
-      pillars: ["Messenger", "Instagram", "Automated WhatsApp"]
+      pillars: ["24/7 replies", "Organized leads", "Automatic booking"]
     },
     problema: {
-      title1: "How many customers did you",
-      title2: "lose today by not answering WhatsApp?",
+      title1: "Customers who wait",
+      title2: "buy somewhere else.",
       puntos: [
         {
           num: "01",
-          title: "No online presence",
-          desc: "A customer searches for you on Google at 11 PM. They can't find you. They book or buy from your competitor."
+          title: "They cannot find you",
+          desc: "They search Google for your services, but your website or listing gives them no clear reason to contact you."
         },
         {
           num: "02",
-          title: "Saturated WhatsApp",
-          desc: "You reply when you can. By then, it's too late. The customer has already gone to another provider."
+          title: "They message and wait",
+          desc: "They ask about pricing, availability, or an appointment. When the answer is late, the conversation goes cold."
         },
         {
           num: "03",
-          title: "Abandoned Google Maps",
-          desc: "Your listing is outdated, missing photos, or has incorrect hours. First impression: bad."
+          title: "Everything depends on you",
+          desc: "Repeating answers, collecting details, and coordinating schedules takes time away from running your business."
         }
       ]
     },
     servicios: {
-      title1: "Three problems.",
-      title2: "Three solutions.",
+      title1: "From the first search to the booking,",
+      title2: "without losing the customer.",
       puntos: [
         {
           num: "01",
-          title: "A website that sells",
+          title: "Turn visits into inquiries",
           items: [
-            "Modern and fast React website",
-            "Online booking system",
-            "Payment integration (Stripe / MercadoPago)",
-            "Responsive, SSL, domain included"
+            "A fast website that explains why customers should choose you",
+            "Bookings and payments without unnecessary steps",
+            "A clear experience on mobile and desktop",
+            "Domain, SSL, and publishing included"
           ]
         },
         {
           num: "02",
-          title: "Google Maps + Local SEO",
+          title: "Show up when they search",
           items: [
             "Optimized Google Business Profile",
-            "Keywords tailored to your city and industry",
-            "Photos, hours, and reviews managed",
-            "Monthly visibility report"
+            "Search terms for your city and industry",
+            "Up-to-date photos, hours, and reviews",
+            "Monthly visibility reporting"
           ]
         },
         {
           num: "03",
-          title: "24/7 AI Support",
+          title: "Reply and book 24/7",
           items: [
-            "WhatsApp chatbot that replies on its own",
-            "Knows your services, pricing, and hours",
-            "Captures leads while you sleep",
-            "Escales to a human when necessary"
+            "AI agent for WhatsApp and Messenger",
+            "Answers based on your business information",
+            "Automatic lead capture and appointment booking",
+            "Handoff to your team when needed"
           ]
         }
       ]
     },
     precios: {
-      title: "Founder Pricing",
-      subtitle: "Solutions designed to strengthen your business's digital presence.",
-      setup: "setup",
+      title: "Choose how much to automate",
+      subtitle: "Start with WhatsApp or connect your entire customer service, booking, and follow-up flow.",
+      setup: "one-time setup",
       monthly: "month",
       recommended: "Recommended",
-      cta: "I want this package",
-      addonsTitle: "Add-ons",
-      addonsSubtitle: "Stack extra capabilities on top of any plan.",
+      cta: "Choose this plan",
+      addonsTitle: "Complete your workflow",
+      addonsSubtitle: "Add automatic scheduling or a professional web presence to the plan you choose.",
       addonsCta: "Add to my plan",
-      bottomNote: "Every plan includes initial setup, AI training, and support throughout implementation.",
-      note: "* Prices in USD. Subject to change without notice.",
+      bottomNote: "Every plan includes initial setup, agent training with your business information, and guidance throughout implementation.",
+      note: "* Prices shown in {currency}. Subject to change without notice.",
       paquetes: [
         {
           name: "WhatsApp AI",
@@ -482,11 +486,11 @@ export const translations = {
       ],
     },
     demoAlbi: {
-      title1: "Your future best employee,",
-      title2: "working right now.",
-      desc: "Text Albi on WhatsApp. She will reply instantly in Spanish or English. That is how natural and fast support will be for your customers.",
-      btn: "Chat with Albi now",
-      footer: "replies in seconds · available 24/7 · bilingual"
+      title1: "Try the experience",
+      title2: "before you decide.",
+      desc: "Message Albi on WhatsApp and ask the same questions one of your customers would. See the experience for yourself before bringing it to your business.",
+      btn: "Try Albi on WhatsApp",
+      footer: "Available 24/7 · English and Spanish · No commitment"
     },
     sobre: {
       title1: "Built for the world,",
@@ -500,40 +504,48 @@ export const translations = {
       ]
     },
     faq: {
-      title: "Frequently asked questions",
+      title: "Before you get started",
       items: [
         {
+          q: "How long does it take to launch my AI agent?",
+          a: "We can have it ready the same day once we receive your business information and the required access."
+        },
+        {
           q: "How long does it take for my site to be ready?",
-          a: "Between 5 and 14 days depending on the package. Digital Presence in 5–7 days, Bookings & Payments in 10–14 days."
+          a: "A website is usually ready in 5 to 14 days, depending on the scope and how quickly we receive your content."
         },
         {
-          q: "Do I need technical knowledge to use this?",
-          a: "No. We set up everything. You just approve the result and use the final product."
+          q: "Do I need technical knowledge to use it?",
+          a: "No. We connect the channels, train the agent, and run the tests. You review the information and approve the experience."
         },
         {
-          q: "Can the chatbot serve clients in English?",
-          a: "Yes. Albi detects the client's language and replies in Spanish or English automatically."
+          q: "Can it serve customers in English and Spanish?",
+          a: "Yes. The agent detects the customer's language and can reply automatically in English or Spanish."
         },
         {
-          q: "What if I want to cancel the monthly service?",
-          a: "You can cancel at any time with a 15-day notice. The website remains yours."
+          q: "What happens when a conversation needs a person?",
+          a: "The agent can hand the conversation over to your team so a person can continue with the context already collected."
         },
         {
-          q: "Are prices in pesos or dollars?",
-          a: "In USD. We accept bank transfers, credit cards, or local payment methods in your country."
+          q: "Can I cancel the monthly service?",
+          a: "Yes. You can cancel the service with 15 days' notice."
+        },
+        {
+          q: "Which currency are the prices shown in?",
+          a: "The page currently shows prices in MXN. We also offer payment alternatives for customers in other countries."
         },
       ]
     },
     ctaFinal: {
-      title1: "Your business can answer",
-      title2: "WhatsApp even while",
-      title3: "you are at the beach.",
-      desc: "Write to us today and discover how we can help your business.",
-      btn: "Chat with Albi on WhatsApp",
-      footer: "No commitment. We'll reply in minutes."
+      title1: "Your next customer",
+      title2: "is already messaging.",
+      title3: "Albatros can answer.",
+      desc: "Tell us how you handle customers today and we will show you which parts of the conversation can be automated.",
+      btn: "Show me how it works for my business",
+      footer: "The WhatsApp demonstration comes with no commitment."
     },
     footer: {
-      brandDesc: "Digital agency with global reach. Websites, Google Maps, and AI chatbots for local businesses.",
+      brandDesc: "AI agents, websites, and local presence that turn searches and messages into opportunities.",
       menu: "Menu",
       legal: "Legal",
       contact: "Contact",
@@ -542,7 +554,7 @@ export const translations = {
       terms: "Terms & Conditions",
       dataDeletion: "Data Deletion",
       address: "La Paz, BCS, Mexico · Global Support",
-      bottomLeft: "© 2026 Albatros Dev · Global Reach",
+      bottomLeft: "© 2026 Albatros AI · La Paz, BCS",
       bottomRight: "Made with lots of coffee ☕ and good internet ⚡"
     }
   }
