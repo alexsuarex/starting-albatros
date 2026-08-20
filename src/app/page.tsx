@@ -605,6 +605,27 @@ const successStoriesCopy = {
       "Aquí irá el testimonio del propietario: su experiencia con Albatros, el cambio que vivió su negocio y los resultados que ha conseguido.",
     link: "Sitio web o fanpage",
     placeholder: "Espacio para caso de éxito",
+    featuredStatus: "Agente IA activo",
+    featuredBusiness: "MAS Persianas",
+    featuredOwner: "Marcos Suarez Lopez · Propietario",
+    featuredQuote:
+      "Albatros transformó la forma en que atendemos a nuestros clientes. El agente de IA responde consultas por WhatsApp y Messenger de manera rápida y clara, incluso cuando estamos ocupados. Estoy muy satisfecho con el servicio y con el acompañamiento que hemos recibido.",
+    featuredLink: "Visitar MAS Persianas en Facebook",
+    featuredImageAlt: "Logo de MAS Persianas",
+    secondStatus: "Citas automatizadas",
+    secondBusiness: "La Paz Bay",
+    secondMeta: "Administración de propiedades · Bienes raíces",
+    secondQuote:
+      "Con Albatros podemos atender a quienes buscan rentar, administrar o comprar una propiedad sin dejar conversaciones pendientes. Los agentes de IA responden por Messenger y WhatsApp, orientan a cada cliente y agendan citas automáticamente, lo que nos permite dar seguimiento de forma más ordenada y oportuna.",
+    secondLink: "Visitar La Paz Bay en Facebook",
+    secondImageAlt: "Logo de La Paz Bay rentals and real estate",
+    thirdStatus: "Ventas y citas automatizadas",
+    thirdBusiness: "Satélite Car Audio",
+    thirdMeta: "Audio automotriz · Rastreo satelital",
+    thirdQuote:
+      "Con Albatros automatizamos la atención y las ventas sin perder el trato cercano con nuestros clientes. Los agentes de IA responden por WhatsApp y Messenger, orientan sobre equipos de sonido, instalaciones, reparaciones y sistemas de rastreo, y además agendan citas automáticamente para que cada solicitud reciba seguimiento.",
+    thirdLink: "Visitar el sitio de Satélite Car Audio",
+    thirdImageAlt: "Logo de Satélite Car Audio",
     previous: "Ver caso anterior",
     next: "Ver siguiente caso",
     hint: "Desliza para conocer más historias",
@@ -620,6 +641,27 @@ const successStoriesCopy = {
       "The owner's story will go here: their experience with Albatros, how their business changed, and the results they have achieved.",
     link: "Website or Facebook page",
     placeholder: "Success story space",
+    featuredStatus: "AI agent active",
+    featuredBusiness: "MAS Persianas",
+    featuredOwner: "Marcos Suarez Lopez · Owner",
+    featuredQuote:
+      "Albatros transformed the way we serve our customers. The AI agent answers questions on WhatsApp and Messenger quickly and clearly, even when we are busy. I am very satisfied with the service and the support we have received.",
+    featuredLink: "Visit MAS Persianas on Facebook",
+    featuredImageAlt: "MAS Persianas logo",
+    secondStatus: "Automated appointments",
+    secondBusiness: "La Paz Bay",
+    secondMeta: "Property management · Real estate",
+    secondQuote:
+      "With Albatros, we can help people looking to rent, manage, or buy a property without leaving conversations unanswered. The AI agents respond on Messenger and WhatsApp, guide each client, and schedule appointments automatically, allowing us to follow up in a more organized and timely way.",
+    secondLink: "Visit La Paz Bay on Facebook",
+    secondImageAlt: "La Paz Bay rentals and real estate logo",
+    thirdStatus: "Automated sales and appointments",
+    thirdBusiness: "Satélite Car Audio",
+    thirdMeta: "Car audio · Satellite tracking",
+    thirdQuote:
+      "With Albatros, we automated customer service and sales while keeping a personal connection with our customers. The AI agents respond on WhatsApp and Messenger, provide guidance on audio equipment, installations, repairs, and tracking systems, and automatically schedule appointments so every request receives follow-up.",
+    thirdLink: "Visit the Satélite Car Audio website",
+    thirdImageAlt: "Satélite Car Audio logo",
     previous: "View previous story",
     next: "View next story",
     hint: "Swipe to discover more stories",
@@ -737,27 +779,92 @@ function CasosExito() {
           aria-label={copy.title}
           tabIndex={0}
         >
-          {successStorySlots.map((accent, index) => (
+          {successStorySlots.map((accent, index) => {
+            const story = index === 0
+              ? {
+                  status: copy.featuredStatus,
+                  business: copy.featuredBusiness,
+                  meta: copy.featuredOwner,
+                  quote: copy.featuredQuote,
+                  link: copy.featuredLink,
+                  imageAlt: copy.featuredImageAlt,
+                  imageSrc: "/mas-persianas-logo.jpg",
+                  imageWidth: 951,
+                  imageHeight: 480,
+                  href: "https://www.facebook.com/MASpersianasbcs",
+                }
+              : index === 1
+                ? {
+                    status: copy.secondStatus,
+                    business: copy.secondBusiness,
+                    meta: copy.secondMeta,
+                    quote: copy.secondQuote,
+                    link: copy.secondLink,
+                    imageAlt: copy.secondImageAlt,
+                    imageSrc: "/lapaz-bay-logo.png",
+                    imageWidth: 600,
+                    imageHeight: 575,
+                    href: "https://www.facebook.com/lapazbay/",
+                  }
+                : {
+                    status: copy.thirdStatus,
+                    business: copy.thirdBusiness,
+                    meta: copy.thirdMeta,
+                    quote: copy.thirdQuote,
+                    link: copy.thirdLink,
+                    imageAlt: copy.thirdImageAlt,
+                    imageSrc: "/satelite-car-audio-logo.avif",
+                    imageWidth: 1188,
+                    imageHeight: 400,
+                    href: "https://satelitecaraudio.wixsite.com/misitio",
+                  };
+
+            return (
             <article className={`success-story-card success-story-accent-${accent} fade-in`} key={accent}>
-              <div
-                className="success-story-photo"
-                role="img"
-                aria-label={`${copy.photo} ${index + 1}`}
-              >
-                <span>{copy.photo}</span>
+              <div className={`success-story-photo${story ? " has-logo" : ""}`}>
+                {story ? (
+                  <Image
+                    src={story.imageSrc}
+                    alt={story.imageAlt}
+                    width={story.imageWidth}
+                    height={story.imageHeight}
+                    sizes="(max-width: 767px) 92vw, 22rem"
+                    className="success-story-logo"
+                  />
+                ) : (
+                  <span role="img" aria-label={`${copy.photo} ${index + 1}`}>{copy.photo}</span>
+                )}
               </div>
 
               <div className="success-story-content">
-                <span className="success-story-status">{copy.placeholder}</span>
-                <h3 className="font-display">{copy.business}</h3>
-                <blockquote>{copy.quote}</blockquote>
-                <span className="success-story-link-placeholder">
-                  <ExternalLinkGlyph />
-                  {copy.link}
+                <span className="success-story-status">
+                  {story ? story.status : copy.placeholder}
                 </span>
+                <h3 className="font-display">
+                  {story ? story.business : copy.business}
+                </h3>
+                {story && <p className="success-story-owner">{story.meta}</p>}
+                <blockquote>{story ? story.quote : copy.quote}</blockquote>
+                {story ? (
+                  <a
+                    href={story.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="success-story-link-placeholder"
+                  >
+                    <ExternalLinkGlyph />
+                    {story.link}
+                  </a>
+                ) : (
+                  <span className="success-story-link-placeholder">
+                    <ExternalLinkGlyph />
+                    {copy.link}
+                  </span>
+                )}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
 
         <p className="success-stories-hint">{copy.hint}</p>
@@ -792,36 +899,6 @@ function DemoAlbi() {
         <p className="font-mono-custom text-xs text-zinc-400 mt-4 fade-in">
           {t.demoAlbi.footer}
         </p>
-      </div>
-    </section>
-  );
-}
-
-// ─── Sobre nosotros ───────────────────────────────────────────────────────────
-function Sobre() {
-  const { t } = useLanguage();
-
-  return (
-    <section className="aurora-about py-24 px-6 text-white">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="font-display text-4xl md:text-5xl font-semibold mb-6 fade-in">
-          {t.sobre.title1}
-          <br />
-          {t.sobre.title2}
-        </h2>
-        <p className="text-zinc-400 text-lg max-w-2xl mb-16 leading-relaxed fade-in">
-          {t.sobre.desc}
-        </p>
-        <div className="grid grid-cols-2 gap-6 stagger">
-          {t.sobre.stats.map((s) => (
-            <div key={s.label} className="stat-card fade-in rounded-2xl p-6">
-              <div className="font-display text-2xl font-semibold text-white mb-2">
-                {s.num}
-              </div>
-              <div className="text-zinc-500 text-sm leading-snug">{s.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -1151,7 +1228,6 @@ export default function Home() {
         <Precios />
         <CasosExito />
         <DemoAlbi />
-        <Sobre />
         <FAQ />
         <CTAFinal />
       </main>
