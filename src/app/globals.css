@@ -1158,6 +1158,19 @@ h3.fade-in.fade-ready:not(.visible) {
   letter-spacing: 0.04em;
 }
 
+.success-story-photo.has-logo {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  background: #ffffff;
+}
+
+.success-story-logo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 .success-story-content {
   position: relative;
   display: flex;
@@ -1202,6 +1215,15 @@ h3.fade-in.fade-ready:not(.visible) {
   font-weight: 600;
 }
 
+.success-story-owner {
+  position: relative;
+  z-index: 1;
+  margin: -0.25rem 0 0.75rem;
+  color: #89909a;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
 .success-story-content blockquote {
   position: relative;
   z-index: 1;
@@ -1229,6 +1251,23 @@ h3.fade-in.fade-ready:not(.visible) {
 .success-story-link-placeholder svg {
   width: 17px;
   height: 17px;
+}
+
+a.success-story-link-placeholder {
+  color: color-mix(in srgb, var(--story-accent) 72%, #20242c);
+  border-bottom-color: color-mix(in srgb, var(--story-accent) 45%, #bfc5cd);
+  text-decoration: none;
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
+a.success-story-link-placeholder:hover {
+  color: #20242c;
+  border-bottom-color: #20242c;
+}
+
+a.success-story-link-placeholder:focus-visible {
+  outline: 2px solid var(--story-accent);
+  outline-offset: 4px;
 }
 
 .success-stories-hint {
