@@ -138,10 +138,10 @@ function Nav() {
       ref={navRef}
       className="aurora-nav fixed top-0 left-0 right-0 z-50 transition-all duration-200"
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#hero" className="brand-lockup flex items-center gap-2">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+        <a href="#hero" className="brand-lockup flex items-center gap-2 whitespace-nowrap">
           <Image src="/albatros-monogram.png" alt="" width={32} height={32} className="brand-monogram" />
-          <span className="font-display text-lg font-semibold tracking-[0.08em] text-zinc-900">
+          <span className="font-display text-base sm:text-lg font-semibold tracking-[0.08em] text-zinc-900">
             ALBATROS IA
           </span>
         </a>
@@ -158,11 +158,11 @@ function Nav() {
           </a>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Selector de idioma premium de un solo botón */}
           <button
             onClick={() => setLang(lang === "es" ? "en" : "es")}
-            className="text-xs font-mono border border-zinc-200 px-2.5 py-1 rounded-full hover:bg-zinc-50 transition-colors font-medium text-zinc-600 hover:text-zinc-900"
+            className="text-xs font-mono border border-zinc-200 px-2 sm:px-2.5 py-1 rounded-full hover:bg-zinc-50 transition-colors font-medium text-zinc-600 hover:text-zinc-900"
             title={lang === "es" ? "Switch to English" : "Cambiar a Español"}
           >
             {lang === "es" ? "EN 🇺🇸" : "ES 🇪🇸"}
@@ -172,7 +172,7 @@ function Nav() {
             href={wa.general}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-zinc-900 text-white text-sm px-4 py-2 rounded-full hover:bg-zinc-700 transition-colors"
+            className="flex items-center gap-1.5 sm:gap-2 bg-zinc-900 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full hover:bg-zinc-700 transition-colors whitespace-nowrap"
           >
             <WhatsAppIcon size={16} />
             {t.nav.talkToAlbi}
@@ -193,14 +193,14 @@ function Hero() {
   const carouselTimerRef = useRef<number | null>(null);
   const slides = isEnglish
     ? [
-        { label: "Clear signal", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
-        { label: "Human receptionist", kicker: "YOUR BUSINESS, ALWAYS WELL ATTENDED", title1: "A receptionist", title2: "who never keeps people waiting.", description: "While you take care of your customers, Albatros replies to messages, resolves questions, and fills your schedule in your business's voice.", primary: "See how it would serve my business", accent: "green" },
-        { label: "Control center", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Every conversation,", title2: "under control.", description: "Centralize your channels, activate AI agents, and turn conversations into measurable opportunities from one platform.", primary: "Request a demo", accent: "orange" },
+        { label: "Always available", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.talkToAlbi, accent: "blue" },
+        { label: "Personal service", kicker: "CUSTOMER SERVICE THAT SOUNDS LIKE YOUR BUSINESS", title1: "Answer every message", title2: "as if you were there.", description: "Albatros answers common questions with your information, gathers customer details, and brings your team in when human judgment is needed.", primary: "Try the AI experience", accent: "green" },
+        { label: "Connected journey", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "From the first question", title2: "to the confirmed booking.", description: "Connect your channels, organize each lead, and let Albatros schedule the next step without making your customer wait.", primary: "Request a demonstration", accent: "orange" },
       ]
     : [
-        { label: "Señal clara", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.viewPackages, accent: "blue" },
-        { label: "Recepcionista humana", kicker: "TU NEGOCIO SIEMPRE BIEN ATENDIDO", title1: "Una recepcionista que", title2: "nunca deja esperando.", description: "Mientras tú atiendes a tus clientes, Albatros contesta mensajes, resuelve dudas y llena tu agenda con el tono de tu negocio.", primary: "Ver cómo atendería mi negocio", accent: "green" },
-        { label: "Centro de control", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "Cada conversación,", title2: "bajo control.", description: "Centraliza tus canales, activa agentes de IA y convierte conversaciones en oportunidades medibles desde una sola plataforma.", primary: "Solicitar una demo", accent: "orange" },
+        { label: "Siempre disponible", kicker: t.hero.kicker, title1: t.hero.title1, title2: t.hero.title2, description: t.hero.description, primary: t.hero.talkToAlbi, accent: "blue" },
+        { label: "Atención personal", kicker: "UNA ATENCIÓN QUE SUENA COMO TU NEGOCIO", title1: "Responde cada mensaje", title2: "como si estuvieras ahí.", description: "Albatros contesta preguntas frecuentes con tu información, reúne los datos del cliente y avisa a tu equipo cuando se necesita criterio humano.", primary: "Probar la atención con IA", accent: "green" },
+        { label: "Recorrido conectado", kicker: "WHATSAPP · INSTAGRAM · MESSENGER · CALENDAR", title1: "De la primera pregunta", title2: "a la cita confirmada.", description: "Conecta tus canales, organiza cada prospecto y deja que Albatros agende el siguiente paso sin hacer esperar al cliente.", primary: "Solicitar una demostración", accent: "orange" },
       ];
 
   useEffect(() => {
@@ -273,22 +273,22 @@ function Hero() {
           </p>
           <div className="flex flex-wrap gap-3">
             <a
-              href="#precios"
-              className="cta-primary px-6 py-3 rounded-full text-sm font-medium"
-            >
-              {slide.primary}
-            </a>
-            <a
               href={wa.general}
               target="_blank"
               rel="noopener noreferrer"
-              className="cta-secondary flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium"
+              className="cta-primary flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium"
             >
               <WhatsAppIcon size={16} />
-              {t.hero.talkToAlbi}
+              {slide.primary}
+            </a>
+            <a
+              href="#precios"
+              className="cta-secondary flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium"
+            >
+              {t.hero.viewPackages}
             </a>
           </div>
-          <div className="signal-checks" aria-label="Beneficios principales">
+          <div className="signal-checks" aria-label={isEnglish ? "Key benefits" : "Beneficios principales"}>
             {t.hero.pillars.map((pillar) => (
               <span key={pillar}>
                 <b>✓</b>
@@ -300,7 +300,7 @@ function Hero() {
         <div className="signal-demo flex items-center justify-center">
           <ConversationPreview isEnglish={isEnglish} variant={index} />
         </div>
-        <ul className="signal-promises" aria-label="Cómo funciona Albatros">
+        <ul className="signal-promises" aria-label={isEnglish ? "How Albatros works" : "Cómo funciona Albatros"}>
           <li>{lang === "en" ? "Answer real questions, not generic replies." : "Responde preguntas reales, no respuestas genéricas."}</li>
           <li>{lang === "en" ? "Capture leads and notify your team automatically." : "Captura prospectos y notifica a tu equipo automáticamente."}</li>
           <li>{lang === "en" ? "Your team takes over when human judgment is needed." : "Tu equipo entra cuando se necesita criterio humano."}</li>
@@ -585,7 +585,7 @@ function Precios() {
         </div>
 
         <p className="text-xs text-zinc-400 font-mono-custom mt-12 fade-in">
-          {t.precios.note.replace("USD", currency)}
+          {t.precios.note.replace("{currency}", currency)}
         </p>
       </div>
     </section>
@@ -595,10 +595,10 @@ function Precios() {
 // ─── Demo Albi ────────────────────────────────────────────────────────────────
 const successStoriesCopy = {
   es: {
-    eyebrow: "Historias de clientes",
-    title: "Casos de éxito",
+    eyebrow: "Negocios que ya usan Albatros",
+    title: "Así se ve la IA en el trabajo",
     description:
-      "Un espacio para conocer los negocios que están creciendo con Albatros, contado por sus propios dueños.",
+      "Tres negocios distintos. Una misma experiencia: responder por redes sociales, orientar a sus clientes y dar seguimiento sin dejar conversaciones pendientes.",
     photo: "Foto del negocio",
     business: "Nombre del negocio",
     quote:
@@ -612,13 +612,6 @@ const successStoriesCopy = {
       "Albatros transformó la forma en que atendemos a nuestros clientes. El agente de IA responde consultas por WhatsApp y Messenger de manera rápida y clara, incluso cuando estamos ocupados. Estoy muy satisfecho con el servicio y con el acompañamiento que hemos recibido.",
     featuredLink: "Visitar MAS Persianas en Facebook",
     featuredImageAlt: "Logo de MAS Persianas",
-    secondStatus: "Citas automatizadas",
-    secondBusiness: "La Paz Bay",
-    secondMeta: "Administración de propiedades · Bienes raíces",
-    secondQuote:
-      "Con Albatros podemos atender a quienes buscan rentar, administrar o comprar una propiedad sin dejar conversaciones pendientes. Los agentes de IA responden por Messenger y WhatsApp, orientan a cada cliente y agendan citas automáticamente, lo que nos permite dar seguimiento de forma más ordenada y oportuna.",
-    secondLink: "Visitar La Paz Bay en Facebook",
-    secondImageAlt: "Logo de La Paz Bay rentals and real estate",
     thirdStatus: "Ventas y citas automatizadas",
     thirdBusiness: "Satélite Car Audio",
     thirdMeta: "Audio automotriz · Rastreo satelital",
@@ -626,15 +619,22 @@ const successStoriesCopy = {
       "Con Albatros automatizamos la atención y las ventas sin perder el trato cercano con nuestros clientes. Los agentes de IA responden por WhatsApp y Messenger, orientan sobre equipos de sonido, instalaciones, reparaciones y sistemas de rastreo, y además agendan citas automáticamente para que cada solicitud reciba seguimiento.",
     thirdLink: "Visitar el sitio de Satélite Car Audio",
     thirdImageAlt: "Logo de Satélite Car Audio",
+    fourthStatus: "Agenda médica 24/7",
+    fourthBusiness: "Vital Health Clinic",
+    fourthMeta: "Clínica de especialidades · Servicios médicos",
+    fourthQuote:
+      "Con Albatros, nuestros pacientes pueden solicitar información y agendar citas desde las redes sociales a cualquier hora, todos los días del año. Los agentes de IA responden con rapidez y ayudan a mantener la agenda organizada, lo que mejora la eficiencia y el tiempo de atención desde el primer mensaje.",
+    fourthLink: "Visitar Vital Health Clinic en Facebook",
+    fourthImageAlt: "Logo de Vital Health Clinic",
     previous: "Ver caso anterior",
     next: "Ver siguiente caso",
     hint: "Desliza para conocer más historias",
   },
   en: {
-    eyebrow: "Customer stories",
-    title: "Success stories",
+    eyebrow: "Businesses already using Albatros",
+    title: "See AI at work",
     description:
-      "A place to meet the businesses growing with Albatros, told in their owners' own words.",
+      "Three different businesses. One shared experience: answering on social media, guiding customers, and following up without leaving conversations behind.",
     photo: "Business photo",
     business: "Business name",
     quote:
@@ -648,13 +648,6 @@ const successStoriesCopy = {
       "Albatros transformed the way we serve our customers. The AI agent answers questions on WhatsApp and Messenger quickly and clearly, even when we are busy. I am very satisfied with the service and the support we have received.",
     featuredLink: "Visit MAS Persianas on Facebook",
     featuredImageAlt: "MAS Persianas logo",
-    secondStatus: "Automated appointments",
-    secondBusiness: "La Paz Bay",
-    secondMeta: "Property management · Real estate",
-    secondQuote:
-      "With Albatros, we can help people looking to rent, manage, or buy a property without leaving conversations unanswered. The AI agents respond on Messenger and WhatsApp, guide each client, and schedule appointments automatically, allowing us to follow up in a more organized and timely way.",
-    secondLink: "Visit La Paz Bay on Facebook",
-    secondImageAlt: "La Paz Bay rentals and real estate logo",
     thirdStatus: "Automated sales and appointments",
     thirdBusiness: "Satélite Car Audio",
     thirdMeta: "Car audio · Satellite tracking",
@@ -662,13 +655,20 @@ const successStoriesCopy = {
       "With Albatros, we automated customer service and sales while keeping a personal connection with our customers. The AI agents respond on WhatsApp and Messenger, provide guidance on audio equipment, installations, repairs, and tracking systems, and automatically schedule appointments so every request receives follow-up.",
     thirdLink: "Visit the Satélite Car Audio website",
     thirdImageAlt: "Satélite Car Audio logo",
+    fourthStatus: "24/7 medical scheduling",
+    fourthBusiness: "Vital Health Clinic",
+    fourthMeta: "Specialty clinic · Medical services",
+    fourthQuote:
+      "With Albatros, our patients can request information and book appointments through social media at any time, every day of the year. The AI agents reply quickly and help keep the schedule organized, improving efficiency and response times from the first message.",
+    fourthLink: "Visit Vital Health Clinic on Facebook",
+    fourthImageAlt: "Vital Health Clinic logo",
     previous: "View previous story",
     next: "View next story",
     hint: "Swipe to discover more stories",
   },
 } as const;
 
-const successStorySlots = ["blue", "green", "orange"] as const;
+const successStorySlots = ["orange", "teal", "blue"] as const;
 const SUCCESS_STORIES_AUTOPLAY_MS = 5000;
 
 function CarouselArrow({ direction }: { direction: "left" | "right" }) {
@@ -696,6 +696,44 @@ function CasosExito() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const lastManualScrollRef = useRef(0);
+  const stories = [
+    {
+      status: copy.thirdStatus,
+      business: copy.thirdBusiness,
+      meta: copy.thirdMeta,
+      quote: copy.thirdQuote,
+      link: copy.thirdLink,
+      imageAlt: copy.thirdImageAlt,
+      imageSrc: "/satelite-car-audio-logo.avif",
+      imageWidth: 1188,
+      imageHeight: 400,
+      href: "https://satelitecaraudio.wixsite.com/misitio",
+    },
+    {
+      status: copy.fourthStatus,
+      business: copy.fourthBusiness,
+      meta: copy.fourthMeta,
+      quote: copy.fourthQuote,
+      link: copy.fourthLink,
+      imageAlt: copy.fourthImageAlt,
+      imageSrc: "/vital-health-clinic-logo.jpg",
+      imageWidth: 714,
+      imageHeight: 714,
+      href: "https://www.facebook.com/vitalhealthlapazbcs",
+    },
+    {
+      status: copy.featuredStatus,
+      business: copy.featuredBusiness,
+      meta: copy.featuredOwner,
+      quote: copy.featuredQuote,
+      link: copy.featuredLink,
+      imageAlt: copy.featuredImageAlt,
+      imageSrc: "/mas-persianas-logo.jpg",
+      imageWidth: 951,
+      imageHeight: 480,
+      href: "https://www.facebook.com/MASpersianasbcs",
+    },
+  ];
 
   const scrollStories = useCallback((direction: -1 | 1) => {
     const track = trackRef.current;
@@ -780,44 +818,7 @@ function CasosExito() {
           tabIndex={0}
         >
           {successStorySlots.map((accent, index) => {
-            const story = index === 0
-              ? {
-                  status: copy.featuredStatus,
-                  business: copy.featuredBusiness,
-                  meta: copy.featuredOwner,
-                  quote: copy.featuredQuote,
-                  link: copy.featuredLink,
-                  imageAlt: copy.featuredImageAlt,
-                  imageSrc: "/mas-persianas-logo.jpg",
-                  imageWidth: 951,
-                  imageHeight: 480,
-                  href: "https://www.facebook.com/MASpersianasbcs",
-                }
-              : index === 1
-                ? {
-                    status: copy.secondStatus,
-                    business: copy.secondBusiness,
-                    meta: copy.secondMeta,
-                    quote: copy.secondQuote,
-                    link: copy.secondLink,
-                    imageAlt: copy.secondImageAlt,
-                    imageSrc: "/lapaz-bay-logo.png",
-                    imageWidth: 600,
-                    imageHeight: 575,
-                    href: "https://www.facebook.com/lapazbay/",
-                  }
-                : {
-                    status: copy.thirdStatus,
-                    business: copy.thirdBusiness,
-                    meta: copy.thirdMeta,
-                    quote: copy.thirdQuote,
-                    link: copy.thirdLink,
-                    imageAlt: copy.thirdImageAlt,
-                    imageSrc: "/satelite-car-audio-logo.avif",
-                    imageWidth: 1188,
-                    imageHeight: 400,
-                    href: "https://satelitecaraudio.wixsite.com/misitio",
-                  };
+            const story = stories[index];
 
             return (
             <article className={`success-story-card success-story-accent-${accent} fade-in`} key={accent}>
@@ -970,7 +971,7 @@ function Footer() {
   const { t, wa } = useLanguage();
 
   return (
-    <footer className="aurora-footer py-16 px-6">
+    <footer className="aurora-footer overflow-hidden py-16 px-6">
       <div className="max-w-6xl mx-auto">
         {/* Columns */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
@@ -1203,11 +1204,11 @@ export default function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "ProfessionalService",
-            name: "Albatros Dev",
+            name: "Albatros IA",
             url: "https://www.albatrosia.com",
             logo: "https://www.albatrosia.com/albatros.png",
             description:
-              "Sitios web, optimización de presencia en Google y automatización de atención al cliente con IA.",
+              "Agentes de IA para WhatsApp y Messenger, automatización de citas, sitios web y presencia local en Google.",
             email: "hola@albatrosia.com",
             areaServed: "Worldwide",
             knowsAbout: [
@@ -1216,6 +1217,7 @@ export default function Home() {
               "Google Business Profile",
               "Automatización con IA",
               "Chatbots para WhatsApp",
+              "Agendamiento automático",
             ],
           }).replace(/</g, "\\u003c"),
         }}
