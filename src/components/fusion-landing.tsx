@@ -12,9 +12,11 @@ import {
 } from "@/lib/translations";
 
 type PlanKey = "whatsappIA" | "multicanalIA" | "negocioAutonomoIA";
+type AddonKey = "agendaInteligente" | "sitioWebProfesional";
 type Channel = "WhatsApp" | "Messenger" | "Instagram";
 
 const planKeys: PlanKey[] = ["whatsappIA", "multicanalIA", "negocioAutonomoIA"];
+const addonKeys: AddonKey[] = ["agendaInteligente", "sitioWebProfesional"];
 const channels: Channel[] = ["WhatsApp", "Messenger", "Instagram"];
 
 const copy = {
@@ -55,6 +57,11 @@ const copy = {
     month: "mes",
     setup: "configuración",
     recommended: "Recomendado",
+    addon: "Add-on",
+    monthlyFrom: "Mensualidad desde",
+    developmentFrom: "Desarrollo y configuración desde",
+    singlePayment: "pago único",
+    agendaNote: "Se integra a tu calendario y al plan que elijas.",
     faqTitle: "Antes de empezar",
     faqIntro: "Respuestas claras para tomar una decisión sin letra pequeña.",
     clientsEyebrow: "Opiniones de clientes",
@@ -147,6 +154,11 @@ const copy = {
     month: "month",
     setup: "setup",
     recommended: "Recommended",
+    addon: "Add-on",
+    monthlyFrom: "Monthly from",
+    developmentFrom: "Development and setup from",
+    singlePayment: "one-time payment",
+    agendaNote: "Connects your calendar to the plan you choose.",
     faqTitle: "Before you start",
     faqIntro: "Straight answers to help you decide without fine print.",
     clientsEyebrow: "Client feedback",
@@ -233,6 +245,13 @@ function BrandMark() {
 
 function Arrow() {
   return <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg>;
+}
+
+function AddonIcon({ addon }: { addon: AddonKey }) {
+  if (addon === "agendaInteligente") {
+    return <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4.5" y="7.5" width="23" height="20" rx="4" /><path d="M10 4v7M22 4v7M5 13.5h22M10 19h4v4h-4z" /></svg>;
+  }
+  return <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3.5" y="5.5" width="25" height="21" rx="4" /><path d="M4 11.5h24M9 8.5h.01M13 8.5h.01M8.5 17h9M8.5 21h14" /></svg>;
 }
 
 function ChannelIcon({ channel }: { channel: Channel }) {
@@ -379,6 +398,40 @@ export function FusionLanding() {
                 <header>{plan.featured ? <small>{c.recommended}</small> : <small aria-hidden="true">&nbsp;</small>}<h3>{plan.name}</h3><p><strong>{price.monthly}</strong><span>{prices.suffix} / {c.month}</span></p></header>
                 <div className="fusion-plan-features"><span>{c.includes}</span><ul>{plan.features.filter(({ included }) => included).slice(0, 6).map(({ label }) => <li key={label}>✓ {label}</li>)}</ul></div>
                 <footer><span>+ {price.setup} {prices.suffix} {c.setup}</span><a className={plan.featured ? "fusion-button fusion-button-orange" : "fusion-button fusion-button-outline"} href={whatsapp[key]} target="_blank" rel="noreferrer">{c.choose}<Arrow /></a></footer>
+              </article>;
+            })}
+          </div>
+          <div className="fusion-addons-heading">
+            <span>{c.addon}</span>
+            <div><h3>{t.precios.addonsTitle}</h3><p>{t.precios.addonsSubtitle}</p></div>
+          </div>
+          <div className="fusion-addon-grid">
+            {addonKeys.map((key, index) => {
+              const addon = t.precios.addons[index];
+              const price = prices.addons[key];
+              const isWebsite = key === "sitioWebProfesional";
+              return <article className={isWebsite ? "is-website" : "is-agenda"} key={key}>
+                <div className="fusion-addon-icon"><AddonIcon addon={key} /></div>
+                <div className="fusion-addon-copy">
+                  <small>{c.addon}</small>
+                  <h3>{addon.name}</h3>
+                  <ul>{addon.features.slice(0, 4).map((feature) => <li key={feature}>{feature}</li>)}</ul>
+                </div>
+                <div className="fusion-addon-price">
+                  {isWebsite
+                    ? <>
+                        <div className="fusion-addon-rate">
+                          <span>{c.monthlyFrom}</span>
+                          <p><strong>{price.monthly}</strong><small>{prices.suffix} / {c.month}</small></p>
+                        </div>
+                        <div className="fusion-addon-rate fusion-addon-rate-setup">
+                          <span>{c.developmentFrom}</span>
+                          <p><strong>{price.setup}</strong><small>{prices.suffix} · {c.singlePayment}</small></p>
+                        </div>
+                      </>
+                    : <><p><strong>{price.monthly}</strong><small>{prices.suffix} / {c.month}</small></p><p className="fusion-addon-setup">{c.agendaNote}</p></>}
+                  <a className="fusion-button fusion-button-outline" href={whatsapp[key]} target="_blank" rel="noreferrer">{t.precios.addonsCta}<Arrow /></a>
+                </div>
               </article>;
             })}
           </div>

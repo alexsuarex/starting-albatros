@@ -35,7 +35,7 @@ export const PRICING_BY_CURRENCY = {
     },
     addons: {
       agendaInteligente: { setup: "", monthly: "$790" },
-      sitioWebProfesional: { setup: "$4,990", monthly: "$490" }
+      sitioWebProfesional: { setup: "$5,000", monthly: "$500" }
     }
   },
   CLP: {
@@ -238,9 +238,9 @@ export const translations = {
           ],
         },
         {
-          name: "Sitio Web Profesional",
+          name: "Página y sitio web",
           features: [
-            "Sitio web profesional",
+            "Diseño y desarrollo profesional",
             "Dominio",
             "SSL",
             "Hosting",
@@ -474,9 +474,9 @@ export const translations = {
           ],
         },
         {
-          name: "Professional Website",
+          name: "Website",
           features: [
-            "Professional website",
+            "Professional design and development",
             "Domain",
             "SSL",
             "Hosting",
