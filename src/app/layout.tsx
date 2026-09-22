@@ -1,40 +1,32 @@
 import type { Metadata } from "next";
-import { DM_Sans, Playfair_Display, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const geist = localFont({
+  src: "../../node_modules/next/dist/next-devtools/server/font/geist-latin.woff2",
   variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
+const geistMono = localFont({
+  src: "../../node_modules/next/dist/next-devtools/server/font/geist-mono-latin.woff2",
   variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.albatrosia.com"),
   title: {
-    default: "Albatros | Sitios web, SEO y automatización con IA",
-    template: "%s | Albatros",
+    default: "Albatros IA | Agentes de IA para WhatsApp y Messenger",
+    template: "%s | Albatros IA",
   },
   description:
-    "Creamos sitios web de alto rendimiento, optimizamos tu presencia en Google y automatizamos la atención al cliente con IA.",
+    "Atiende clientes, captura prospectos y agenda citas automáticamente con agentes de IA para WhatsApp y Messenger.",
   keywords: [
-    "diseño web profesional",
+    "agentes de IA para negocios",
     "automatización con IA",
     "chatbot para WhatsApp",
     "SEO local",
     "Google Business Profile",
-    "agencia digital",
+    "automatización de citas",
   ],
   alternates: {
     canonical: "/",
@@ -51,11 +43,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Albatros Dev | Sitios web, SEO y automatización con IA",
+    title: "Albatros IA | Agentes de IA para WhatsApp y Messenger",
     description:
-      "Sitios web de alto rendimiento, presencia en Google y atención automatizada con IA para tu negocio.",
+      "Responde mensajes, captura prospectos y agenda citas automáticamente con agentes de IA entrenados para tu negocio.",
     url: "/",
-    siteName: "Albatros Dev",
+    siteName: "Albatros IA",
     locale: "es_MX",
     type: "website",
     images: [
@@ -63,15 +55,15 @@ export const metadata: Metadata = {
         url: "/albatros.png",
         width: 1024,
         height: 1024,
-        alt: "Albatros Dev",
+        alt: "Albatros IA",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Albatros Dev | Sitios web, SEO y automatización con IA",
+    title: "Albatros IA | Agentes de IA para WhatsApp y Messenger",
     description:
-      "Sitios web de alto rendimiento, presencia en Google y atención automatizada con IA.",
+      "Responde mensajes, captura prospectos y agenda citas automáticamente con agentes de IA.",
     images: ["/albatros.png"],
   },
 };
@@ -84,7 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${dmSans.variable} ${playfair.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${geist.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
